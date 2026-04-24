@@ -8,7 +8,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type ThemeColorType = 'lavenderBliss' | 'softPink' | 'violetWhisper' | 'hotPink' | 'darkMode';
+export type ThemeColorType = 'lavenderBliss' | 'softPink' | 'violetWhisper' | 'hotPink' | 'oceanCalm' | 'darkMode';
 
 export type MoodType = 'happy' | 'stressed' | 'anxious' | 'calm';
 
@@ -83,6 +83,16 @@ export const THEME_COLORS: Record<ThemeColorType, ThemeColors & { name: string; 
     gradientEnd: '#DA5A9A',
     accent: '#9370DB',
     backgroundGradient: ['#CC6898', '#D44E92', '#B83878', '#B83878'],
+  },
+  oceanCalm: {
+    name: 'Ocean Calm',
+    description: 'Deep and tranquil',
+    primary: '#3A75B5',
+    secondary: '#5A8FCC',
+    gradientStart: '#4A85C2',
+    gradientEnd: '#A8C8E8',
+    accent: '#9370DB',
+    backgroundGradient: ['#6A9FCC', '#3A75B5', '#1A5090', '#1A5090'],
   },
   darkMode: {
     name: 'Midnight Glow',
