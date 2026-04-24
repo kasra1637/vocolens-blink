@@ -41,6 +41,8 @@ export interface ThemeColors {
   accent: string;
   /** 3-stop screen background gradient, safe for all themes including dark mode */
   backgroundGradient: [string, string, string];
+  /** 2-stop button gradient */
+  buttonGradient: [string, string];
 }
 
 export const THEME_COLORS: Record<ThemeColorType, ThemeColors & { name: string; description: string }> = {
@@ -53,6 +55,7 @@ export const THEME_COLORS: Record<ThemeColorType, ThemeColors & { name: string; 
     gradientEnd: '#A79BD8',
     accent: '#9E84EF',
     backgroundGradient: ['#A79BD8', '#9E84EF', '#9370DB'],
+    buttonGradient: ['#9370DB', '#7A50C0'],
   },
   softPink: {
     name: 'Sage & Still',
@@ -63,6 +66,7 @@ export const THEME_COLORS: Record<ThemeColorType, ThemeColors & { name: string; 
     gradientEnd: '#9AAC99',
     accent: '#9AAC99',
     backgroundGradient: ['#9AB897', '#6D9B6A', '#557A52'],
+    buttonGradient: ['#6D9B6A', '#4A6E47'],
   },
   violetWhisper: {
     name: 'Mystic Dreams',
@@ -73,6 +77,7 @@ export const THEME_COLORS: Record<ThemeColorType, ThemeColors & { name: string; 
     gradientEnd: '#B784D9',
     accent: '#9370DB',
     backgroundGradient: ['#A670CC', '#7A48B0', '#6035A0'],
+    buttonGradient: ['#7A48B0', '#572E90'],
   },
   hotPink: {
     name: 'Bold Heart',
@@ -83,6 +88,7 @@ export const THEME_COLORS: Record<ThemeColorType, ThemeColors & { name: string; 
     gradientEnd: '#DA5A9A',
     accent: '#9370DB',
     backgroundGradient: ['#CC6898', '#D44E92', '#B83878'],
+    buttonGradient: ['#D44E92', '#A32E6A'],
   },
   oceanCalm: {
     name: 'Ocean Calm',
@@ -93,6 +99,7 @@ export const THEME_COLORS: Record<ThemeColorType, ThemeColors & { name: string; 
     gradientEnd: '#A8C8E8',
     accent: '#9370DB',
     backgroundGradient: ['#6A9FCC', '#3A75B5', '#1A5090'],
+    buttonGradient: ['#3A75B5', '#1A5090'],
   },
   darkMode: {
     name: 'Midnight Glow',
@@ -103,6 +110,7 @@ export const THEME_COLORS: Record<ThemeColorType, ThemeColors & { name: string; 
     gradientEnd: '#0F0E1A',
     accent: '#A78BFA',
     backgroundGradient: ['#252333', '#181624', '#0F0E1A'],
+    buttonGradient: ['#9370DB', '#6A3FC0'],
   },
 };
 
