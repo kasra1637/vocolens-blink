@@ -12,6 +12,10 @@ const BACKEND_URL =
   process.env.EXPO_PUBLIC_BACKEND_URL ||
   'http://localhost:3000';
 
+export function resolveBackendUrl(): string {
+  return BACKEND_URL;
+}
+
 export interface OpenRouterAnalysisResult {
   emotions: EmotionType[];
   primaryEmotion: EmotionType;

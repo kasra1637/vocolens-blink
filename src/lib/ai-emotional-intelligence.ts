@@ -1,5 +1,6 @@
-// AI-Powered Emotional Intelligence Analysis using OpenAI GPT-4o-mini
-import { JournalEntry, EmotionType } from './types';
+// AI-Powered Emotional Intelligence Analysis via backend proxy
+import { JournalEntry } from './types';
+import { resolveBackendUrl } from './api/openrouter-service';
 import {
   DeepInsight,
   EmotionalPattern,
@@ -18,10 +19,50 @@ export interface AIAnalysisResponse {
 }
 
 // ============================================================================
-// AI ANALYSIS SERVICE
+// CACHE
 // ============================================================================
 
-// Prepare journal entries for AI analysis
+interface CachedAnalysis {
+  data: AIAnalysisResponse;
+  timestamp: number;
+  entryCount: number;
+}
+
+let cachedAnalysis: CachedAnalysis | null = null;
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+
+export function clearAICache(): void {
+  cachedAnalysis = null;
+}
+
+// ============================================================================
+// DEFAULT ANALYSIS
+// ============================================================================
+
+function getDefaultAnalysis(): AIAnalysisResponse {
+  return {
+    patterns: [],
+    triggers: [],
+    cycles: [],
+    shifts: [],
+    insights: [
+      {
+        category: 'recommendation',
+        title: 'Keep Journaling',
+        message:
+          'Continue recording your thoughts and emotions. The more entries you add, the more personalized insights we can provide.',
+        evidence: [],
+        priority: 'medium',
+        emoji: '📝',
+      },
+    ],
+  };
+}
+
+// ============================================================================
+// ENTRY PREPARATION
+// ============================================================================
+
 function prepareEntriesForAI(entries: JournalEntry[]): string {
   // Get the most recent 20 entries for analysis (to stay within token limits)
   const recentEntries = entries.slice(0, 20);
@@ -46,14 +87,11 @@ Content: ${entry.transcript.slice(0, 300)}${entry.transcript.length > 300 ? '...
     .join('\n\n');
 }
 
-// Call GPT-4o-mini for emotional intelligence analysis (fallback)
-async function analyzeWithOpenAI(entries: JournalEntry[]): Promise<AIAnalysisResponse> {
-  if (entries.length < 5) {
-    return getDefaultAnalysis();
-  }
+// ============================================================================
+// AI CALL (via backend proxy)
+// ============================================================================
 
-  const entriesText = prepareEntriesForAI(entries);
-
+async function callBackendAI(entriesText: string): Promise<AIAnalysisResponse> {
   const systemPrompt = `You are an expert emotional intelligence analyst and therapist. Analyze journal entries to provide deep psychological insights. Be empathetic, insightful, and provide actionable advice.
 
 Return a JSON object with the following structure:
@@ -128,68 +166,40 @@ ${entriesText}
 
 Provide your analysis as valid JSON only, no additional text.`;
 
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.EXPO_PUBLIC_OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-        response_format: { type: 'json_object' },
-      }),
-    });
+  const response = await fetch(`${resolveBackendUrl()}/api/journal/ai-completion`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      systemPrompt,
+      userPrompt,
+      temperature: 0.7,
+      maxTokens: 2000,
+    }),
+  });
 
-    if (!response.ok) {
-      console.error('OpenAI analysis failed:', response.status);
-      return getDefaultAnalysis();
-    }
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-
-    if (!content) {
-      console.error('No content in OpenAI response');
-      return getDefaultAnalysis();
-    }
-
-    // Parse JSON from response
-    const analysis = JSON.parse(content) as AIAnalysisResponse;
-    return validateAndCleanAnalysis(analysis);
-  } catch (error) {
-    console.error('Error calling OpenAI:', error);
-    return getDefaultAnalysis();
-  }
-}
-
-/**
- * Main analysis function - uses OpenAI (primary) or default analysis
- */
-export async function analyzeWithAI(entries: JournalEntry[]): Promise<AIAnalysisResponse> {
-  if (entries.length < 5) {
+  if (!response.ok) {
+    const errText = await response.text();
+    console.error('[AI Emotional Intelligence] Backend returned non-OK status:', response.status, errText);
     return getDefaultAnalysis();
   }
 
-  // Try OpenAI first
-  try {
-    console.log('Using OpenAI for deep emotional intelligence analysis...');
-    return await analyzeWithOpenAI(entries);
-  } catch (error) {
-    console.warn('OpenAI deep analysis failed, using default analysis:', error);
+  const json = (await response.json()) as { success: boolean; data?: unknown; error?: string };
+
+  if (!json.success || json.data === undefined) {
+    console.error('[AI Emotional Intelligence] Backend error:', json.error || 'Missing data field');
+    return getDefaultAnalysis();
   }
 
-  console.log('No AI service configured, returning default analysis');
-  return getDefaultAnalysis();
+  const analysis = json.data as AIAnalysisResponse;
+  return validateAndCleanAnalysis(analysis);
 }
 
-// Validate and clean the AI response
+// ============================================================================
+// VALIDATION & CLEANING
+// ============================================================================
+
 function validateAndCleanAnalysis(analysis: AIAnalysisResponse): AIAnalysisResponse {
   return {
     patterns: Array.isArray(analysis.patterns) ? analysis.patterns.slice(0, 3) : [],
@@ -222,39 +232,24 @@ function validatePriority(priority: string): 'high' | 'medium' | 'low' {
   return validPriorities.includes(priority) ? (priority as 'high' | 'medium' | 'low') : 'medium';
 }
 
-// Default analysis when AI is unavailable
-function getDefaultAnalysis(): AIAnalysisResponse {
-  return {
-    patterns: [],
-    triggers: [],
-    cycles: [],
-    shifts: [],
-    insights: [
-      {
-        category: 'recommendation',
-        title: 'Keep Journaling',
-        message:
-          'Continue recording your thoughts and emotions. The more entries you add, the more personalized insights we can provide.',
-        evidence: [],
-        priority: 'medium',
-        emoji: '📝',
-      },
-    ],
-  };
-}
-
 // ============================================================================
-// CACHED AI ANALYSIS
+// PUBLIC API
 // ============================================================================
 
-interface CachedAnalysis {
-  data: AIAnalysisResponse;
-  timestamp: number;
-  entryCount: number;
-}
+export async function analyzeWithAI(entries: JournalEntry[]): Promise<AIAnalysisResponse> {
+  if (entries.length < 5) {
+    return getDefaultAnalysis();
+  }
 
-let cachedAnalysis: CachedAnalysis | null = null;
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
+  const entriesText = prepareEntriesForAI(entries);
+
+  try {
+    return await callBackendAI(entriesText);
+  } catch (error) {
+    console.warn('[AI Emotional Intelligence] Analysis failed, using default:', error);
+    return getDefaultAnalysis();
+  }
+}
 
 export async function getAIAnalysis(entries: JournalEntry[]): Promise<AIAnalysisResponse> {
   const now = Date.now();
@@ -279,9 +274,4 @@ export async function getAIAnalysis(entries: JournalEntry[]): Promise<AIAnalysis
   };
 
   return analysis;
-}
-
-// Clear cache when needed
-export function clearAICache(): void {
-  cachedAnalysis = null;
 }

@@ -517,3 +517,57 @@ Respond with valid JSON only (no markdown, no code fences):
     weekLabel,
   };
 }
+
+// ── AI Emotional Intelligence Analysis ────────────────────────────────────────
+
+export interface AICompletionRequest {
+  systemPrompt: string;
+  userPrompt: string;
+  temperature?: number;
+  maxTokens?: number;
+}
+
+export async function generateAIEmotionalAnalysis(request: AICompletionRequest): Promise<unknown> {
+  const apiKey = getApiKey();
+
+  if (!apiKey || !apiKey.startsWith("sk-or-")) {
+    throw new Error("[OpenRouter] OPENROUTER_API_KEY is missing or invalid.");
+  }
+
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+    method: "POST",
+    headers: buildHeaders(apiKey),
+    body: JSON.stringify({
+      model: TEXT_FALLBACK_MODEL,
+      messages: [
+        { role: "system", content: request.systemPrompt },
+        { role: "user", content: request.userPrompt },
+      ],
+      temperature: request.temperature ?? 0.7,
+      max_tokens: request.maxTokens ?? 2000,
+      response_format: { type: "json_object" },
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`[OpenRouter] AI completion error (${response.status}): ${errText}`);
+  }
+
+  const data = await response.json() as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) {
+    throw new Error("[OpenRouter] AI completion returned empty content");
+  }
+
+  const jsonStr = content
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+
+  return JSON.parse(jsonStr);
+}

@@ -10,6 +10,7 @@ import {
   analyzeTranscriptWithRetry,
   isOpenRouterConfigured,
   generateWeeklyReflection,
+  generateAIEmotionalAnalysis,
 } from "../lib/openrouter";
 
 export const journalRouter = new Hono();
@@ -103,6 +104,42 @@ journalRouter.post("/weekly-reflection", async (c) => {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Weekly reflection failed";
     console.error("Weekly reflection error:", message);
+    return c.json({ error: message }, 500);
+  }
+});
+
+// POST /api/journal/ai-completion - General AI completion endpoint
+const aiCompletionSchema = z.object({
+  systemPrompt: z.string(),
+  userPrompt: z.string(),
+  temperature: z.number().optional(),
+  maxTokens: z.number().optional(),
+});
+
+journalRouter.post("/ai-completion", async (c) => {
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: "Invalid JSON body" }, 400);
+  }
+
+  const parsed = aiCompletionSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: parsed.error.issues[0]?.message ?? "Validation failed" }, 400);
+  }
+
+  if (!isOpenRouterConfigured()) {
+    return c.json({ error: "OpenRouter API key not configured on server" }, 503);
+  }
+
+  try {
+    const { systemPrompt, userPrompt, temperature, maxTokens } = parsed.data;
+    const result = await generateAIEmotionalAnalysis({ systemPrompt, userPrompt, temperature, maxTokens });
+    return c.json({ success: true, data: result });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "AI completion failed";
+    console.error("AI completion error:", message);
     return c.json({ error: message }, 500);
   }
 });
