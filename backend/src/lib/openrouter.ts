@@ -123,8 +123,10 @@ export function isOpenRouterConfigured(): boolean {
 }
 
 // ── Prompts ───────────────────────────────────────────────────────────────────
-const AUDIO_SYSTEM_PROMPT = `You are an expert emotional intelligence analyst specializing in Plutchik's wheel of emotions.
-You have been given a voice journal entry as raw audio. Analyse BOTH the audio speech characteristics (prosody, tone, pitch, pacing, vocal energy, pauses, tremor, rhythm) AND the transcript text content together to produce the most accurate emotional assessment possible.
+function buildAudioSystemPrompt(personalizationContext?: string): string {
+  const personalization = personalizationContext ? `\n\n${personalizationContext}` : '';
+  return `You are an expert emotional intelligence analyst specializing in Plutchik's wheel of emotions.
+You have been given a voice journal entry as raw audio. Analyse BOTH the audio speech characteristics (prosody, tone, pitch, pacing, vocal energy, pauses, tremor, rhythm) AND the transcript text content together to produce the most accurate emotional assessment possible.${personalization}
 
 Return ONLY a valid JSON object — no markdown, no explanation:
 {
@@ -156,8 +158,10 @@ Rules:
 - reflection: warm, second-person ("you"), suitable for TTS
 - Only valid emotions: happiness, sadness, anger, disgust, fear, surprise, trust, anticipation`;
 
-const TEXT_SYSTEM_PROMPT = `You are an expert emotional intelligence analyst specializing in Plutchik's wheel of emotions.
-Analyse the journal transcript and return ONLY a valid JSON object — no markdown, no explanation:
+function buildTextSystemPrompt(personalizationContext?: string): string {
+  const personalization = personalizationContext ? `\n\n${personalizationContext}` : '';
+  return `You are an expert emotional intelligence analyst specializing in Plutchik's wheel of emotions.
+Analyse the journal transcript and return ONLY a valid JSON object — no markdown, no explanation.${personalization}
 {
   "emotions": ["emotion1", "emotion2"],
   "primaryEmotion": "emotion",
@@ -257,7 +261,8 @@ function buildHeaders(apiKey: string): Record<string, string> {
 // ── Main analysis function ────────────────────────────────────────────────────
 export async function analyzeTranscript(
   transcript: string,
-  audioBase64?: string
+  audioBase64?: string,
+  personalizationContext?: string
 ): Promise<AnalysisResult> {
   const apiKey = getApiKey();
 
@@ -281,7 +286,7 @@ export async function analyzeTranscript(
           messages: [
             {
               role: "system",
-              content: AUDIO_SYSTEM_PROMPT,
+              content: buildAudioSystemPrompt(personalizationContext),
             },
             {
               role: "user",
@@ -344,7 +349,7 @@ export async function analyzeTranscript(
     body: JSON.stringify({
       model: TEXT_FALLBACK_MODEL,    // "openai/gpt-4o" — explicit, never inferred
       messages: [
-        { role: "system", content: TEXT_SYSTEM_PROMPT },
+        { role: "system", content: buildTextSystemPrompt(personalizationContext) },
         { role: "user", content: `Analyse this journal entry:\n\n"${transcript}"` },
       ],
       temperature: 0.7,
@@ -376,13 +381,14 @@ export async function analyzeTranscript(
 export async function analyzeTranscriptWithRetry(
   transcript: string,
   maxRetries = 3,
-  audioBase64?: string
+  audioBase64?: string,
+  personalizationContext?: string
 ): Promise<AnalysisResult> {
   let lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await analyzeTranscript(transcript, audioBase64);
+      return await analyzeTranscript(transcript, audioBase64, personalizationContext);
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       console.warn(`[OpenRouter] Attempt ${attempt}/${maxRetries} failed: ${lastError.message}`);

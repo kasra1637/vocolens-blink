@@ -41,6 +41,10 @@ export async function analyzeTranscript(transcript: string, audioBase64?: string
   topics: string[];
   analysis: string;
   reflection?: string;
+  valence: number;
+  arousal: number;
+  suggestedBodySensations: string[];
+  distressLevel: 'low' | 'moderate' | 'high';
 }> {
   // Ensure we have a transcript
   if (!transcript || transcript.trim().length === 0) {
@@ -61,6 +65,10 @@ export async function analyzeTranscript(transcript: string, audioBase64?: string
       topics: result.topics,
       analysis: result.analysis,
       reflection: result.reflection,
+      valence: result.valence ?? 0,
+      arousal: result.arousal ?? 50,
+      suggestedBodySensations: result.suggestedBodySensations ?? [],
+      distressLevel: result.distressLevel ?? 'low',
     };
   } catch (error) {
     console.warn('OpenRouter analysis failed, falling back to local analysis:', error);
@@ -79,6 +87,10 @@ export async function analyzeTranscript(transcript: string, audioBase64?: string
       emotionScores: { happiness: 50, sadness: 0, anger: 0, disgust: 0, fear: 0, surprise: 0, trust: 30, anticipation: 20 },
       topics: ['reflection'],
       analysis: 'Your journal entry has been recorded.',
+      valence: 25,
+      arousal: 40,
+      suggestedBodySensations: [],
+      distressLevel: 'low',
     };
   }
 }
@@ -95,6 +107,10 @@ function analyzeTranscriptLocal(transcript: string): {
   emotionIntensityLabels: EmotionIntensityLabels;
   topics: string[];
   analysis: string;
+  valence: number;
+  arousal: number;
+  suggestedBodySensations: string[];
+  distressLevel: 'low' | 'moderate' | 'high';
 } {
   const lowerTranscript = transcript.toLowerCase();
 
@@ -179,6 +195,32 @@ function analyzeTranscriptLocal(transcript: string): {
   const topics = topicKeywords.filter((topic) => lowerTranscript.includes(topic));
   const analysis = generateAnalysis(primaryEmotion, topics);
 
+  // Compute valence-arousal from emotion scores
+  const positive = emotionScores.happiness + emotionScores.trust + emotionScores.anticipation + emotionScores.surprise;
+  const negative = emotionScores.sadness + emotionScores.fear + emotionScores.anger + emotionScores.disgust;
+  const total = positive + negative;
+  const valence = total === 0 ? 0 : Math.round(((positive - negative) / total) * 100);
+
+  const highArousal = emotionScores.anger + emotionScores.fear + emotionScores.surprise + emotionScores.anticipation;
+  const lowArousal = emotionScores.sadness + emotionScores.trust + emotionScores.disgust + emotionScores.happiness * 0.5;
+  const arousalTotal = highArousal + lowArousal;
+  const arousal = arousalTotal === 0 ? 50 : Math.round((highArousal / arousalTotal) * 100);
+
+  const distress = (-valence * 0.5) + (arousal * 0.5);
+  const distressLevel = distress > 60 ? 'high' : distress > 30 ? 'moderate' : 'low';
+
+  // Suggest body sensations based on dominant emotion
+  const sensationMap: Record<EmotionType, string[]> = {
+    happiness: ['lightness', 'warmth'],
+    sadness: ['heavy limbs', 'chest tightness'],
+    anger: ['tension in shoulders', 'racing heart'],
+    disgust: ['stomach discomfort', 'coldness'],
+    fear: ['racing heart', 'breathlessness'],
+    surprise: ['tingling', 'restlessness'],
+    trust: ['warmth', 'lightness'],
+    anticipation: ['restlessness', 'racing heart'],
+  };
+
   return {
     emotions,
     primaryEmotion,
@@ -187,6 +229,10 @@ function analyzeTranscriptLocal(transcript: string): {
     emotionIntensityLabels: buildIntensityLabels(emotionScores),
     topics: topics.length > 0 ? topics : ['reflection'],
     analysis,
+    valence,
+    arousal,
+    suggestedBodySensations: sensationMap[primaryEmotion] ?? [],
+    distressLevel,
   };
 }
 
@@ -231,6 +277,10 @@ export async function transcribeAndAnalyze(
     topics: string[];
     analysis: string;
     reflection?: string;
+    valence: number;
+    arousal: number;
+    suggestedBodySensations: string[];
+    distressLevel: 'low' | 'moderate' | 'high';
   };
 }> {
   let transcript = '';
@@ -284,12 +334,25 @@ function generateMockTranscript(): string {
 }
 
 // Create a new journal entry with full processing
+export interface ReflectionOverride {
+  emotions: EmotionType[];
+  primaryEmotion: EmotionType;
+  valence: number;
+  arousal: number;
+  bodySensation?: import('./types').BodySensation;
+  alexithymiaFlag?: boolean;
+  distressLevel: 'low' | 'moderate' | 'high';
+  emotionScores?: EmotionScores;
+  emotionIntensityLabels?: EmotionIntensityLabels;
+}
+
 export async function createJournalEntry(
   audioUri: string | undefined,
   duration: number,
   conversationTopic?: TopicCategory,
   conversationPrompt?: string,
-  preTranscribedText?: string
+  preTranscribedText?: string,
+  reflectionOverride?: ReflectionOverride
 ): Promise<JournalEntry> {
   const journalStore = useJournalStore.getState();
   const userStatsStore = useUserStatsStore.getState();
@@ -305,13 +368,31 @@ export async function createJournalEntry(
     topics: string[];
     analysis: string;
     reflection?: string;
+    valence: number;
+    arousal: number;
+    suggestedBodySensations: string[];
+    distressLevel: 'low' | 'moderate' | 'high';
   };
 
-  // If we have a pre-transcribed text (from live transcription), use it
-  if (preTranscribedText) {
+  // If reflection override is provided, skip AI analysis and use user-adjusted data
+  if (reflectionOverride && preTranscribedText) {
+    transcript = preTranscribedText;
+    analysis = {
+      emotions: reflectionOverride.emotions,
+      primaryEmotion: reflectionOverride.primaryEmotion,
+      emotionIntensity: 50, // placeholder — could compute from V-A
+      emotionScores: reflectionOverride.emotionScores,
+      emotionIntensityLabels: reflectionOverride.emotionIntensityLabels,
+      topics: ['reflection'],
+      analysis: 'Journal entry recorded with user reflection.',
+      valence: reflectionOverride.valence,
+      arousal: reflectionOverride.arousal,
+      suggestedBodySensations: [],
+      distressLevel: reflectionOverride.distressLevel,
+    };
+  } else if (preTranscribedText) {
     transcript = preTranscribedText;
 
-    // Try to read audio as base64 for prosody analysis even when transcript is pre-supplied
     let audioBase64: string | undefined;
     if (audioUri) {
       try {
@@ -319,11 +400,10 @@ export async function createJournalEntry(
           encoding: FileSystem.EncodingType.Base64,
         });
       } catch {
-        // non-fatal — analysis falls back to text-only
+        // non-fatal
       }
     }
 
-    // Analyze with GPT-4o audio model (prosody + content) or text fallback
     try {
       const analysisResult = await analyzeTranscript(transcript, audioBase64);
       analysis = analysisResult;
@@ -332,7 +412,6 @@ export async function createJournalEntry(
       analysis = analyzeTranscriptLocal(transcript);
     }
   } else {
-    // Transcribe and analyze the audio
     if (!audioUri) {
       throw new Error('Audio URI or transcript is required');
     }
@@ -343,8 +422,6 @@ export async function createJournalEntry(
       analysis = result.analysis;
     } catch (error) {
       console.error('Failed to transcribe and analyze:', error);
-      // If transcription succeeded but analysis failed, we should still have the transcript
-      // But if the whole thing failed, we need to handle it
       throw error;
     }
   }
@@ -360,6 +437,11 @@ export async function createJournalEntry(
     emotionIntensity: analysis.emotionIntensity,
     emotionScores: analysis.emotionScores,
     emotionIntensityLabels: analysis.emotionIntensityLabels,
+    valence: analysis.valence,
+    arousal: analysis.arousal,
+    distressLevel: analysis.distressLevel,
+    bodySensation: reflectionOverride?.bodySensation,
+    alexithymiaFlag: reflectionOverride?.alexithymiaFlag,
     topics: analysis.topics,
     aiAnalysis: analysis.analysis,
     aiReflection: analysis.reflection,

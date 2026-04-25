@@ -37,6 +37,28 @@ export interface EmotionIntensityLabels {
   anticipation: string;
 }
 
+// Distress level based on valence-arousal composite
+export type DistressLevel = 'low' | 'moderate' | 'high';
+
+// Body sensations users can report when they struggle to name emotions
+export type BodySensation =
+  | 'chest tightness'
+  | 'knot in stomach'
+  | 'racing heart'
+  | 'heavy limbs'
+  | 'tension in shoulders'
+  | 'lightness'
+  | 'warmth'
+  | 'coldness'
+  | 'tingling'
+  | 'numbness'
+  | 'restlessness'
+  | 'fatigue'
+  | 'head pressure'
+  | 'throat constriction'
+  | 'breathlessness'
+  | 'none';
+
 // Journal Entry
 export interface JournalEntry {
   id: string;
@@ -51,6 +73,16 @@ export interface JournalEntry {
   emotionIntensity: number; // 0-100
   emotionScores?: EmotionScores; // individual scores for all 8 emotions
   emotionIntensityLabels?: EmotionIntensityLabels; // Plutchik intensity labels per emotion
+  // Valence-Arousal (Circumplex Model) — 2D emotional space
+  valence: number; // -100 (unpleasant) to +100 (pleasant)
+  arousal: number; // 0 (calm) to 100 (activated)
+  // Alexithymia support
+  bodySensation?: BodySensation; // where the user feels this in their body
+  alexithymiaFlag?: boolean; // user chose "I don't know" for emotions
+  // Grounding support
+  distressLevel: DistressLevel;
+  groundingUsed?: boolean; // user engaged a grounding exercise
+  // AI-generated
   topics: string[];
   aiAnalysis?: string;
   aiReflection?: string; // TTS-ready empathetic reflection

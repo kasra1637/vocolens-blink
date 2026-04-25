@@ -197,6 +197,9 @@ export function populateDummyData(): void {
       emotions: entry.emotions,
       primaryEmotion: entry.primaryEmotion,
       emotionIntensity: entry.emotionIntensity,
+      valence: (entry as any).valence ?? 10,
+      arousal: (entry as any).arousal ?? 45,
+      distressLevel: (entry as any).distressLevel ?? 'low',
       topics: entry.topics,
       aiAnalysis: entry.aiAnalysis,
     });

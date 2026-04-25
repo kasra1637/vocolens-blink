@@ -8,6 +8,7 @@ import {
   deleteJournalEntry,
   getFormattedEntries,
   analyzeTranscript,
+  ReflectionOverride,
 } from './journal-service';
 import {
   generateInsights,
@@ -80,19 +81,22 @@ export function useCreateEntry() {
       duration,
       conversationTopic,
       conversationPrompt,
+      reflectionOverride,
     }: {
       audioUri?: string;
       transcript?: string;
       duration: number;
       conversationTopic?: TopicCategory;
       conversationPrompt?: string;
+      reflectionOverride?: ReflectionOverride;
     }) => {
       return createJournalEntry(
         audioUri,
         duration,
         conversationTopic,
         conversationPrompt,
-        transcript
+        transcript,
+        reflectionOverride
       );
     },
     onSuccess: () => {

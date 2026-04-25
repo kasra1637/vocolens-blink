@@ -27,7 +27,12 @@ export interface OpenRouterAnalysisResult {
   reflection: string;
   insights: string[];
   confidence: number;
-  audioAnalyzed: boolean; // true when GPT-4o processed actual audio (prosody)
+  audioAnalyzed: boolean;
+  // Valence-Arousal (Circumplex Model)
+  valence: number; // -100 (unpleasant) to +100 (pleasant)
+  arousal: number; // 0 (calm) to 100 (activated)
+  suggestedBodySensations: string[];
+  distressLevel: 'low' | 'moderate' | 'high';
 }
 
 /**

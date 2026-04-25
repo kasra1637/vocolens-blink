@@ -28,7 +28,11 @@ import { getThemeColors, getThemeGradients, getThemeShadows, BorderRadius, Spaci
 import { useCreateEntry } from '@/lib/hooks';
 import { useRealtimeVoiceRecording } from '@/lib/hooks/useRealtimeVoiceRecording';
 import { MicTabIcon } from '@/components/TabIcons';
-import { TopicCategory } from '@/lib/types';
+import { TopicCategory, EmotionType } from '@/lib/types';
+import EmotionReflectionScreen from '@/components/emotion-reflection';
+import type { ReflectionResult } from '@/components/emotion-reflection';
+import GroundingToolsModal from '@/components/GroundingToolsModal';
+import { analyzeTranscript } from '@/lib/journal-service';
 import useOnboardingStore from '@/lib/state/onboarding-store';
 import useSettingsStore from '@/lib/state/settings-store';
 import { useUsageMinutes, useRemainingMinutes, useIsAtLimit, USAGE_LIMIT_MINUTES } from '@/lib/state/user-stats-store';
@@ -119,6 +123,18 @@ export default function SpeakScreen() {
   const [currentQuestion, setCurrentQuestion] = useState<string | undefined>(undefined);
   const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingDurationRef = useRef(0);
+
+  // Emotion reflection state
+  const [showReflection, setShowReflection] = useState(false);
+  const [showGrounding, setShowGrounding] = useState(false);
+  const [reflectionTranscript, setReflectionTranscript] = useState('');
+  const [reflectionAudioUri, setReflectionAudioUri] = useState<string | undefined>();
+  const [reflectionDuration, setReflectionDuration] = useState(0);
+  const [suggestedEmotions, setSuggestedEmotions] = useState<EmotionType[]>([]);
+  const [suggestedBodySensations, setSuggestedBodySensations] = useState<string[]>([]);
+  const [initialValence, setInitialValence] = useState(0);
+  const [initialArousal, setInitialArousal] = useState(50);
+  const [initialDistress, setInitialDistress] = useState<'low' | 'moderate' | 'high'>('low');
 
   // Get selected theme and dark mode
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
@@ -261,42 +277,70 @@ export default function SpeakScreen() {
       console.log('[Journal] Recording stopped - audioUri:', audioUri);
       console.log('[Journal] Transcript length:', finalTranscript?.length || 0);
 
-      // Create the journal entry with transcription and analysis
       if (finalTranscript && finalTranscript.trim().length > 0) {
         try {
-          console.log('[Journal] Creating entry with audioUri:', audioUri);
-          const entry = await createEntryMutation.mutateAsync({
-            audioUri: audioUri || undefined,
-            transcript: finalTranscript,
-            duration: finalDuration,
-            conversationTopic: selectedTopic,
-            conversationPrompt: currentQuestion,
-          });
-          console.log('[Journal] Entry created:', entry?.id, 'with audioUri:', entry?.audioUri);
+          // Analyze transcript for emotion suggestions
+          const analysis = await analyzeTranscript(finalTranscript);
+
+          // Store data for reflection screen
+          setReflectionTranscript(finalTranscript);
+          setReflectionAudioUri(audioUri || undefined);
+          setReflectionDuration(finalDuration);
+          setSuggestedEmotions(analysis.emotions);
+          setSuggestedBodySensations(analysis.suggestedBodySensations);
+          setInitialValence(analysis.valence);
+          setInitialArousal(analysis.arousal);
+          setInitialDistress(analysis.distressLevel);
 
           setRecordingState('idle');
-          successHaptic();
-
-          // Reset recording state
-          voiceActions.reset();
-
-          // Navigate to the newly created entry detail page
-          if (entry && entry.id) {
-            router.push(`/entry-detail?id=${entry.id}`);
-          }
-        } catch (entryError) {
-          console.error('Failed to process recording:', entryError);
+          setShowReflection(true);
+        } catch (error) {
+          console.error('Failed to analyze recording:', error);
           setRecordingState('idle');
           errorHaptic();
         }
       } else {
-        // No transcript - maybe recording was too short or transcription failed
         console.log('No transcript available');
         setRecordingState('idle');
         warningHaptic();
       }
     } catch (error) {
       console.error('Failed to stop recording:', error);
+      setRecordingState('idle');
+      errorHaptic();
+    }
+  };
+
+  const handleReflectionComplete = async (result: ReflectionResult) => {
+    setShowReflection(false);
+    setRecordingState('processing');
+
+    try {
+      const entry = await createEntryMutation.mutateAsync({
+        audioUri: reflectionAudioUri,
+        transcript: reflectionTranscript,
+        duration: reflectionDuration,
+        conversationTopic: selectedTopic,
+        conversationPrompt: currentQuestion,
+        reflectionOverride: {
+          emotions: result.emotions,
+          primaryEmotion: result.primaryEmotion,
+          valence: result.valence,
+          arousal: result.arousal,
+          bodySensation: result.bodySensation,
+          alexithymiaFlag: result.alexithymiaFlag,
+          distressLevel: result.distressLevel,
+        },
+      });
+
+      successHaptic();
+      voiceActions.reset();
+
+      if (entry && entry.id) {
+        router.push(`/entry-detail?id=${entry.id}`);
+      }
+    } catch (entryError) {
+      console.error('Failed to save entry:', entryError);
       setRecordingState('idle');
       errorHaptic();
     }
@@ -963,6 +1007,30 @@ export default function SpeakScreen() {
           )}
         </View>
       </View>
+
+      {/* Emotion Reflection Screen */}
+      <EmotionReflectionScreen
+        visible={showReflection}
+        transcript={reflectionTranscript}
+        suggestedEmotions={suggestedEmotions}
+        suggestedBodySensations={suggestedBodySensations}
+        initialValence={initialValence}
+        initialArousal={initialArousal}
+        initialDistressLevel={initialDistress}
+        onComplete={handleReflectionComplete}
+        onDismiss={() => {
+          setShowReflection(false);
+          setRecordingState('idle');
+          voiceActions.reset();
+        }}
+        onGrounding={() => setShowGrounding(true)}
+      />
+
+      {/* Grounding Tools Modal */}
+      <GroundingToolsModal
+        visible={showGrounding}
+        onDismiss={() => setShowGrounding(false)}
+      />
     </View>
   );
 }

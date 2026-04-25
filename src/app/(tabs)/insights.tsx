@@ -39,6 +39,7 @@ import {
 import { WeeklyReflectionCard } from '@/components/WeeklyReflectionCard';
 import { StreakCalendar } from '@/components/StreakCalendar';
 import { MoodStoryTimeline } from '@/components/MoodStoryTimeline';
+import ValenceArousalChart from '@/components/ValenceArousalChart';
 
 // Core emotions with icons and emojis - 8 Plutchik emotions
 // Row 1: Happiness, Sadness, Anger, Anticipation
@@ -351,6 +352,11 @@ function InsightsContent({ insets }: { insets: { top: number; bottom: number; le
         {/* Mood Story Timeline */}
         <Animated.View>
           <MoodStoryTimeline entries={entries} primaryColor={Colors.primary} />
+        </Animated.View>
+
+        {/* Valence-Arousal Emotional Landscape */}
+        <Animated.View style={{ marginBottom: 24 }}>
+          <ValenceArousalChart entries={entries} days={30} />
         </Animated.View>
 
         {/* Deep Insights */}
