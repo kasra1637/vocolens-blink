@@ -1,5 +1,13 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, TextInput, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  TextInput,
+  Platform,
+  Modal,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -10,61 +18,35 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
-import {
-  Filter,
-  Search,
-  Calendar,
-  Clock,
-  ChevronDown,
-  Trash2,
-  X,
-  BookOpen,
-  Activity,
-  Mic,
-} from 'lucide-react-native';
+import { Filter, Search, Clock, ChevronDown, ChevronUp, Trash2, X, Activity, Mic, CreditCard as Edit3, Save, TriangleAlert as AlertTriangle } from 'lucide-react-native';
 import Animated, {
   FadeOut,
+  FadeIn,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { tapHaptic, selectHaptic } from '@/lib/haptics';
+import { tapHaptic, selectHaptic, confirmHaptic, warningHaptic } from '@/lib/haptics';
 import { getThemeColors, getThemeGradients, getThemeShadows } from '@/lib/theme';
 import useJournalStore from '@/lib/state/journal-store';
-import useOnboardingStore from '@/lib/state/onboarding-store';
+import useOnboardingStore, { THEME_COLORS } from '@/lib/state/onboarding-store';
 import useSettingsStore from '@/lib/state/settings-store';
 import { useDeleteEntry } from '@/lib/hooks';
 import { useClickSound } from '@/lib/hooks/useClickSound';
 import { JournalEntry, EmotionType, formatShortDuration, getEmotionSubLabel } from '@/lib/types';
 import { AudioPlayer } from '@/components/AudioPlayer';
 
-// Display types for UI (capitalized versions)
-type DisplayEmotion =
-  | 'Happiness'
-  | 'Sadness'
-  | 'Anger'
-  | 'Disgust';
+type DisplayEmotion = 'Happiness' | 'Sadness' | 'Anger' | 'Disgust';
 
-const EMOTION_FILTERS: DisplayEmotion[] = [
-  'Happiness',
-  'Sadness',
-  'Anger',
-  'Disgust',
-];
-
+const EMOTION_FILTERS: DisplayEmotion[] = ['Happiness', 'Sadness', 'Anger', 'Disgust'];
 const SORT_OPTIONS = ['Newest First', 'Oldest First'] as const;
-
 type SortOption = (typeof SORT_OPTIONS)[number];
 
-// Helper to convert stored emotion to display emotion
-const toDisplayEmotion = (emotion: EmotionType): DisplayEmotion => {
-  return (emotion.charAt(0).toUpperCase() + emotion.slice(1)) as DisplayEmotion;
-};
+const toDisplayEmotion = (emotion: EmotionType): DisplayEmotion =>
+  (emotion.charAt(0).toUpperCase() + emotion.slice(1)) as DisplayEmotion;
 
-// Helper to convert display emotion back to store type
-const fromDisplayEmotion = (emotion: DisplayEmotion): EmotionType => {
-  return emotion.toLowerCase() as EmotionType;
-};
+const fromDisplayEmotion = (emotion: DisplayEmotion): EmotionType =>
+  emotion.toLowerCase() as EmotionType;
 
 export default function EntriesScreen() {
   const insets = useSafeAreaInsets();
@@ -75,16 +57,17 @@ export default function EntriesScreen() {
   const [selectedEmotions, setSelectedEmotions] = useState<DisplayEmotion[]>([]);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showEmotionDropdown, setShowEmotionDropdown] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
-  // Get selected theme and dark mode
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
   const isDarkMode = useSettingsStore((s) => s.isDarkMode);
   const Colors = getThemeColors(selectedTheme, isDarkMode);
   const Gradients = getThemeGradients(selectedTheme, isDarkMode);
   const Shadows = getThemeShadows(selectedTheme);
+  const themeColors = THEME_COLORS[selectedTheme];
 
-  // Get entries from store
   const entries = useJournalStore((s) => s.entries);
+  const updateEntry = useJournalStore((s) => s.updateEntry);
   const deleteEntryMutation = useDeleteEntry();
 
   const [fontsLoaded] = useFonts({
@@ -97,16 +80,15 @@ export default function EntriesScreen() {
   const filteredEntries = useMemo(() => {
     let filtered = [...entries];
 
-    // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((entry) =>
-        entry.transcript.toLowerCase().includes(query) ||
-        entry.title.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (entry) =>
+          entry.transcript.toLowerCase().includes(query) ||
+          entry.title.toLowerCase().includes(query)
       );
     }
 
-    // Filter by emotions
     if (selectedEmotions.length > 0) {
       const emotionFilters = selectedEmotions.map(fromDisplayEmotion);
       filtered = filtered.filter((entry) =>
@@ -114,12 +96,10 @@ export default function EntriesScreen() {
       );
     }
 
-    // Sort
-    if (selectedSort === 'Newest First') {
-      filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    } else {
-      filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    }
+    filtered.sort((a, b) => {
+      const diff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return selectedSort === 'Newest First' ? diff : -diff;
+    });
 
     return filtered;
   }, [entries, searchQuery, selectedSort, selectedEmotions]);
@@ -127,9 +107,7 @@ export default function EntriesScreen() {
   const toggleEmotion = useCallback((emotion: DisplayEmotion) => {
     tapHaptic();
     setSelectedEmotions((prev) =>
-      prev.includes(emotion)
-        ? prev.filter((e) => e !== emotion)
-        : [...prev, emotion]
+      prev.includes(emotion) ? prev.filter((e) => e !== emotion) : [...prev, emotion]
     );
   }, []);
 
@@ -137,21 +115,39 @@ export default function EntriesScreen() {
     (entry: JournalEntry) => {
       playClickSound();
       tapHaptic();
-      router.push({
-        pathname: '/entry-detail',
-        params: { id: entry.id },
-      });
+      router.push({ pathname: '/entry-detail', params: { id: entry.id } });
     },
     [router, playClickSound]
   );
 
-  const handleDeleteEntry = useCallback(
+  const handleDeleteRequest = useCallback(
     (entryId: string) => {
-      playClickSound();
-      selectHaptic();
-      deleteEntryMutation.mutate(entryId);
+      warningHaptic();
+      setPendingDeleteId(entryId);
     },
-    [deleteEntryMutation, playClickSound]
+    []
+  );
+
+  const handleDeleteConfirm = useCallback(() => {
+    if (!pendingDeleteId) return;
+    confirmHaptic();
+    deleteEntryMutation.mutate(pendingDeleteId);
+    setPendingDeleteId(null);
+  }, [pendingDeleteId, deleteEntryMutation]);
+
+  const handleDeleteCancel = useCallback(() => {
+    tapHaptic();
+    setPendingDeleteId(null);
+  }, []);
+
+  const handleSaveTitle = useCallback(
+    (entryId: string, newTitle: string) => {
+      const trimmed = newTitle.trim();
+      if (trimmed.length > 0) {
+        updateEntry(entryId, { title: trimmed });
+      }
+    },
+    [updateEntry]
   );
 
   if (!fontsLoaded) {
@@ -175,6 +171,7 @@ export default function EntriesScreen() {
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
+
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -199,12 +196,8 @@ export default function EntriesScreen() {
             Browse, search, and revisit all your{'\n'}journal entries in one place.
           </Text>
 
-          {/* Total Entries */}
           <View className="items-center mb-6">
-            <Text
-              style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF' }}
-              className="text-4xl"
-            >
+            <Text style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF' }} className="text-4xl">
               {filteredEntries.length}
             </Text>
             <Text
@@ -216,7 +209,7 @@ export default function EntriesScreen() {
           </View>
         </Animated.View>
 
-        {/* Filter & Search Section */}
+        {/* Filter & Search */}
         <Animated.View>
           <View
             className="rounded-3xl overflow-hidden mb-6"
@@ -227,7 +220,6 @@ export default function EntriesScreen() {
             }}
           >
             <View className="p-4">
-              {/* Section Header */}
               <View className="flex-row items-center mb-3">
                 <Filter size={16} color="#FFFFFF" strokeWidth={2} />
                 <Text
@@ -238,7 +230,6 @@ export default function EntriesScreen() {
                 </Text>
               </View>
 
-              {/* Search Bar */}
               <View
                 className="flex-row items-center rounded-xl px-4 py-3 mb-3"
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
@@ -259,9 +250,7 @@ export default function EntriesScreen() {
                 )}
               </View>
 
-              {/* Filter Dropdowns */}
               <View className="flex-row" style={{ gap: 8 }}>
-                {/* Sort Filter */}
                 <Pressable
                   onPress={() => {
                     tapHaptic();
@@ -271,16 +260,12 @@ export default function EntriesScreen() {
                   className="flex-1 flex-row items-center justify-between rounded-xl px-3 py-3"
                   style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
                 >
-                  <Text
-                    style={{ fontFamily: 'Inter_500Medium', color: '#FFFFFF' }}
-                    className="text-xs"
-                  >
+                  <Text style={{ fontFamily: 'Inter_500Medium', color: '#FFFFFF' }} className="text-xs">
                     {selectedSort}
                   </Text>
                   <ChevronDown size={14} color="#FFFFFF" strokeWidth={2} />
                 </Pressable>
 
-                {/* Emotion Filter */}
                 <Pressable
                   onPress={() => {
                     tapHaptic();
@@ -290,19 +275,13 @@ export default function EntriesScreen() {
                   className="flex-1 flex-row items-center justify-between rounded-xl px-3 py-3"
                   style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
                 >
-                  <Text
-                    style={{ fontFamily: 'Inter_500Medium', color: '#FFFFFF' }}
-                    className="text-xs"
-                  >
-                    {selectedEmotions.length > 0
-                      ? `${selectedEmotions.length} Selected`
-                      : 'Emotions'}
+                  <Text style={{ fontFamily: 'Inter_500Medium', color: '#FFFFFF' }} className="text-xs">
+                    {selectedEmotions.length > 0 ? `${selectedEmotions.length} Selected` : 'Emotions'}
                   </Text>
                   <ChevronDown size={14} color="#FFFFFF" strokeWidth={2} />
                 </Pressable>
               </View>
 
-              {/* Sort Dropdown */}
               {showSortDropdown && (
                 <Animated.View
                   exiting={FadeOut.duration(200)}
@@ -323,21 +302,12 @@ export default function EntriesScreen() {
                       }}
                       className="px-3 py-3"
                       style={{
-                        backgroundColor:
-                          selectedSort === sort
-                            ? 'rgba(255, 255, 255, 0.15)'
-                            : 'transparent',
+                        backgroundColor: selectedSort === sort ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
                         borderBottomWidth: 1,
                         borderBottomColor: 'rgba(255, 255, 255, 0.1)',
                       }}
                     >
-                      <Text
-                        style={{
-                          fontFamily: 'Inter_500Medium',
-                          fontSize: 14,
-                          color: '#FFFFFF',
-                        }}
-                      >
+                      <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 14, color: '#FFFFFF' }}>
                         {sort}
                       </Text>
                     </Pressable>
@@ -345,7 +315,6 @@ export default function EntriesScreen() {
                 </Animated.View>
               )}
 
-              {/* Emotion Dropdown */}
               {showEmotionDropdown && (
                 <Animated.View
                   exiting={FadeOut.duration(200)}
@@ -370,13 +339,7 @@ export default function EntriesScreen() {
                           borderBottomColor: 'rgba(255, 255, 255, 0.1)',
                         }}
                       >
-                        <Text
-                          style={{
-                            fontFamily: 'Inter_500Medium',
-                            fontSize: 14,
-                            color: '#FFFFFF',
-                          }}
-                        >
+                        <Text style={{ fontFamily: 'Inter_500Medium', fontSize: 14, color: '#FFFFFF' }}>
                           {emotion}
                         </Text>
                       </Pressable>
@@ -389,14 +352,13 @@ export default function EntriesScreen() {
         </Animated.View>
 
         {/* Entry Cards */}
-        {filteredEntries.map((entry, index) => (
-          <Animated.View
-            key={entry.id}
-          >
+        {filteredEntries.map((entry) => (
+          <Animated.View key={entry.id}>
             <EntryCard
               entry={entry}
               onPress={() => handleEntryPress(entry)}
-              onDelete={() => handleDeleteEntry(entry.id)}
+              onDeleteRequest={() => handleDeleteRequest(entry.id)}
+              onSaveTitle={(title) => handleSaveTitle(entry.id, title)}
               surfaceElevatedColor={Colors.surfaceElevated}
               primaryColor={Colors.primary}
               isDarkMode={isDarkMode}
@@ -404,11 +366,8 @@ export default function EntriesScreen() {
           </Animated.View>
         ))}
 
-        {/* Empty State */}
         {filteredEntries.length === 0 && (
-          <Animated.View
-            className="items-center py-8"
-          >
+          <Animated.View className="items-center py-8">
             <Text
               style={{ fontFamily: 'Inter_600SemiBold', color: '#FFFFFF' }}
               className="text-center text-lg mb-2"
@@ -421,62 +380,175 @@ export default function EntriesScreen() {
             >
               {entries.length === 0
                 ? 'Start recording your thoughts\nto see them here.'
-                : 'Try adjusting your filters\nto find what you\'re looking for.'}
+                : "Try adjusting your filters\nto find what you're looking for."}
             </Text>
           </Animated.View>
         )}
       </ScrollView>
+
+      {/* Themed Delete Confirmation Modal */}
+      <Modal
+        visible={pendingDeleteId !== null}
+        animationType="fade"
+        transparent
+        onRequestClose={handleDeleteCancel}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24 }}>
+          <LinearGradient
+            colors={themeColors.backgroundGradient}
+            start={{ x: 0.2, y: 0 }}
+            end={{ x: 0.8, y: 1 }}
+            style={{
+              borderRadius: 28,
+              padding: 28,
+              width: '100%',
+              maxWidth: 360,
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0.18)',
+            }}
+          >
+            <Animated.View entering={FadeIn.duration(200)}>
+              <View style={{ alignItems: 'center', marginBottom: 20 }}>
+                <View
+                  style={{
+                    width: 64,
+                    height: 64,
+                    borderRadius: 32,
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 16,
+                  }}
+                >
+                  <AlertTriangle size={30} color="#EF4444" strokeWidth={2} />
+                </View>
+                <Text
+                  style={{
+                    fontFamily: 'Inter_700Bold',
+                    color: '#FFFFFF',
+                    fontSize: 20,
+                    marginBottom: 8,
+                    textAlign: 'center',
+                  }}
+                >
+                  Delete Entry?
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: 'Inter_400Regular',
+                    color: 'rgba(255,255,255,0.75)',
+                    fontSize: 14,
+                    textAlign: 'center',
+                    lineHeight: 22,
+                  }}
+                >
+                  This will permanently delete this journal entry. This action cannot be undone.
+                </Text>
+              </View>
+
+              <View style={{ gap: 12 }}>
+                <Pressable
+                  onPress={handleDeleteConfirm}
+                  style={({ pressed }) => ({
+                    borderRadius: 16,
+                    overflow: 'hidden',
+                    opacity: pressed ? 0.85 : 1,
+                  })}
+                >
+                  <LinearGradient
+                    colors={['#EF4444', '#DC2626']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{ padding: 16, alignItems: 'center', borderRadius: 16 }}
+                  >
+                    <Text style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF', fontSize: 15 }}>
+                      Delete Entry
+                    </Text>
+                  </LinearGradient>
+                </Pressable>
+
+                <Pressable
+                  onPress={handleDeleteCancel}
+                  style={({ pressed }) => ({
+                    borderRadius: 16,
+                    padding: 16,
+                    alignItems: 'center',
+                    borderWidth: 2,
+                    borderColor: themeColors.primary,
+                    backgroundColor: pressed ? 'rgba(255,255,255,0.05)' : 'transparent',
+                  })}
+                >
+                  <Text style={{ fontFamily: 'Inter_700Bold', color: themeColors.primary, fontSize: 15 }}>
+                    Cancel
+                  </Text>
+                </Pressable>
+              </View>
+            </Animated.View>
+          </LinearGradient>
+        </View>
+      </Modal>
     </View>
   );
 }
 
+// ── Entry Card ────────────────────────────────────────────────────────────────
+
 interface EntryCardProps {
   entry: JournalEntry;
   onPress: () => void;
-  onDelete: () => void;
+  onDeleteRequest: () => void;
+  onSaveTitle: (title: string) => void;
   surfaceElevatedColor: string;
   primaryColor: string;
   isDarkMode?: boolean;
 }
 
-function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColor, isDarkMode = false }: EntryCardProps) {
+function EntryCard({
+  entry,
+  onPress,
+  onDeleteRequest,
+  onSaveTitle,
+  primaryColor,
+  isDarkMode = false,
+}: EntryCardProps) {
   const scale = useSharedValue(1);
-
-  // Log entry audioUri for debugging
-  React.useEffect(() => {
-    console.log('[EntryCard] Entry ID:', entry.id, 'audioUri:', entry.audioUri);
-  }, [entry.id, entry.audioUri]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(entry.title);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
 
-  const handlePressIn = () => {
-    scale.value = withSpring(0.98);
+  const handlePressIn = () => { scale.value = withSpring(0.98); };
+  const handlePressOut = () => { scale.value = withSpring(1); };
+
+  const handleEditPress = () => {
+    selectHaptic();
+    setIsEditing(true);
+    setEditTitle(entry.title);
   };
 
-  const handlePressOut = () => {
-    scale.value = withSpring(1);
+  const handleSavePress = () => {
+    confirmHaptic();
+    onSaveTitle(editTitle);
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    tapHaptic();
+    setEditTitle(entry.title);
+    setIsEditing(false);
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
   };
-
 
   return (
     <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut}>
@@ -497,52 +569,137 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
           animatedStyle,
         ]}
       >
-        <View className="p-5">
-          {/* Header */}
-          <View className="flex-row items-start justify-between mb-2">
-            <View className="flex-1 mr-3">
-              <View className="flex-row items-center" style={{ gap: 8 }}>
-                <Text
-                  style={{ fontFamily: 'Inter_600SemiBold', color: '#FFFFFF' }}
-                  className="text-lg flex-1"
-                  numberOfLines={1}
-                >
-                  {entry.title}
-                </Text>
-                {entry.audioUri && (
-                  <View
-                    className="px-2 py-1 rounded-full flex-row items-center"
-                    style={{ backgroundColor: `${primaryColor}30` }}
+        <View style={{ padding: 20 }}>
+          {/* Header row */}
+          <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 6 }}>
+            <View style={{ flex: 1, marginRight: 12 }}>
+              {isEditing ? (
+                <TextInput
+                  value={editTitle}
+                  onChangeText={setEditTitle}
+                  maxLength={50}
+                  autoFocus
+                  style={{
+                    fontFamily: 'Inter_600SemiBold',
+                    fontSize: 17,
+                    color: '#FFFFFF',
+                    backgroundColor: 'rgba(255,255,255,0.12)',
+                    borderRadius: 10,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderWidth: 1,
+                    borderColor: primaryColor,
+                  }}
+                  placeholderTextColor="rgba(255,255,255,0.4)"
+                  placeholder="Entry title..."
+                />
+              ) : (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Text
+                    style={{ fontFamily: 'Inter_600SemiBold', color: '#FFFFFF', fontSize: 17, flex: 1 }}
+                    numberOfLines={1}
                   >
-                    <Mic size={12} color={primaryColor} strokeWidth={2.5} />
-                  </View>
-                )}
-              </View>
+                    {entry.title}
+                  </Text>
+                  {entry.audioUri && (
+                    <View
+                      style={{
+                        paddingHorizontal: 8,
+                        paddingVertical: 4,
+                        borderRadius: 20,
+                        backgroundColor: `${primaryColor}30`,
+                      }}
+                    >
+                      <Mic size={12} color={primaryColor} strokeWidth={2.5} />
+                    </View>
+                  )}
+                </View>
+              )}
               <Text
-                style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.7)' }}
-                className="text-xs"
+                style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.7)', fontSize: 12, marginTop: 2 }}
               >
                 {formatDate(entry.createdAt)}, {formatTime(entry.createdAt)}
               </Text>
             </View>
+
+            {/* Edit / Save / Cancel buttons */}
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {isEditing ? (
+                <>
+                  <Pressable
+                    onPress={handleCancelEdit}
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: 17,
+                      backgroundColor: 'rgba(239,68,68,0.2)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <X size={16} color="#EF4444" strokeWidth={2.5} />
+                  </Pressable>
+                  <Pressable
+                    onPress={handleSavePress}
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: 17,
+                      backgroundColor: 'rgba(34,197,94,0.2)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Save size={16} color="#22C55E" strokeWidth={2.5} />
+                  </Pressable>
+                </>
+              ) : (
+                <>
+                  <Pressable
+                    onPress={handleEditPress}
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: 17,
+                      backgroundColor: 'rgba(255,255,255,0.12)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Edit3 size={15} color="#FFFFFF" strokeWidth={2.5} />
+                  </Pressable>
+                  <Pressable
+                    onPress={onDeleteRequest}
+                    style={{
+                      width: 34,
+                      height: 34,
+                      borderRadius: 17,
+                      backgroundColor: 'rgba(255,255,255,0.12)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Trash2 size={15} color="#FFFFFF" strokeWidth={2.5} />
+                  </Pressable>
+                </>
+              )}
+            </View>
           </View>
 
-          {/* Date & Duration */}
-          <View className="flex-row items-center mb-3" style={{ gap: 12 }}>
-            <View className="flex-row items-center">
+          {/* Duration + Intensity */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, gap: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Clock size={14} color="rgba(255, 255, 255, 0.7)" strokeWidth={2} />
               <Text
-                style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.7)' }}
-                className="text-xs ml-1"
+                style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.7)', fontSize: 12, marginLeft: 4 }}
               >
                 {formatShortDuration(entry.duration)}
               </Text>
             </View>
-            <View className="flex-row items-center">
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Activity size={14} color="rgba(255, 255, 255, 0.7)" strokeWidth={2} />
               <Text
-                style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.7)' }}
-                className="text-xs ml-1"
+                style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.7)', fontSize: 12, marginLeft: 4 }}
               >
                 {entry.emotionIntensity}% intensity
               </Text>
@@ -551,18 +708,22 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
 
           {/* Primary Emotion */}
           {entry.primaryEmotion && (
-            <View className="mb-3">
+            <View style={{ marginBottom: 12 }}>
               <View
-                className="px-3 py-1.5 rounded-full self-start flex-row items-center"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)', gap: 6 }}
+                style={{
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                  borderRadius: 20,
+                  alignSelf: 'flex-start',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                  gap: 6,
+                }}
               >
-                <Text
-                  style={{ fontFamily: 'Inter_600SemiBold', color: '#FFFFFF' }}
-                  className="text-xs"
-                >
-                  {/* Show intensity-adjusted sub-label from saved labels, or compute on-the-fly */}
-                  {entry.emotionIntensityLabels?.[entry.primaryEmotion]
-                    ?? getEmotionSubLabel(entry.primaryEmotion, entry.emotionIntensity)}
+                <Text style={{ fontFamily: 'Inter_600SemiBold', color: '#FFFFFF', fontSize: 12 }}>
+                  {entry.emotionIntensityLabels?.[entry.primaryEmotion] ??
+                    getEmotionSubLabel(entry.primaryEmotion, entry.emotionIntensity)}
                 </Text>
                 <Text
                   style={{
@@ -580,14 +741,16 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
 
           {/* Conversation Prompt */}
           {entry.conversationPrompt && (
-            <View className="mb-3">
+            <View style={{ marginBottom: 12 }}>
               <View
-                className="p-2 rounded-lg"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                style={{
+                  padding: 10,
+                  borderRadius: 10,
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                }}
               >
                 <Text
-                  style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.8)' }}
-                  className="text-xs italic"
+                  style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.8)', fontSize: 12 }}
                   numberOfLines={2}
                 >
                   "{entry.conversationPrompt}"
@@ -596,49 +759,63 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
             </View>
           )}
 
-          {/* Transcript Preview */}
-          <Text
-            style={{ fontFamily: 'Inter_400Regular', color: '#FFFFFF', lineHeight: 22 }}
-            className="text-sm mb-3"
-            numberOfLines={3}
-          >
-            {entry.transcript}
-          </Text>
+          {/* Collapsible Transcript */}
+          <CollapsibleTranscript transcript={entry.transcript} primaryColor={primaryColor} />
 
           {/* Topics */}
-          {entry.topics && entry.topics.length > 0 && entry.topics.some(t => t && t.trim().length > 0) && (
-            <View className="mb-3">
+          {entry.topics && entry.topics.length > 0 && entry.topics.some((t) => t && t.trim().length > 0) && (
+            <View style={{ marginBottom: 12 }}>
               <Text
-                style={{ fontFamily: 'Inter_600SemiBold', color: 'rgba(255, 255, 255, 0.8)' }}
-                className="text-xs uppercase mb-2"
+                style={{
+                  fontFamily: 'Inter_600SemiBold',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  fontSize: 11,
+                  textTransform: 'uppercase',
+                  marginBottom: 8,
+                  letterSpacing: 0.5,
+                }}
               >
                 Topics
               </Text>
-              <View className="flex-row flex-wrap" style={{ gap: 6 }}>
-                {entry.topics.slice(0, 3).filter(t => t && t.trim().length > 0).map((topic, index) => (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                {entry.topics
+                  .slice(0, 3)
+                  .filter((t) => t && t.trim().length > 0)
+                  .map((topic, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        paddingHorizontal: 10,
+                        paddingVertical: 4,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontFamily: 'Inter_400Regular',
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          fontSize: 11,
+                          textTransform: 'capitalize',
+                        }}
+                      >
+                        {topic}
+                      </Text>
+                    </View>
+                  ))}
+                {entry.topics.filter((t) => t && t.trim().length > 0).length > 3 && (
                   <View
-                    key={index}
-                    className="px-2 py-1 rounded-full"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                    style={{
+                      paddingHorizontal: 10,
+                      paddingVertical: 4,
+                      borderRadius: 20,
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    }}
                   >
                     <Text
-                      style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.9)' }}
-                      className="text-xs capitalize"
+                      style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.9)', fontSize: 11 }}
                     >
-                      {topic}
-                    </Text>
-                  </View>
-                ))}
-                {entry.topics.filter(t => t && t.trim().length > 0).length > 3 && (
-                  <View
-                    className="px-2 py-1 rounded-full"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                  >
-                    <Text
-                      style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.9)' }}
-                      className="text-xs"
-                    >
-                      +{entry.topics.filter(t => t && t.trim().length > 0).length - 3}
+                      +{entry.topics.filter((t) => t && t.trim().length > 0).length - 3}
                     </Text>
                   </View>
                 )}
@@ -648,18 +825,23 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
 
           {/* AI Analysis Snippet */}
           {entry.aiAnalysis && entry.aiAnalysis.trim().length > 1 && (
-            <View className="mb-4">
+            <View style={{ marginBottom: 16 }}>
               <View
-                className="p-3 rounded-lg"
                 style={{
+                  padding: 12,
+                  borderRadius: 12,
                   backgroundColor: 'rgba(255, 255, 255, 0.08)',
                   borderWidth: 1,
                   borderColor: 'rgba(255, 255, 255, 0.15)',
                 }}
               >
                 <Text
-                  style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.9)', lineHeight: 22 }}
-                  className="text-xs"
+                  style={{
+                    fontFamily: 'Inter_400Regular',
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    lineHeight: 20,
+                    fontSize: 12,
+                  }}
                   numberOfLines={2}
                 >
                   {entry.aiAnalysis}
@@ -670,35 +852,96 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
 
           {/* Audio Player */}
           {entry.audioUri && (
-            <View className="mb-4">
-              <AudioPlayer
-                audioUri={entry.audioUri}
-                primaryColor={primaryColor}
-                isDarkMode={isDarkMode}
-              />
+            <View style={{ marginBottom: 16 }}>
+              <AudioPlayer audioUri={entry.audioUri} primaryColor={primaryColor} isDarkMode={isDarkMode} />
             </View>
           )}
 
-          {/* Action Buttons */}
-          <View className="flex-row items-center" style={{ gap: 12 }}>
-            <Pressable
-              onPress={onPress}
-              className="flex-1 rounded-full py-3 items-center"
-              style={{ backgroundColor: primaryColor }}
-            >
-              <Text
-                style={{ fontFamily: 'Inter_600SemiBold' }}
-                className="text-sm text-white"
-              >
-                View Full Analysis
-              </Text>
-            </Pressable>
-            <Pressable onPress={onDelete}>
-              <Trash2 size={20} color="#FFFFFF" strokeWidth={2} />
-            </Pressable>
-          </View>
+          {/* View Full Analysis button */}
+          <Pressable
+            onPress={onPress}
+            style={({ pressed }) => ({
+              borderRadius: 20,
+              paddingVertical: 12,
+              alignItems: 'center',
+              backgroundColor: primaryColor,
+              opacity: pressed ? 0.85 : 1,
+            })}
+          >
+            <Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 14, color: '#FFFFFF' }}>
+              View Full Analysis
+            </Text>
+          </Pressable>
         </View>
       </Animated.View>
     </Pressable>
+  );
+}
+
+// ── Collapsible Transcript ────────────────────────────────────────────────────
+
+function CollapsibleTranscript({
+  transcript,
+  primaryColor,
+}: {
+  transcript: string;
+  primaryColor: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [needsCollapse, setNeedsCollapse] = useState(false);
+
+  const toggle = () => {
+    tapHaptic();
+    setExpanded((v) => !v);
+  };
+
+  return (
+    <View style={{ marginBottom: 12 }}>
+      <Text
+        style={{
+          fontFamily: 'Inter_400Regular',
+          color: '#FFFFFF',
+          lineHeight: 22,
+          fontSize: 14,
+        }}
+        numberOfLines={expanded ? undefined : 2}
+        onTextLayout={(e) => {
+          // If text is truncated (more than 2 lines worth), show the toggle
+          if (!needsCollapse && e.nativeEvent.lines.length > 2) {
+            setNeedsCollapse(true);
+          }
+        }}
+      >
+        {transcript}
+      </Text>
+
+      {(needsCollapse || expanded) && (
+        <Pressable
+          onPress={toggle}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginTop: 6,
+            alignSelf: 'flex-start',
+            gap: 4,
+          }}
+        >
+          <Text
+            style={{
+              fontFamily: 'Inter_600SemiBold',
+              color: primaryColor,
+              fontSize: 12,
+            }}
+          >
+            {expanded ? 'Show less' : 'Show more'}
+          </Text>
+          {expanded ? (
+            <ChevronUp size={14} color={primaryColor} strokeWidth={2.5} />
+          ) : (
+            <ChevronDown size={14} color={primaryColor} strokeWidth={2.5} />
+          )}
+        </Pressable>
+      )}
+    </View>
   );
 }
