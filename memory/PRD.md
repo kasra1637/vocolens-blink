@@ -63,6 +63,11 @@ Add an option to reset all app data and start from scratch. Adds a "Danger Zone"
   - Edit mode: header icons (X, Save) stay white; title editable via TextInput
   - Split delete handler into request + confirm pattern with haptic feedback
 
+- **Jan 2026**: Two-step reset confirmation (no PIN)
+  - Replaced single confirmation with two-step flow: Step 1 "Reset All Data?" → Step 2 "Are you sure?"
+  - Step indicator dots show progress; Cancel resets to step 1
+  - No PIN input required — just double confirmation then immediate data wipe
+
 ## Prioritized Backlog
 - P0: None
 - P1: None
