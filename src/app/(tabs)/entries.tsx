@@ -1,15 +1,23 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, TextInput, Platform, Modal } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import React, { useState, useMemo, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  TextInput,
+  Platform,
+  Modal,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import {
   useFonts,
   Inter_400Regular,
   Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
-} from '@expo-google-fonts/inter';
+} from "@expo-google-fonts/inter";
 import {
   Filter,
   Search,
@@ -22,39 +30,49 @@ import {
   Activity,
   Mic,
   ChevronUp,
-} from 'lucide-react-native';
+} from "lucide-react-native";
 import Animated, {
   FadeOut,
   FadeIn,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-} from 'react-native-reanimated';
-import { tapHaptic, selectHaptic, warningHaptic, confirmHaptic } from '@/lib/haptics';
-import { getThemeColors, getThemeGradients, getThemeShadows } from '@/lib/theme';
-import useJournalStore from '@/lib/state/journal-store';
-import useOnboardingStore, { THEME_COLORS } from '@/lib/state/onboarding-store';
-import useSettingsStore from '@/lib/state/settings-store';
-import { useDeleteEntry } from '@/lib/hooks';
-import { useClickSound } from '@/lib/hooks/useClickSound';
-import { JournalEntry, EmotionType, formatShortDuration, getEmotionSubLabel } from '@/lib/types';
-import { AudioPlayer } from '@/components/AudioPlayer';
+} from "react-native-reanimated";
+import {
+  tapHaptic,
+  selectHaptic,
+  warningHaptic,
+  confirmHaptic,
+} from "@/lib/haptics";
+import {
+  getThemeColors,
+  getThemeGradients,
+  getThemeShadows,
+} from "@/lib/theme";
+import useJournalStore from "@/lib/state/journal-store";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
+import useSettingsStore from "@/lib/state/settings-store";
+import { useDeleteEntry } from "@/lib/hooks";
+import { useClickSound } from "@/lib/hooks/useClickSound";
+import {
+  JournalEntry,
+  EmotionType,
+  formatShortDuration,
+  getEmotionSubLabel,
+} from "@/lib/types";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 // Display types for UI (capitalized versions)
-type DisplayEmotion =
-  | 'Happiness'
-  | 'Sadness'
-  | 'Anger'
-  | 'Disgust';
+type DisplayEmotion = "Happiness" | "Sadness" | "Anger" | "Disgust";
 
 const EMOTION_FILTERS: DisplayEmotion[] = [
-  'Happiness',
-  'Sadness',
-  'Anger',
-  'Disgust',
+  "Happiness",
+  "Sadness",
+  "Anger",
+  "Disgust",
 ];
 
-const SORT_OPTIONS = ['Newest First', 'Oldest First'] as const;
+const SORT_OPTIONS = ["Newest First", "Oldest First"] as const;
 
 type SortOption = (typeof SORT_OPTIONS)[number];
 
@@ -72,9 +90,11 @@ export default function EntriesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const playClickSound = useClickSound();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSort, setSelectedSort] = useState<SortOption>('Newest First');
-  const [selectedEmotions, setSelectedEmotions] = useState<DisplayEmotion[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSort, setSelectedSort] = useState<SortOption>("Newest First");
+  const [selectedEmotions, setSelectedEmotions] = useState<DisplayEmotion[]>(
+    [],
+  );
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [showEmotionDropdown, setShowEmotionDropdown] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -104,9 +124,10 @@ export default function EntriesScreen() {
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((entry) =>
-        entry.transcript.toLowerCase().includes(query) ||
-        entry.title.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (entry) =>
+          entry.transcript.toLowerCase().includes(query) ||
+          entry.title.toLowerCase().includes(query),
       );
     }
 
@@ -114,15 +135,21 @@ export default function EntriesScreen() {
     if (selectedEmotions.length > 0) {
       const emotionFilters = selectedEmotions.map(fromDisplayEmotion);
       filtered = filtered.filter((entry) =>
-        emotionFilters.some((emotion) => entry.emotions.includes(emotion))
+        emotionFilters.some((emotion) => entry.emotions.includes(emotion)),
       );
     }
 
     // Sort
-    if (selectedSort === 'Newest First') {
-      filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    if (selectedSort === "Newest First") {
+      filtered.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
     } else {
-      filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      filtered.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
     }
 
     return filtered;
@@ -133,7 +160,7 @@ export default function EntriesScreen() {
     setSelectedEmotions((prev) =>
       prev.includes(emotion)
         ? prev.filter((e) => e !== emotion)
-        : [...prev, emotion]
+        : [...prev, emotion],
     );
   }, []);
 
@@ -142,21 +169,18 @@ export default function EntriesScreen() {
       playClickSound();
       tapHaptic();
       router.push({
-        pathname: '/entry-detail',
+        pathname: "/entry-detail",
         params: { id: entry.id },
       });
     },
-    [router, playClickSound]
+    [router, playClickSound],
   );
 
-  const handleDeleteRequest = useCallback(
-    (entryId: string) => {
-      warningHaptic();
-      setEntryToDelete(entryId);
-      setDeleteModalVisible(true);
-    },
-    []
-  );
+  const handleDeleteRequest = useCallback((entryId: string) => {
+    warningHaptic();
+    setEntryToDelete(entryId);
+    setDeleteModalVisible(true);
+  }, []);
 
   const handleDeleteConfirm = useCallback(() => {
     if (!entryToDelete) return;
@@ -177,7 +201,7 @@ export default function EntriesScreen() {
       <View className="flex-1" style={{ backgroundColor: Colors.background }}>
         <LinearGradient
           colors={Gradients.background}
-          style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+          style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
         />
@@ -189,7 +213,7 @@ export default function EntriesScreen() {
     <View className="flex-1" style={{ backgroundColor: Colors.background }}>
       <LinearGradient
         colors={Gradients.background}
-        style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+        style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
@@ -205,28 +229,39 @@ export default function EntriesScreen() {
         {/* Header */}
         <Animated.View>
           <Text
-            style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF', fontSize: 22 }}
+            style={{
+              fontFamily: "Fraunces_700Bold",
+              color: "#FFFFFF",
+              fontSize: 22,
+            }}
             className="text-center mb-2"
           >
             Your Journal Entries
           </Text>
           <Text
-            style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.8)' }}
+            style={{
+              fontFamily: "Inter_400Regular",
+              color: "rgba(255, 255, 255, 0.8)",
+            }}
             className="text-sm text-center mb-4"
           >
-            Browse, search, and revisit all your{'\n'}journal entries in one place.
+            Browse, search, and revisit all your{"\n"}journal entries in one
+            place.
           </Text>
 
           {/* Total Entries */}
           <View className="items-center mb-6">
             <Text
-              style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF' }}
+              style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF" }}
               className="text-4xl"
             >
               {filteredEntries.length}
             </Text>
             <Text
-              style={{ fontFamily: 'Inter_500Medium', color: 'rgba(255, 255, 255, 0.8)' }}
+              style={{
+                fontFamily: "Inter_500Medium",
+                color: "rgba(255, 255, 255, 0.8)",
+              }}
               className="text-xs uppercase tracking-wider"
             >
               Total Entries
@@ -239,9 +274,9 @@ export default function EntriesScreen() {
           <View
             className="rounded-3xl overflow-hidden mb-6"
             style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
               borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.2)',
+              borderColor: "rgba(255, 255, 255, 0.2)",
             }}
           >
             <View className="p-4">
@@ -249,7 +284,7 @@ export default function EntriesScreen() {
               <View className="flex-row items-center mb-3">
                 <Filter size={16} color="#FFFFFF" strokeWidth={2} />
                 <Text
-                  style={{ fontFamily: 'Inter_600SemiBold', color: '#FFFFFF' }}
+                  style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
                   className="text-sm ml-2"
                 >
                   FILTER & SEARCH
@@ -259,19 +294,23 @@ export default function EntriesScreen() {
               {/* Search Bar */}
               <View
                 className="flex-row items-center rounded-xl px-4 py-3 mb-3"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.15)" }}
               >
                 <Search size={18} color="#FFFFFF" strokeWidth={2} />
                 <TextInput
                   className="flex-1 ml-3"
-                  style={{ fontFamily: 'Inter_400Regular', fontSize: 14, color: '#FFFFFF' }}
+                  style={{
+                    fontFamily: "Inter_400Regular",
+                    fontSize: 14,
+                    color: "#FFFFFF",
+                  }}
                   placeholder="Search your thoughts..."
                   placeholderTextColor="rgba(255, 255, 255, 0.6)"
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                 />
                 {searchQuery.length > 0 && (
-                  <Pressable onPress={() => setSearchQuery('')}>
+                  <Pressable onPress={() => setSearchQuery("")}>
                     <X size={18} color="#FFFFFF" strokeWidth={2} />
                   </Pressable>
                 )}
@@ -287,10 +326,10 @@ export default function EntriesScreen() {
                     setShowEmotionDropdown(false);
                   }}
                   className="flex-1 flex-row items-center justify-between rounded-xl px-3 py-3"
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                  style={{ backgroundColor: "rgba(255, 255, 255, 0.15)" }}
                 >
                   <Text
-                    style={{ fontFamily: 'Inter_500Medium', color: '#FFFFFF' }}
+                    style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF" }}
                     className="text-xs"
                   >
                     {selectedSort}
@@ -306,15 +345,15 @@ export default function EntriesScreen() {
                     setShowSortDropdown(false);
                   }}
                   className="flex-1 flex-row items-center justify-between rounded-xl px-3 py-3"
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                  style={{ backgroundColor: "rgba(255, 255, 255, 0.15)" }}
                 >
                   <Text
-                    style={{ fontFamily: 'Inter_500Medium', color: '#FFFFFF' }}
+                    style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF" }}
                     className="text-xs"
                   >
                     {selectedEmotions.length > 0
                       ? `${selectedEmotions.length} Selected`
-                      : 'Emotions'}
+                      : "Emotions"}
                   </Text>
                   <ChevronDown size={14} color="#FFFFFF" strokeWidth={2} />
                 </Pressable>
@@ -326,9 +365,9 @@ export default function EntriesScreen() {
                   exiting={FadeOut.duration(200)}
                   className="mt-2 rounded-2xl overflow-hidden"
                   style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
                     borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderColor: "rgba(255, 255, 255, 0.2)",
                   }}
                 >
                   {SORT_OPTIONS.map((sort) => (
@@ -343,17 +382,17 @@ export default function EntriesScreen() {
                       style={{
                         backgroundColor:
                           selectedSort === sort
-                            ? 'rgba(255, 255, 255, 0.15)'
-                            : 'transparent',
+                            ? "rgba(255, 255, 255, 0.15)"
+                            : "transparent",
                         borderBottomWidth: 1,
-                        borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+                        borderBottomColor: "rgba(255, 255, 255, 0.1)",
                       }}
                     >
                       <Text
                         style={{
-                          fontFamily: 'Inter_500Medium',
+                          fontFamily: "Inter_500Medium",
                           fontSize: 14,
-                          color: '#FFFFFF',
+                          color: "#FFFFFF",
                         }}
                       >
                         {sort}
@@ -369,12 +408,19 @@ export default function EntriesScreen() {
                   exiting={FadeOut.duration(200)}
                   className="mt-2 rounded-2xl overflow-hidden"
                   style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
                     borderWidth: 1,
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderColor: "rgba(255, 255, 255, 0.2)",
                   }}
                 >
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', padding: 12, gap: 8 }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      flexWrap: "wrap",
+                      padding: 12,
+                      gap: 8,
+                    }}
+                  >
                     {EMOTION_FILTERS.map((emotion) => (
                       <Pressable
                         key={emotion}
@@ -382,17 +428,17 @@ export default function EntriesScreen() {
                         className="px-3 py-3 rounded-full"
                         style={{
                           backgroundColor: selectedEmotions.includes(emotion)
-                            ? 'rgba(255, 255, 255, 0.15)'
-                            : 'transparent',
+                            ? "rgba(255, 255, 255, 0.15)"
+                            : "transparent",
                           borderBottomWidth: 1,
-                          borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+                          borderBottomColor: "rgba(255, 255, 255, 0.1)",
                         }}
                       >
                         <Text
                           style={{
-                            fontFamily: 'Inter_500Medium',
+                            fontFamily: "Inter_500Medium",
                             fontSize: 14,
-                            color: '#FFFFFF',
+                            color: "#FFFFFF",
                           }}
                         >
                           {emotion}
@@ -408,9 +454,7 @@ export default function EntriesScreen() {
 
         {/* Entry Cards */}
         {filteredEntries.map((entry, index) => (
-          <Animated.View
-            key={entry.id}
-          >
+          <Animated.View key={entry.id}>
             <EntryCard
               entry={entry}
               onPress={() => handleEntryPress(entry)}
@@ -424,22 +468,23 @@ export default function EntriesScreen() {
 
         {/* Empty State */}
         {filteredEntries.length === 0 && (
-          <Animated.View
-            className="items-center py-8"
-          >
+          <Animated.View className="items-center py-8">
             <Text
-              style={{ fontFamily: 'Inter_600SemiBold', color: '#FFFFFF' }}
+              style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
               className="text-center text-lg mb-2"
             >
-              {entries.length === 0 ? 'No Entries Yet' : 'No Matches Found'}
+              {entries.length === 0 ? "No Entries Yet" : "No Matches Found"}
             </Text>
             <Text
-              style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.8)' }}
+              style={{
+                fontFamily: "Inter_400Regular",
+                color: "rgba(255, 255, 255, 0.8)",
+              }}
               className="text-center"
             >
               {entries.length === 0
-                ? 'Start recording your thoughts\nto see them here.'
-                : 'Try adjusting your filters\nto find what you\'re looking for.'}
+                ? "Start recording your thoughts\nto see them here."
+                : "Try adjusting your filters\nto find what you're looking for."}
             </Text>
           </Animated.View>
         )}
@@ -461,26 +506,36 @@ export default function EntriesScreen() {
               colors={Gradients.background}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
-              style={{ padding: 24, borderRadius: 24, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' }}
+              style={{
+                padding: 24,
+                borderRadius: 24,
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.2)",
+              }}
             >
               <View className="items-center mb-4">
                 <View
                   className="w-16 h-16 rounded-full items-center justify-center mb-4"
-                  style={{ backgroundColor: 'rgba(239, 68, 68, 0.15)' }}
+                  style={{ backgroundColor: "rgba(239, 68, 68, 0.15)" }}
                 >
                   <Trash2 size={32} color="#EF4444" strokeWidth={2} />
                 </View>
                 <Text
                   className="text-2xl font-bold mb-2 text-center"
-                  style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF' }}
+                  style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF" }}
                 >
                   Delete Entry?
                 </Text>
                 <Text
                   className="text-center text-base"
-                  style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.8)', lineHeight: 22 }}
+                  style={{
+                    fontFamily: "Inter_400Regular",
+                    color: "rgba(255, 255, 255, 0.8)",
+                    lineHeight: 22,
+                  }}
                 >
-                  This will permanently delete this journal entry. This action cannot be undone.
+                  This will permanently delete this journal entry. This action
+                  cannot be undone.
                 </Text>
               </View>
 
@@ -491,14 +546,14 @@ export default function EntriesScreen() {
                   className="rounded-2xl overflow-hidden"
                 >
                   <LinearGradient
-                    colors={['#EF4444', '#DC2626']}
+                    colors={["#EF4444", "#DC2626"]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 0 }}
-                    style={{ padding: 16, alignItems: 'center' }}
+                    style={{ padding: 16, alignItems: "center" }}
                   >
                     <Text
                       className="text-white text-base font-bold"
-                      style={{ fontFamily: 'Inter_700Bold' }}
+                      style={{ fontFamily: "Inter_700Bold" }}
                     >
                       Delete Entry
                     </Text>
@@ -512,12 +567,15 @@ export default function EntriesScreen() {
                   style={{
                     borderWidth: 2,
                     borderColor: Colors.primary,
-                    backgroundColor: 'transparent',
+                    backgroundColor: "transparent",
                   }}
                 >
                   <Text
                     className="text-base font-bold"
-                    style={{ fontFamily: 'Inter_700Bold', color: Colors.primary }}
+                    style={{
+                      fontFamily: "Inter_700Bold",
+                      color: Colors.primary,
+                    }}
                   >
                     Cancel
                   </Text>
@@ -540,7 +598,14 @@ interface EntryCardProps {
   isDarkMode?: boolean;
 }
 
-function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColor, isDarkMode = false }: EntryCardProps) {
+function EntryCard({
+  entry,
+  onPress,
+  onDelete,
+  surfaceElevatedColor,
+  primaryColor,
+  isDarkMode = false,
+}: EntryCardProps) {
   const scale = useSharedValue(1);
   const [transcriptExpanded, setTranscriptExpanded] = useState(false);
 
@@ -560,52 +625,57 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
   const displayTitle = useMemo(() => {
     const title = entry.title;
     // If title looks auto-generated/generic (e.g., "Journal Entry", "Untitled", empty, or just a date)
-    if (!title || title.trim().length === 0 || /^(journal entry|untitled|entry|new entry)/i.test(title.trim())) {
+    if (
+      !title ||
+      title.trim().length === 0 ||
+      /^(journal entry|untitled|entry|new entry)/i.test(title.trim())
+    ) {
       // Generate from first meaningful sentence of transcript
-      const transcript = entry.transcript || '';
-      const firstSentence = transcript.split(/[.!?\n]/)[0]?.trim() || '';
+      const transcript = entry.transcript || "";
+      const firstSentence = transcript.split(/[.!?\n]/)[0]?.trim() || "";
       if (firstSentence.length > 0) {
-        return firstSentence.length > 50 ? firstSentence.slice(0, 50).trim() + '...' : firstSentence;
+        return firstSentence.length > 50
+          ? firstSentence.slice(0, 50).trim() + "..."
+          : firstSentence;
       }
-      return 'Journal Entry';
+      return "Journal Entry";
     }
     return title;
   }, [entry.title, entry.transcript]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
       hour12: true,
     });
   };
-
 
   return (
     <Pressable onPressIn={handlePressIn} onPressOut={handlePressOut}>
       <Animated.View
         style={[
           {
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
             borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.2)',
+            borderColor: "rgba(255, 255, 255, 0.2)",
             borderRadius: 24,
             marginBottom: 16,
-            shadowColor: '#000',
+            shadowColor: "#000",
             shadowOffset: { width: 0, height: 8 },
             shadowOpacity: 0.1,
             shadowRadius: 20,
-            elevation: Platform.OS === 'android' ? 0 : 6,
+            elevation: Platform.OS === "android" ? 0 : 6,
           },
           animatedStyle,
         ]}
@@ -616,7 +686,7 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
             <View className="flex-1 mr-3">
               <View className="flex-row items-center" style={{ gap: 8 }}>
                 <Text
-                  style={{ fontFamily: 'Inter_600SemiBold', color: '#FFFFFF' }}
+                  style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
                   className="text-lg flex-1"
                   numberOfLines={1}
                 >
@@ -632,7 +702,10 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
                 )}
               </View>
               <Text
-                style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.7)' }}
+                style={{
+                  fontFamily: "Inter_400Regular",
+                  color: "rgba(255, 255, 255, 0.7)",
+                }}
                 className="text-xs"
               >
                 {formatDate(entry.createdAt)}, {formatTime(entry.createdAt)}
@@ -643,18 +716,32 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
           {/* Date & Duration */}
           <View className="flex-row items-center mb-3" style={{ gap: 12 }}>
             <View className="flex-row items-center">
-              <Clock size={14} color="rgba(255, 255, 255, 0.7)" strokeWidth={2} />
+              <Clock
+                size={14}
+                color="rgba(255, 255, 255, 0.7)"
+                strokeWidth={2}
+              />
               <Text
-                style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.7)' }}
+                style={{
+                  fontFamily: "Inter_400Regular",
+                  color: "rgba(255, 255, 255, 0.7)",
+                }}
                 className="text-xs ml-1"
               >
                 {formatShortDuration(entry.duration)}
               </Text>
             </View>
             <View className="flex-row items-center">
-              <Activity size={14} color="rgba(255, 255, 255, 0.7)" strokeWidth={2} />
+              <Activity
+                size={14}
+                color="rgba(255, 255, 255, 0.7)"
+                strokeWidth={2}
+              />
               <Text
-                style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.7)' }}
+                style={{
+                  fontFamily: "Inter_400Regular",
+                  color: "rgba(255, 255, 255, 0.7)",
+                }}
                 className="text-xs ml-1"
               >
                 {entry.emotionIntensity}% intensity
@@ -667,22 +754,25 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
             <View className="mb-3">
               <View
                 className="px-3 py-1.5 rounded-full self-start flex-row items-center"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)', gap: 6 }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.15)", gap: 6 }}
               >
                 <Text
-                  style={{ fontFamily: 'Inter_600SemiBold', color: '#FFFFFF' }}
+                  style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
                   className="text-xs"
                 >
                   {/* Show intensity-adjusted sub-label from saved labels, or compute on-the-fly */}
-                  {entry.emotionIntensityLabels?.[entry.primaryEmotion]
-                    ?? getEmotionSubLabel(entry.primaryEmotion, entry.emotionIntensity)}
+                  {entry.emotionIntensityLabels?.[entry.primaryEmotion] ??
+                    getEmotionSubLabel(
+                      entry.primaryEmotion,
+                      entry.emotionIntensity,
+                    )}
                 </Text>
                 <Text
                   style={{
-                    fontFamily: 'Inter_400Regular',
-                    color: 'rgba(255,255,255,0.5)',
+                    fontFamily: "Inter_400Regular",
+                    color: "rgba(255,255,255,0.5)",
                     fontSize: 10,
-                    textTransform: 'capitalize',
+                    textTransform: "capitalize",
                   }}
                 >
                   {entry.primaryEmotion}
@@ -696,10 +786,13 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
             <View className="mb-3">
               <View
                 className="p-2 rounded-lg"
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.08)' }}
+                style={{ backgroundColor: "rgba(255, 255, 255, 0.08)" }}
               >
                 <Text
-                  style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.8)' }}
+                  style={{
+                    fontFamily: "Inter_400Regular",
+                    color: "rgba(255, 255, 255, 0.8)",
+                  }}
                   className="text-xs italic"
                   numberOfLines={2}
                 >
@@ -712,7 +805,11 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
           {/* Transcript Preview — Collapsible */}
           <View className="mb-3">
             <Text
-              style={{ fontFamily: 'Inter_400Regular', color: '#FFFFFF', lineHeight: 22 }}
+              style={{
+                fontFamily: "Inter_400Regular",
+                color: "#FFFFFF",
+                lineHeight: 22,
+              }}
               className="text-sm"
               numberOfLines={transcriptExpanded ? undefined : 2}
             >
@@ -720,58 +817,82 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
             </Text>
             {entry.transcript && entry.transcript.length > 100 && (
               <Pressable
-                onPress={() => { tapHaptic(); setTranscriptExpanded(!transcriptExpanded); }}
+                onPress={() => {
+                  tapHaptic();
+                  setTranscriptExpanded(!transcriptExpanded);
+                }}
                 className="mt-1"
               >
                 <Text
-                  style={{ fontFamily: 'Inter_500Medium', color: primaryColor, fontSize: 13 }}
+                  style={{
+                    fontFamily: "Inter_500Medium",
+                    color: primaryColor,
+                    fontSize: 13,
+                  }}
                 >
-                  {transcriptExpanded ? 'Show less' : 'Read more'}
+                  {transcriptExpanded ? "Show less" : "Read more"}
                 </Text>
               </Pressable>
             )}
           </View>
 
           {/* Topics */}
-          {entry.topics && entry.topics.length > 0 && entry.topics.some(t => t && t.trim().length > 0) && (
-            <View className="mb-3">
-              <Text
-                style={{ fontFamily: 'Inter_600SemiBold', color: 'rgba(255, 255, 255, 0.8)' }}
-                className="text-xs uppercase mb-2"
-              >
-                Topics
-              </Text>
-              <View className="flex-row flex-wrap" style={{ gap: 6 }}>
-                {entry.topics.slice(0, 3).filter(t => t && t.trim().length > 0).map((topic, index) => (
-                  <View
-                    key={index}
-                    className="px-2 py-1 rounded-full"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                  >
-                    <Text
-                      style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.9)' }}
-                      className="text-xs capitalize"
+          {entry.topics &&
+            entry.topics.length > 0 &&
+            entry.topics.some((t) => t && t.trim().length > 0) && (
+              <View className="mb-3">
+                <Text
+                  style={{
+                    fontFamily: "Inter_600SemiBold",
+                    color: "rgba(255, 255, 255, 0.8)",
+                  }}
+                  className="text-xs uppercase mb-2"
+                >
+                  Topics
+                </Text>
+                <View className="flex-row flex-wrap" style={{ gap: 6 }}>
+                  {entry.topics
+                    .slice(0, 3)
+                    .filter((t) => t && t.trim().length > 0)
+                    .map((topic, index) => (
+                      <View
+                        key={index}
+                        className="px-2 py-1 rounded-full"
+                        style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+                      >
+                        <Text
+                          style={{
+                            fontFamily: "Inter_400Regular",
+                            color: "rgba(255, 255, 255, 0.9)",
+                          }}
+                          className="text-xs capitalize"
+                        >
+                          {topic}
+                        </Text>
+                      </View>
+                    ))}
+                  {entry.topics.filter((t) => t && t.trim().length > 0).length >
+                    3 && (
+                    <View
+                      className="px-2 py-1 rounded-full"
+                      style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
                     >
-                      {topic}
-                    </Text>
-                  </View>
-                ))}
-                {entry.topics.filter(t => t && t.trim().length > 0).length > 3 && (
-                  <View
-                    className="px-2 py-1 rounded-full"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                  >
-                    <Text
-                      style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.9)' }}
-                      className="text-xs"
-                    >
-                      +{entry.topics.filter(t => t && t.trim().length > 0).length - 3}
-                    </Text>
-                  </View>
-                )}
+                      <Text
+                        style={{
+                          fontFamily: "Inter_400Regular",
+                          color: "rgba(255, 255, 255, 0.9)",
+                        }}
+                        className="text-xs"
+                      >
+                        +
+                        {entry.topics.filter((t) => t && t.trim().length > 0)
+                          .length - 3}
+                      </Text>
+                    </View>
+                  )}
+                </View>
               </View>
-            </View>
-          )}
+            )}
 
           {/* AI Analysis Snippet */}
           {entry.aiAnalysis && entry.aiAnalysis.trim().length > 1 && (
@@ -779,13 +900,17 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
               <View
                 className="p-3 rounded-lg"
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backgroundColor: "rgba(255, 255, 255, 0.08)",
                   borderWidth: 1,
-                  borderColor: 'rgba(255, 255, 255, 0.15)',
+                  borderColor: "rgba(255, 255, 255, 0.15)",
                 }}
               >
                 <Text
-                  style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.9)', lineHeight: 22 }}
+                  style={{
+                    fontFamily: "Inter_400Regular",
+                    color: "rgba(255, 255, 255, 0.9)",
+                    lineHeight: 22,
+                  }}
                   className="text-xs"
                   numberOfLines={2}
                 >
@@ -814,7 +939,7 @@ function EntryCard({ entry, onPress, onDelete, surfaceElevatedColor, primaryColo
               style={{ backgroundColor: primaryColor }}
             >
               <Text
-                style={{ fontFamily: 'Inter_600SemiBold' }}
+                style={{ fontFamily: "Inter_600SemiBold" }}
                 className="text-sm text-white"
               >
                 View Full Analysis

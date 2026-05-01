@@ -1,15 +1,23 @@
-import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, Dimensions, Modal, Platform } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import React, { useState, useMemo, useCallback } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  Dimensions,
+  Modal,
+  Platform,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   useFonts,
   Inter_400Regular,
   Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
-} from '@expo-google-fonts/inter';
-import { shareMilestone } from '@/lib/share-utils';
+} from "@expo-google-fonts/inter";
+import { shareMilestone } from "@/lib/share-utils";
 import {
   Flame,
   Calendar,
@@ -37,7 +45,7 @@ import {
   CalendarCheck,
   Clock,
   Settings,
-} from 'lucide-react-native';
+} from "lucide-react-native";
 import Animated, {
   FadeOut,
   useAnimatedStyle,
@@ -46,82 +54,98 @@ import Animated, {
   withSequence,
   withTiming,
   withRepeat,
-} from 'react-native-reanimated';
-import { tapHaptic, selectHaptic, successHaptic } from '@/lib/haptics';
-import { router } from 'expo-router';
-import { Colors as StaticColors, Gradients as StaticGradients, Shadows as StaticShadows, BorderRadius, getThemeColors, getThemeGradients, getThemeShadows } from '@/lib/theme';
-import useBadgesStore from '@/lib/state/badges-store';
-import useUserStatsStore from '@/lib/state/user-stats-store';
-import useOnboardingStore from '@/lib/state/onboarding-store';
-import useSettingsStore from '@/lib/state/settings-store';
-import { Badge, BadgeCategory, BadgeRarity } from '@/lib/types';
+} from "react-native-reanimated";
+import { tapHaptic, selectHaptic, successHaptic } from "@/lib/haptics";
+import { router } from "expo-router";
+import {
+  Colors as StaticColors,
+  Gradients as StaticGradients,
+  Shadows as StaticShadows,
+  BorderRadius,
+  getThemeColors,
+  getThemeGradients,
+  getThemeShadows,
+} from "@/lib/theme";
+import useBadgesStore from "@/lib/state/badges-store";
+import useUserStatsStore from "@/lib/state/user-stats-store";
+import useOnboardingStore from "@/lib/state/onboarding-store";
+import useSettingsStore from "@/lib/state/settings-store";
+import { Badge, BadgeCategory, BadgeRarity } from "@/lib/types";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = (SCREEN_WIDTH - 60) / 2;
 
 // Icon mapping for badges
 const BADGE_ICONS: Record<string, typeof Flame> = {
-  'flame': Flame,
-  'calendar': Calendar,
-  'trophy': Trophy,
-  'crown': Crown,
-  'award': Award,
-  'star': Star,
-  'target': Target,
-  'sun': Sun,
-  'moon': Moon,
-  'heart': Heart,
-  'smile': Smile,
-  'zap': Zap,
-  'sparkles': Sparkles,
-  'book-open': BookOpen,
-  'pen-tool': PenTool,
-  'book': Book,
-  'sunrise': Sunrise,
-  'moon-star': MoonStar,
-  'calendar-check': CalendarCheck,
-  'clock': Clock,
+  flame: Flame,
+  calendar: Calendar,
+  trophy: Trophy,
+  crown: Crown,
+  award: Award,
+  star: Star,
+  target: Target,
+  sun: Sun,
+  moon: Moon,
+  heart: Heart,
+  smile: Smile,
+  zap: Zap,
+  sparkles: Sparkles,
+  "book-open": BookOpen,
+  "pen-tool": PenTool,
+  book: Book,
+  sunrise: Sunrise,
+  "moon-star": MoonStar,
+  "calendar-check": CalendarCheck,
+  clock: Clock,
 };
 
 // Rarity colors and effects
-const RARITY_CONFIG: Record<BadgeRarity, { colors: readonly [string, string]; glow: string; label: string }> = {
+const RARITY_CONFIG: Record<
+  BadgeRarity,
+  { colors: readonly [string, string]; glow: string; label: string }
+> = {
   common: {
     colors: [StaticColors.purple200, StaticColors.purple300] as const,
     glow: StaticColors.purple300,
-    label: 'Common',
+    label: "Common",
   },
   rare: {
-    colors: ['#7B5FE8', '#8E6BFF'] as const,
-    glow: '#8E6BFF',
-    label: 'Rare',
+    colors: ["#7B5FE8", "#8E6BFF"] as const,
+    glow: "#8E6BFF",
+    label: "Rare",
   },
   epic: {
-    colors: ['#9D4EDD', '#C77DFF'] as const,
-    glow: '#C77DFF',
-    label: 'Epic',
+    colors: ["#9D4EDD", "#C77DFF"] as const,
+    glow: "#C77DFF",
+    label: "Epic",
   },
   legendary: {
-    colors: ['#FF6B6B', '#FFD93D'] as const,
-    glow: '#FFD93D',
-    label: 'Legendary',
+    colors: ["#FF6B6B", "#FFD93D"] as const,
+    glow: "#FFD93D",
+    label: "Legendary",
   },
 };
 
-type FilterCategory = 'all' | BadgeCategory;
+type FilterCategory = "all" | BadgeCategory;
 
-const CATEGORY_OPTIONS: { value: FilterCategory; label: string; icon: typeof Award }[] = [
-  { value: 'all', label: 'All Badges', icon: Award },
-  { value: 'streak', label: 'Streak', icon: Flame },
-  { value: 'entries', label: 'Entries', icon: Star },
-  { value: 'consistency', label: 'Consistency', icon: Zap },
-  { value: 'mood', label: 'Mood', icon: Heart },
-  { value: 'time', label: 'Time-Based', icon: Sun },
-  { value: 'special', label: 'Special', icon: Sparkles },
+const CATEGORY_OPTIONS: {
+  value: FilterCategory;
+  label: string;
+  icon: typeof Award;
+}[] = [
+  { value: "all", label: "All Badges", icon: Award },
+  { value: "streak", label: "Streak", icon: Flame },
+  { value: "entries", label: "Entries", icon: Star },
+  { value: "consistency", label: "Consistency", icon: Zap },
+  { value: "mood", label: "Mood", icon: Heart },
+  { value: "time", label: "Time-Based", icon: Sun },
+  { value: "special", label: "Special", icon: Sparkles },
 ];
 
 export default function MilestonesScreen() {
   const insets = useSafeAreaInsets();
-  const [selectedCategory, setSelectedCategory] = useState<FilterCategory>('all');
+  const [selectedCategory, setSelectedCategory] =
+    useState<FilterCategory>("all");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -152,16 +176,19 @@ export default function MilestonesScreen() {
   const allBadges = useMemo(() => getAllBadges(), [getAllBadges]);
 
   const filteredBadges = useMemo(() => {
-    if (selectedCategory === 'all') return allBadges;
+    if (selectedCategory === "all") return allBadges;
     return getBadgesByCategory(selectedCategory);
   }, [selectedCategory, allBadges, getBadgesByCategory]);
 
-  const userStats = useMemo(() => ({
-    currentStreak: stats.currentStreak,
-    totalEntries: stats.totalEntries,
-    totalBadges: allBadges.length,
-    unlockedBadges: unlockedCount,
-  }), [stats, allBadges.length, unlockedCount]);
+  const userStats = useMemo(
+    () => ({
+      currentStreak: stats.currentStreak,
+      totalEntries: stats.totalEntries,
+      totalBadges: allBadges.length,
+      unlockedBadges: unlockedCount,
+    }),
+    [stats, allBadges.length, unlockedCount],
+  );
 
   const handleCategorySelect = useCallback((category: FilterCategory) => {
     tapHaptic();
@@ -191,7 +218,7 @@ export default function MilestonesScreen() {
       <View className="flex-1" style={{ backgroundColor: Colors.background }}>
         <LinearGradient
           colors={Gradients.background}
-          style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+          style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
         />
@@ -199,13 +226,15 @@ export default function MilestonesScreen() {
     );
   }
 
-  const selectedCategoryOption = CATEGORY_OPTIONS.find((opt) => opt.value === selectedCategory);
+  const selectedCategoryOption = CATEGORY_OPTIONS.find(
+    (opt) => opt.value === selectedCategory,
+  );
 
   return (
     <View className="flex-1" style={{ backgroundColor: Colors.background }}>
       <LinearGradient
         colors={Gradients.background}
-        style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+        style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
       />
@@ -224,13 +253,20 @@ export default function MilestonesScreen() {
           <View className="flex-row items-center justify-center mb-6">
             <View className="items-center">
               <Text
-                style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF', fontSize: 22 }}
+                style={{
+                  fontFamily: "Fraunces_700Bold",
+                  color: "#FFFFFF",
+                  fontSize: 22,
+                }}
                 className="mb-2"
               >
                 Your Milestones
               </Text>
               <Text
-                style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.8)' }}
+                style={{
+                  fontFamily: "Inter_400Regular",
+                  color: "rgba(255, 255, 255, 0.8)",
+                }}
                 className="text-base"
               >
                 Track your progress & earn badges
@@ -280,7 +316,10 @@ export default function MilestonesScreen() {
             style={{ paddingVertical: 60 }}
           >
             <Text
-              style={{ fontFamily: 'Inter_500Medium', color: 'rgba(255, 255, 255, 0.8)' }}
+              style={{
+                fontFamily: "Inter_500Medium",
+                color: "rgba(255, 255, 255, 0.8)",
+              }}
               className="text-center"
             >
               No badges in this category yet
@@ -316,9 +355,9 @@ function StatsOverview({ stats, isDarkMode = false }: StatsOverviewProps) {
     <View
       className="mb-6"
       style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.2)',
+        borderColor: "rgba(255, 255, 255, 0.2)",
         borderRadius: BorderRadius.xxlarge,
         ...StaticShadows.medium,
       }}
@@ -328,7 +367,7 @@ function StatsOverview({ stats, isDarkMode = false }: StatsOverviewProps) {
           <StatItem
             icon={Flame}
             label="Current Streak"
-            value={`${stats.currentStreak} ${stats.currentStreak === 1 ? 'day' : 'days'}`}
+            value={`${stats.currentStreak} ${stats.currentStreak === 1 ? "day" : "days"}`}
             color="#FFFFFF"
             isDarkMode={isDarkMode}
           />
@@ -360,7 +399,13 @@ interface StatItemProps {
   isDarkMode?: boolean;
 }
 
-function StatItem({ icon: Icon, label, value, color, isDarkMode = false }: StatItemProps) {
+function StatItem({
+  icon: Icon,
+  label,
+  value,
+  color,
+  isDarkMode = false,
+}: StatItemProps) {
   return (
     <View className="items-center flex-1">
       <View
@@ -368,22 +413,25 @@ function StatItem({ icon: Icon, label, value, color, isDarkMode = false }: StatI
           width: 48,
           height: 48,
           borderRadius: BorderRadius.large,
-          backgroundColor: 'rgba(255, 255, 255, 0.15)',
-          alignItems: 'center',
-          justifyContent: 'center',
+          backgroundColor: "rgba(255, 255, 255, 0.15)",
+          alignItems: "center",
+          justifyContent: "center",
           marginBottom: 8,
         }}
       >
         <Icon size={24} color="#FFFFFF" strokeWidth={2} />
       </View>
       <Text
-        style={{ fontFamily: 'Inter_600SemiBold', color: '#FFFFFF' }}
+        style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
         className="text-base mb-1"
       >
         {value}
       </Text>
       <Text
-        style={{ fontFamily: 'Inter_400Regular', color: 'rgba(255, 255, 255, 0.8)' }}
+        style={{
+          fontFamily: "Inter_400Regular",
+          color: "rgba(255, 255, 255, 0.8)",
+        }}
         className="text-xs text-center"
       >
         {label}
@@ -413,25 +461,25 @@ function CategoryDropdown({
   const Icon = selectedOption.icon;
 
   return (
-    <View style={{ position: 'relative', zIndex: 100 }}>
+    <View style={{ position: "relative", zIndex: 100 }}>
       <Pressable
         onPress={onToggle}
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          backgroundColor: "rgba(255, 255, 255, 0.1)",
           borderWidth: 1,
-          borderColor: 'rgba(255, 255, 255, 0.2)',
+          borderColor: "rgba(255, 255, 255, 0.2)",
           borderRadius: BorderRadius.large,
           padding: 14,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
           ...StaticShadows.small,
         }}
       >
         <View className="flex-row items-center">
           <Icon size={20} color="#FFFFFF" strokeWidth={2} />
           <Text
-            style={{ fontFamily: 'Inter_500Medium', color: '#FFFFFF' }}
+            style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF" }}
             className="text-base ml-2"
           >
             {selectedOption.label}
@@ -439,9 +487,9 @@ function CategoryDropdown({
         </View>
         <ChevronDown
           size={20}
-          color='rgba(255, 255, 255, 0.8)'
+          color="rgba(255, 255, 255, 0.8)"
           strokeWidth={2}
-          style={{ transform: [{ rotate: isOpen ? '180deg' : '0deg' }] }}
+          style={{ transform: [{ rotate: isOpen ? "180deg" : "0deg" }] }}
         />
       </Pressable>
 
@@ -450,9 +498,9 @@ function CategoryDropdown({
           exiting={FadeOut.duration(200)}
           className="mt-2 rounded-2xl overflow-hidden"
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
             borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.2)',
+            borderColor: "rgba(255, 255, 255, 0.2)",
             ...StaticShadows.small,
           }}
         >
@@ -465,21 +513,19 @@ function CategoryDropdown({
                 onPress={() => onSelect(option.value)}
                 className="px-3 py-3"
                 style={{
-                  backgroundColor: isSelected ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+                  backgroundColor: isSelected
+                    ? "rgba(255, 255, 255, 0.15)"
+                    : "transparent",
                   borderBottomWidth: 1,
-                  borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+                  borderBottomColor: "rgba(255, 255, 255, 0.1)",
                 }}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <OptionIcon
-                    size={18}
-                    color="#FFFFFF"
-                    strokeWidth={2}
-                  />
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <OptionIcon size={18} color="#FFFFFF" strokeWidth={2} />
                   <Text
                     style={{
-                      fontFamily: 'Inter_500Medium',
-                      color: '#FFFFFF',
+                      fontFamily: "Inter_500Medium",
+                      color: "#FFFFFF",
                       marginLeft: 12,
                       fontSize: 13,
                     }}
@@ -526,21 +572,27 @@ function BadgeCard({ badge, delay, onPress }: BadgeCardProps) {
   };
 
   const formatUnlockDate = (dateString?: string) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
   return (
-    <Animated.View
-      style={[{ width: CARD_WIDTH }, animatedStyle]}
-    >
-      <Pressable onPress={onPress} onPressIn={handlePressIn} onPressOut={handlePressOut}>
+    <Animated.View style={[{ width: CARD_WIDTH }, animatedStyle]}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+      >
         <View
           style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
             borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.2)',
+            borderColor: "rgba(255, 255, 255, 0.2)",
             borderRadius: BorderRadius.xlarge,
             padding: 16,
             opacity: 1,
@@ -551,7 +603,7 @@ function BadgeCard({ badge, delay, onPress }: BadgeCardProps) {
           <View className="items-center mb-3">
             <View
               style={{
-                position: 'relative',
+                position: "relative",
                 width: 64,
                 height: 64,
               }}
@@ -561,18 +613,18 @@ function BadgeCard({ badge, delay, onPress }: BadgeCardProps) {
                   width: 64,
                   height: 64,
                   borderRadius: 32,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
                 }}
               >
                 <View
                   style={{
-                    position: 'absolute',
+                    position: "absolute",
                     width: 64,
                     height: 64,
                     borderRadius: 32,
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    backgroundColor: "rgba(255, 255, 255, 0.2)",
                   }}
                 />
                 <View style={{ zIndex: 1 }}>
@@ -583,22 +635,24 @@ function BadgeCard({ badge, delay, onPress }: BadgeCardProps) {
               {/* Lock/Unlock Indicator */}
               <View
                 style={{
-                  position: 'absolute',
+                  position: "absolute",
                   bottom: -2,
                   right: -2,
                   width: 24,
                   height: 24,
                   borderRadius: 12,
-                  backgroundColor: '#FFFFFF',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  backgroundColor: "#FFFFFF",
+                  alignItems: "center",
+                  justifyContent: "center",
                   borderWidth: 2,
-                  borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : '#FFFFFF',
-                  shadowColor: '#000',
+                  borderColor: isDarkMode
+                    ? "rgba(255, 255, 255, 0.2)"
+                    : "#FFFFFF",
+                  shadowColor: "#000",
                   shadowOffset: { width: 0, height: 1 },
                   shadowOpacity: 0.2,
                   shadowRadius: 2,
-                  elevation: Platform.OS === 'android' ? 0 : 3,
+                  elevation: Platform.OS === "android" ? 0 : 3,
                 }}
               >
                 {badge.unlocked ? (
@@ -613,9 +667,9 @@ function BadgeCard({ badge, delay, onPress }: BadgeCardProps) {
           {/* Badge Title */}
           <Text
             style={{
-              fontFamily: 'Inter_600SemiBold',
-              color: '#FFFFFF',
-              textAlign: 'center',
+              fontFamily: "Inter_600SemiBold",
+              color: "#FFFFFF",
+              textAlign: "center",
               fontSize: 14,
               marginBottom: 4,
             }}
@@ -627,9 +681,9 @@ function BadgeCard({ badge, delay, onPress }: BadgeCardProps) {
           {/* Badge Rarity */}
           <Text
             style={{
-              fontFamily: 'Inter_500Medium',
-              color: 'rgba(255, 255, 255, 0.8)',
-              textAlign: 'center',
+              fontFamily: "Inter_500Medium",
+              color: "rgba(255, 255, 255, 0.8)",
+              textAlign: "center",
               fontSize: 10,
               marginBottom: 8,
             }}
@@ -644,8 +698,8 @@ function BadgeCard({ badge, delay, onPress }: BadgeCardProps) {
                 <Check size={12} color="#FFFFFF" strokeWidth={2.5} />
                 <Text
                   style={{
-                    fontFamily: 'Inter_400Regular',
-                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontFamily: "Inter_400Regular",
+                    color: "rgba(255, 255, 255, 0.8)",
                     fontSize: 10,
                     marginLeft: 4,
                   }}
@@ -660,24 +714,24 @@ function BadgeCard({ badge, delay, onPress }: BadgeCardProps) {
                 style={{
                   height: 6,
                   borderRadius: 3,
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  overflow: 'hidden',
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  overflow: "hidden",
                 }}
               >
                 <View
                   style={{
-                    height: '100%',
+                    height: "100%",
                     width: `${Math.round(badge.progress)}%`,
-                    backgroundColor: '#FFFFFF',
+                    backgroundColor: "#FFFFFF",
                   }}
                 />
               </View>
               <Text
                 style={{
-                  fontFamily: 'Inter_500Medium',
-                  color: 'rgba(255, 255, 255, 0.8)',
+                  fontFamily: "Inter_500Medium",
+                  color: "rgba(255, 255, 255, 0.8)",
                   fontSize: 10,
-                  textAlign: 'center',
+                  textAlign: "center",
                   marginTop: 4,
                 }}
               >
@@ -717,9 +771,13 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
   const rarityConfig = RARITY_CONFIG[badge.rarity];
 
   const formatUnlockDate = (dateString?: string) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
   return (
@@ -732,18 +790,18 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
       <View
         style={{
           flex: 1,
-          backgroundColor: 'rgba(0, 0, 0, 0.95)',
-          justifyContent: 'center',
-          alignItems: 'center',
+          backgroundColor: "rgba(0, 0, 0, 0.95)",
+          justifyContent: "center",
+          alignItems: "center",
           padding: 20,
         }}
       >
         <Animated.View
           style={{
-            backgroundColor: '#FFFFFF',
+            backgroundColor: "#FFFFFF",
             borderRadius: BorderRadius.xxlarge,
             padding: 28,
-            width: '100%',
+            width: "100%",
             maxWidth: 400,
             borderWidth: 1,
             borderColor: StaticColors.purple200,
@@ -754,16 +812,16 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
           <Pressable
             onPress={onClose}
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 20,
               right: 20,
               zIndex: 10,
               width: 36,
               height: 36,
               borderRadius: 18,
-              backgroundColor: 'transparent',
-              alignItems: 'center',
-              justifyContent: 'center',
+              backgroundColor: "transparent",
+              alignItems: "center",
+              justifyContent: "center",
               borderWidth: 0,
             }}
           >
@@ -772,25 +830,25 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
 
           {/* Badge Icon with Glow */}
           <View className="items-center mb-6">
-            <View style={{ position: 'relative' }}>
+            <View style={{ position: "relative" }}>
               <View
                 style={{
                   width: 100,
                   height: 100,
                   borderRadius: 50,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                  shadowColor: '#000000',
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
+                  shadowColor: "#000000",
                   shadowOffset: { width: 0, height: 0 },
                   shadowOpacity: 0.15,
                   shadowRadius: 12,
-                  elevation: Platform.OS === 'android' ? 0 : 8,
+                  elevation: Platform.OS === "android" ? 0 : 8,
                 }}
               >
                 <View
                   style={{
-                    position: 'absolute',
+                    position: "absolute",
                     width: 100,
                     height: 100,
                     borderRadius: 50,
@@ -809,9 +867,9 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
           {/* Badge Title & Rarity */}
           <Text
             style={{
-              fontFamily: 'Inter_700Bold',
+              fontFamily: "Fraunces_700Bold",
               color: StaticColors.textPrimary,
-              textAlign: 'center',
+              textAlign: "center",
               fontSize: 24,
               marginBottom: 8,
             }}
@@ -820,9 +878,9 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
           </Text>
           <Text
             style={{
-              fontFamily: 'Inter_500Medium',
-              color: '#000000',
-              textAlign: 'center',
+              fontFamily: "Inter_500Medium",
+              color: "#000000",
+              textAlign: "center",
               fontSize: 14,
               marginBottom: 16,
             }}
@@ -833,9 +891,9 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
           {/* Description */}
           <Text
             style={{
-              fontFamily: 'Inter_400Regular',
+              fontFamily: "Inter_400Regular",
               color: StaticColors.textSecondary,
-              textAlign: 'center',
+              textAlign: "center",
               fontSize: 15,
               lineHeight: 22,
               marginBottom: 20,
@@ -856,8 +914,8 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
           >
             <Text
               style={{
-                fontFamily: 'Inter_600SemiBold',
-                color: '#000000',
+                fontFamily: "Inter_600SemiBold",
+                color: "#000000",
                 fontSize: 10,
                 letterSpacing: 0.5,
                 marginBottom: 6,
@@ -867,8 +925,8 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
             </Text>
             <Text
               style={{
-                fontFamily: 'Inter_600SemiBold',
-                color: '#2D1B4E',
+                fontFamily: "Inter_600SemiBold",
+                color: "#2D1B4E",
                 fontSize: 15,
                 lineHeight: 22,
               }}
@@ -880,7 +938,7 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
           {/* Tip */}
           <View
             style={{
-              backgroundColor: '#FEFBFF',
+              backgroundColor: "#FEFBFF",
               borderRadius: BorderRadius.large,
               padding: 14,
               marginBottom: 20,
@@ -892,7 +950,7 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
           >
             <Text
               style={{
-                fontFamily: 'Inter_600SemiBold',
+                fontFamily: "Inter_600SemiBold",
                 color: Colors.primary,
                 fontSize: 10,
                 letterSpacing: 0.5,
@@ -903,8 +961,8 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
             </Text>
             <Text
               style={{
-                fontFamily: 'Inter_500Medium',
-                color: '#3B2463',
+                fontFamily: "Inter_500Medium",
+                color: "#3B2463",
                 fontSize: 13,
                 lineHeight: 21,
               }}
@@ -913,13 +971,12 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
             </Text>
           </View>
 
-
           {/* Unlock Date */}
           {badge.unlocked && badge.unlockDate && (
             <View className="items-center mb-6">
               <Text
                 style={{
-                  fontFamily: 'Inter_500Medium',
+                  fontFamily: "Inter_500Medium",
                   color: StaticColors.textTertiary,
                   fontSize: 12,
                 }}
@@ -935,7 +992,7 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
               onPress={onShare}
               style={{
                 borderRadius: BorderRadius.large,
-                overflow: 'hidden',
+                overflow: "hidden",
               }}
             >
               <LinearGradient
@@ -944,16 +1001,16 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
                 end={{ x: 1, y: 0 }}
                 style={{
                   padding: 14,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <Share2 size={18} color="#FFFFFF" strokeWidth={2} />
                 <Text
                   style={{
-                    fontFamily: 'Inter_600SemiBold',
-                    color: '#FFFFFF',
+                    fontFamily: "Inter_600SemiBold",
+                    color: "#FFFFFF",
                     fontSize: 15,
                     marginLeft: 8,
                   }}

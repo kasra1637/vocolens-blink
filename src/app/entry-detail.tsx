@@ -329,7 +329,7 @@ export default function EntryDetailScreen() {
               value={editedTitle}
               onChangeText={setEditedTitle}
               style={{
-                fontFamily: "Inter_700Bold",
+                fontFamily: "Fraunces_700Bold",
                 color: "#FFFFFF",
                 fontSize: 24,
                 backgroundColor: "rgba(255, 255, 255, 0.1)",

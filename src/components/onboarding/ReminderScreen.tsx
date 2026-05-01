@@ -5,10 +5,10 @@
  * Step 13 — between FreeTrialPreviewScreen (12) and PaywallScreen (14).
  */
 
-import React, { useEffect } from 'react';
-import { View, Text, Pressable, Platform } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect } from "react";
+import { View, Text, Pressable, Platform } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -19,14 +19,14 @@ import Animated, {
   withSequence,
   withDelay,
   Easing,
-} from 'react-native-reanimated';
-import { successHaptic, tapHaptic } from '@/lib/haptics';
-import { Bell, ChevronRight } from 'lucide-react-native';
-import useOnboardingStore, { THEME_COLORS } from '@/lib/state/onboarding-store';
-import { ProgressBar } from '@/components/onboarding/ProgressBar';
-import { BackButton } from '@/components/onboarding/BackButton';
-import { useClickSound } from '@/lib/hooks/useClickSound';
-import { EmotionalCompanion } from '@/components/EmotionalCompanion';
+} from "react-native-reanimated";
+import { successHaptic, tapHaptic } from "@/lib/haptics";
+import { Bell, ChevronRight } from "lucide-react-native";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
+import { ProgressBar } from "@/components/onboarding/ProgressBar";
+import { BackButton } from "@/components/onboarding/BackButton";
+import { useClickSound } from "@/lib/hooks/useClickSound";
+import { EmotionalCompanion } from "@/components/EmotionalCompanion";
 
 // ── Animated Bell ─────────────────────────────────────────────────────────────
 function AnimatedBell({ primaryColor }: { primaryColor: string }) {
@@ -94,37 +94,49 @@ function AnimatedBell({ primaryColor }: { primaryColor: string }) {
   }));
 
   return (
-    <View style={{ width: 130, height: 130, alignItems: 'center', justifyContent: 'center' }}>
+    <View
+      style={{
+        width: 130,
+        height: 130,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       {/* Outer glow ring */}
       <Animated.View
         style={[
           glowStyle,
           {
-            position: 'absolute',
+            position: "absolute",
             width: 130,
             height: 130,
             borderRadius: 65,
-            backgroundColor: 'rgba(255,255,255,0.1)',
+            backgroundColor: "rgba(255,255,255,0.1)",
             borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.2)',
+            borderColor: "rgba(255,255,255,0.2)",
           },
         ]}
       />
       {/* Inner circle */}
       <View
         style={{
-          position: 'absolute',
+          position: "absolute",
           width: 90,
           height: 90,
           borderRadius: 45,
-          backgroundColor: 'rgba(255,255,255,0.15)',
+          backgroundColor: "rgba(255,255,255,0.15)",
           borderWidth: 1,
-          borderColor: 'rgba(255,255,255,0.25)',
+          borderColor: "rgba(255,255,255,0.25)",
         }}
       />
       {/* Bell */}
       <Animated.View style={bellStyle}>
-        <Bell size={52} color="#FFFFFF" strokeWidth={1.8} fill="rgba(255,255,255,0.2)" />
+        <Bell
+          size={52}
+          color="#FFFFFF"
+          strokeWidth={1.8}
+          fill="rgba(255,255,255,0.2)"
+        />
       </Animated.View>
     </View>
   );
@@ -166,9 +178,11 @@ export function ReminderScreen() {
           <BackButton onPress={handleBack} show={currentStep > 0} />
 
           <View style={{ flex: 1, paddingHorizontal: 24 }}>
-
             {/* Character + Title */}
-            <Animated.View entering={FadeInDown.delay(50).duration(600)} style={{ alignItems: 'center', marginTop: 4 }}>
+            <Animated.View
+              entering={FadeInDown.delay(50).duration(600)}
+              style={{ alignItems: "center", marginTop: 4 }}
+            >
               <View style={{ marginBottom: 16 }}>
                 <EmotionalCompanion
                   state="success"
@@ -178,10 +192,10 @@ export function ReminderScreen() {
               </View>
               <Text
                 style={{
-                  fontFamily: 'Inter_700Bold',
-                  color: '#FFFFFF',
+                  fontFamily: "Fraunces_700Bold",
+                  color: "#FFFFFF",
                   fontSize: 22,
-                  textAlign: 'center',
+                  textAlign: "center",
                   lineHeight: 27,
                   opacity: 0.92,
                   letterSpacing: 0.2,
@@ -194,19 +208,22 @@ export function ReminderScreen() {
             {/* Bell */}
             <Animated.View
               entering={FadeInUp.delay(200).duration(700)}
-              style={{ alignItems: 'center', marginTop: 28, marginBottom: 28 }}
+              style={{ alignItems: "center", marginTop: 28, marginBottom: 28 }}
             >
               <AnimatedBell primaryColor={themeColors.primary} />
             </Animated.View>
 
             {/* CTA */}
-            <Animated.View entering={FadeInUp.delay(500).duration(600)} style={{ alignItems: 'center' }}>
+            <Animated.View
+              entering={FadeInUp.delay(500).duration(600)}
+              style={{ alignItems: "center" }}
+            >
               <Text
                 style={{
-                  color: 'rgba(255,255,255,0.75)',
-                  fontFamily: 'Inter_400Regular',
+                  color: "rgba(255,255,255,0.75)",
+                  fontFamily: "Inter_400Regular",
                   fontSize: 13,
-                  textAlign: 'center',
+                  textAlign: "center",
                   marginBottom: 16,
                   letterSpacing: 0.2,
                 }}
@@ -217,34 +234,34 @@ export function ReminderScreen() {
               <Pressable
                 onPress={handleContinue}
                 style={{
-                  width: '100%',
+                  width: "100%",
                   borderRadius: 18,
                   borderWidth: 2,
-                  borderColor: '#FFFFFF',
-                  overflow: 'hidden',
-                  shadowColor: '#000',
+                  borderColor: "#FFFFFF",
+                  overflow: "hidden",
+                  shadowColor: "#000",
                   shadowOffset: { width: 0, height: 8 },
                   shadowOpacity: 0.25,
                   shadowRadius: 16,
-                  elevation: Platform.OS === 'android' ? 0 : 8,
+                  elevation: Platform.OS === "android" ? 0 : 8,
                 }}
-                android_ripple={{ color: 'rgba(255,255,255,0.2)' }}
+                android_ripple={{ color: "rgba(255,255,255,0.2)" }}
               >
                 <LinearGradient
-                  colors={['rgba(255,255,255,0.25)', 'rgba(255,255,255,0.08)']}
+                  colors={["rgba(255,255,255,0.25)", "rgba(255,255,255,0.08)"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 0, y: 1 }}
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
                     paddingVertical: 16,
                   }}
                 >
                   <Text
                     style={{
-                      color: '#FFFFFF',
-                      fontFamily: 'Inter_700Bold',
+                      color: "#FFFFFF",
+                      fontFamily: "Inter_700Bold",
                       fontSize: 17,
                       marginRight: 6,
                     }}
@@ -258,7 +275,6 @@ export function ReminderScreen() {
 
             {/* Remaining space goes to bottom */}
             <View style={{ flex: 1 }} />
-
           </View>
         </SafeAreaView>
       </LinearGradient>

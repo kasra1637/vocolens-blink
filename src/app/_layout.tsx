@@ -20,6 +20,10 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
+import {
+  Fraunces_600SemiBold,
+  Fraunces_700Bold,
+} from "@expo-google-fonts/fraunces";
 import { useFrameworkReady } from "@/hooks/useFrameworkReady";
 
 export const unstable_settings = {
@@ -74,30 +78,7 @@ function RootLayoutNav({
           options={{ headerShown: false, presentation: "card" }}
         />
         <Stack.Screen
-          name="language-picker"
-          options={{
-            headerShown: false,
-            presentation: "fullScreenModal",
-            gestureEnabled: true,
-          }}
-        />
-        <Stack.Screen
-          name="legal"
-          options={{ headerShown: false, presentation: "card" }}
-        />
-        <Stack.Screen
-<<<<<<< HEAD
-=======
-          name="language-picker"
-          options={{
-            headerShown: false,
-            presentation: "fullScreenModal",
-            gestureEnabled: true,
-          }}
-        />
-        <Stack.Screen
->>>>>>> session/agent_0041444f-c843-4858-b44e-057c65bc9634
-          name="legal"
+          name="correction-history"
           options={{ headerShown: false, presentation: "card" }}
         />
       </Stack>
@@ -113,6 +94,8 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    Fraunces_600SemiBold,
+    Fraunces_700Bold,
   });
 
   useEffect(() => {

@@ -5,10 +5,10 @@
  * a study-backed insight about optimal session cadence.
  */
 
-import React, { useEffect } from 'react';
-import { View, Text, Pressable } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect } from "react";
+import { View, Text, Pressable } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -18,26 +18,31 @@ import Animated, {
   withSpring,
   withDelay,
   Easing,
-} from 'react-native-reanimated';
-import { tapHaptic, successHaptic } from '@/lib/haptics';
-import { BookOpen } from 'lucide-react-native';
-import useOnboardingStore, { THEME_COLORS, JournalingFrequencyType } from '@/lib/state/onboarding-store';
-import { EmotionalCompanion } from '@/components/EmotionalCompanion';
-import { ProgressBar } from '@/components/onboarding/ProgressBar';
-import { BackButton } from '@/components/onboarding/BackButton';
-import { useClickSound } from '@/lib/hooks/useClickSound';
-import { OnboardingCTAButton } from '@/components/onboarding/OnboardingCTAButton';
+} from "react-native-reanimated";
+import { tapHaptic, successHaptic } from "@/lib/haptics";
+import { BookOpen } from "lucide-react-native";
+import useOnboardingStore, {
+  THEME_COLORS,
+  JournalingFrequencyType,
+} from "@/lib/state/onboarding-store";
+import { EmotionalCompanion } from "@/components/EmotionalCompanion";
+import { ProgressBar } from "@/components/onboarding/ProgressBar";
+import { BackButton } from "@/components/onboarding/BackButton";
+import { useClickSound } from "@/lib/hooks/useClickSound";
+import { OnboardingCTAButton } from "@/components/onboarding/OnboardingCTAButton";
 
 const FREQUENCY_LABELS: Record<JournalingFrequencyType, string> = {
-  'once-twice': '1–2 times a week',
-  'three-five': '3–5 times a week',
-  'daily': 'Every day',
+  "once-twice": "1–2 times a week",
+  "three-five": "3–5 times a week",
+  daily: "Every day",
 };
 
 export function JournalingFrequencyInsightScreen() {
   const nextStep = useOnboardingStore((s) => s.nextStep);
   const prevStep = useOnboardingStore((s) => s.prevStep);
-  const selectedJournalingFrequency = useOnboardingStore((s) => s.selectedJournalingFrequency);
+  const selectedJournalingFrequency = useOnboardingStore(
+    (s) => s.selectedJournalingFrequency,
+  );
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
   const currentStep = useOnboardingStore((s) => s.currentStep);
   const themeColors = THEME_COLORS[selectedTheme];
@@ -50,9 +55,12 @@ export function JournalingFrequencyInsightScreen() {
     successHaptic();
     progressWidth.value = withDelay(
       400,
-      withTiming(100, { duration: 1400, easing: Easing.out(Easing.cubic) })
+      withTiming(100, { duration: 1400, easing: Easing.out(Easing.cubic) }),
     );
-    ringScale.value = withDelay(600, withSpring(1, { damping: 12, stiffness: 100 }));
+    ringScale.value = withDelay(
+      600,
+      withSpring(1, { damping: 12, stiffness: 100 }),
+    );
   }, []);
 
   const progressAnimatedStyle = useAnimatedStyle(() => ({
@@ -77,7 +85,7 @@ export function JournalingFrequencyInsightScreen() {
 
   const frequencyLabel = selectedJournalingFrequency
     ? FREQUENCY_LABELS[selectedJournalingFrequency]
-    : '3–5 times a week';
+    : "3–5 times a week";
 
   return (
     <View className="flex-1">
@@ -94,7 +102,10 @@ export function JournalingFrequencyInsightScreen() {
 
           <View className="flex-1 px-6 py-3">
             {/* Character */}
-            <View className="items-center justify-center" style={{ height: 110 }}>
+            <View
+              className="items-center justify-center"
+              style={{ height: 110 }}
+            >
               <EmotionalCompanion
                 state="success"
                 size={110}
@@ -109,7 +120,13 @@ export function JournalingFrequencyInsightScreen() {
             >
               <Text
                 className="text-center"
-                style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF', fontSize: 22, opacity: 0.92, letterSpacing: 0.2 }}
+                style={{
+                  fontFamily: "Fraunces_700Bold",
+                  color: "#FFFFFF",
+                  fontSize: 22,
+                  opacity: 0.92,
+                  letterSpacing: 0.2,
+                }}
               >
                 Great choice!
               </Text>
@@ -123,9 +140,9 @@ export function JournalingFrequencyInsightScreen() {
               <View
                 className="rounded-3xl p-6 mx-1"
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backgroundColor: "rgba(255, 255, 255, 0.08)",
                   borderWidth: 1,
-                  borderColor: 'rgba(255, 255, 255, 0.18)',
+                  borderColor: "rgba(255, 255, 255, 0.18)",
                 }}
               >
                 {/* Icon */}
@@ -136,9 +153,9 @@ export function JournalingFrequencyInsightScreen() {
                         width: 90,
                         height: 90,
                         borderRadius: 45,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "rgba(255, 255, 255, 0.12)",
                       },
                       ringAnimatedStyle,
                     ]}
@@ -151,12 +168,12 @@ export function JournalingFrequencyInsightScreen() {
                 <View className="items-center mb-5">
                   <View
                     className="px-5 py-2 rounded-full"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }}
+                    style={{ backgroundColor: "rgba(255, 255, 255, 0.18)" }}
                   >
                     <Text
                       style={{
-                        fontFamily: 'Inter_700Bold',
-                        color: '#FFFFFF',
+                        fontFamily: "Inter_700Bold",
+                        color: "#FFFFFF",
                         fontSize: 16,
                       }}
                     >
@@ -168,15 +185,17 @@ export function JournalingFrequencyInsightScreen() {
                 {/* Study insight */}
                 <Text
                   style={{
-                    fontFamily: 'Inter_400Regular',
-                    color: 'rgba(255, 255, 255, 0.9)',
+                    fontFamily: "Inter_400Regular",
+                    color: "rgba(255, 255, 255, 0.9)",
                     fontSize: 14,
                     lineHeight: 22,
-                    textAlign: 'center',
+                    textAlign: "center",
                   }}
                 >
-                  Studies suggest that{' '}
-                  <Text style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF' }}>
+                  Studies suggest that{" "}
+                  <Text
+                    style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF" }}
+                  >
                     15–20 minute sessions, 3–4 times per week
                   </Text>
                   , provide optimal relief from stress and anxiety.
@@ -186,11 +205,14 @@ export function JournalingFrequencyInsightScreen() {
                 <View className="mt-6">
                   <View
                     className="h-1.5 rounded-full overflow-hidden"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                    style={{ backgroundColor: "rgba(255, 255, 255, 0.15)" }}
                   >
                     <Animated.View
                       className="h-full rounded-full"
-                      style={[{ backgroundColor: 'rgba(255, 255, 255, 0.75)' }, progressAnimatedStyle]}
+                      style={[
+                        { backgroundColor: "rgba(255, 255, 255, 0.75)" },
+                        progressAnimatedStyle,
+                      ]}
                     />
                   </View>
                 </View>
@@ -198,7 +220,10 @@ export function JournalingFrequencyInsightScreen() {
             </Animated.View>
 
             {/* Continue */}
-            <Animated.View entering={FadeInUp.delay(700).duration(500)} className="pb-6">
+            <Animated.View
+              entering={FadeInUp.delay(700).duration(500)}
+              className="pb-6"
+            >
               <OnboardingCTAButton label="Continue" onPress={handleContinue} />
             </Animated.View>
             <View style={{ flex: 1 }} />

@@ -6,10 +6,10 @@
  * Includes the Plutchik Model scientific note above the continue button.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, Pressable } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -19,15 +19,15 @@ import Animated, {
   Easing,
   interpolate,
   runOnJS,
-} from 'react-native-reanimated';
-import { successHaptic, tapHaptic } from '@/lib/haptics';
-import { FlaskConical } from 'lucide-react-native';
-import useOnboardingStore, { THEME_COLORS } from '@/lib/state/onboarding-store';
-import { EmotionalCompanion } from '@/components/EmotionalCompanion';
-import { ProgressBar } from '@/components/onboarding/ProgressBar';
-import { BackButton } from '@/components/onboarding/BackButton';
-import { useClickSound } from '@/lib/hooks/useClickSound';
-import { OnboardingCTAButton } from '@/components/onboarding/OnboardingCTAButton';
+} from "react-native-reanimated";
+import { successHaptic, tapHaptic } from "@/lib/haptics";
+import { FlaskConical } from "lucide-react-native";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
+import { EmotionalCompanion } from "@/components/EmotionalCompanion";
+import { ProgressBar } from "@/components/onboarding/ProgressBar";
+import { BackButton } from "@/components/onboarding/BackButton";
+import { useClickSound } from "@/lib/hooks/useClickSound";
+import { OnboardingCTAButton } from "@/components/onboarding/OnboardingCTAButton";
 
 export function AccountPreparationScreen() {
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
@@ -53,14 +53,18 @@ export function AccountPreparationScreen() {
   useEffect(() => {
     // Small delay before starting so screen settles
     const timeout = setTimeout(() => {
-      progress.value = withTiming(1, {
-        duration: 5000,
-        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-      }, (finished) => {
-        if (finished) {
-          runOnJS(markComplete)();
-        }
-      });
+      progress.value = withTiming(
+        1,
+        {
+          duration: 5000,
+          easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+        },
+        (finished) => {
+          if (finished) {
+            runOnJS(markComplete)();
+          }
+        },
+      );
     }, 400);
 
     return () => clearTimeout(timeout);
@@ -94,11 +98,11 @@ export function AccountPreparationScreen() {
 
   // Milestone labels that appear as progress passes them
   const milestones = [
-    { label: 'Analyzing preferences', threshold: 0.01 },
-    { label: 'Mapping emotions', threshold: 0.35 },
-    { label: 'Calibrating insights', threshold: 0.65 },
-    { label: 'Personalizing journal', threshold: 0.85 },
-    { label: 'Ready!', threshold: 1.0 },
+    { label: "Analyzing preferences", threshold: 0.01 },
+    { label: "Mapping emotions", threshold: 0.35 },
+    { label: "Calibrating insights", threshold: 0.65 },
+    { label: "Personalizing journal", threshold: 0.85 },
+    { label: "Ready!", threshold: 1.0 },
   ];
 
   const currentMilestone = milestones.reduce((acc, m) => {
@@ -121,7 +125,10 @@ export function AccountPreparationScreen() {
 
           <View className="flex-1 px-6">
             {/* Character */}
-            <View className="items-center justify-center" style={{ height: 120 }}>
+            <View
+              className="items-center justify-center"
+              style={{ height: 120 }}
+            >
               <EmotionalCompanion
                 state="idle"
                 size={120}
@@ -136,10 +143,10 @@ export function AccountPreparationScreen() {
             >
               <Text
                 style={{
-                  color: '#FFFFFF',
-                  fontFamily: 'Inter_700Bold',
+                  color: "#FFFFFF",
+                  fontFamily: "Inter_700Bold",
                   fontSize: 24,
-                  textAlign: 'center',
+                  textAlign: "center",
                   marginBottom: 10,
                 }}
               >
@@ -152,15 +159,15 @@ export function AccountPreparationScreen() {
               entering={FadeInUp.delay(200).duration(500)}
               className="rounded-3xl px-5 py-4 mb-4"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                backgroundColor: "rgba(255, 255, 255, 0.12)",
               }}
             >
               {/* Percentage Display */}
               <View className="items-center mb-3">
                 <Text
                   style={{
-                    color: '#FFFFFF',
-                    fontFamily: 'Inter_700Bold',
+                    color: "#FFFFFF",
+                    fontFamily: "Fraunces_700Bold",
                     fontSize: 36,
                     lineHeight: 42,
                     letterSpacing: -1,
@@ -171,8 +178,8 @@ export function AccountPreparationScreen() {
                 </Text>
                 <Text
                   style={{
-                    color: 'rgba(255, 255, 255, 0.75)',
-                    fontFamily: 'Inter_400Regular',
+                    color: "rgba(255, 255, 255, 0.75)",
+                    fontFamily: "Inter_400Regular",
                     fontSize: 12,
                     marginTop: 2,
                     letterSpacing: 0.5,
@@ -186,18 +193,18 @@ export function AccountPreparationScreen() {
               <View
                 style={{
                   height: 8,
-                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
                   borderRadius: 99,
-                  overflow: 'hidden',
+                  overflow: "hidden",
                 }}
               >
                 <Animated.View
                   style={[
                     {
-                      height: '100%',
+                      height: "100%",
                       borderRadius: 99,
-                      backgroundColor: '#FFFFFF',
-                      shadowColor: '#FFFFFF',
+                      backgroundColor: "#FFFFFF",
+                      shadowColor: "#FFFFFF",
                       shadowOffset: { width: 0, height: 0 },
                       shadowOpacity: 0.6,
                       shadowRadius: 8,
@@ -213,10 +220,11 @@ export function AccountPreparationScreen() {
                   <Text
                     key={tick}
                     style={{
-                      color: displayPercent >= tick
-                        ? 'rgba(255, 255, 255, 0.9)'
-                        : 'rgba(255, 255, 255, 0.35)',
-                      fontFamily: 'Inter_400Regular',
+                      color:
+                        displayPercent >= tick
+                          ? "rgba(255, 255, 255, 0.9)"
+                          : "rgba(255, 255, 255, 0.35)",
+                      fontFamily: "Inter_400Regular",
                       fontSize: 10,
                     }}
                   >
@@ -231,20 +239,20 @@ export function AccountPreparationScreen() {
               entering={FadeInUp.delay(350).duration(500)}
               className="rounded-2xl px-5 py-4 mb-4"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backgroundColor: "rgba(255, 255, 255, 0.08)",
                 borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.15)',
+                borderColor: "rgba(255, 255, 255, 0.15)",
               }}
             >
               {/* Research Badge */}
               <View
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  alignSelf: 'center',
-                  backgroundColor: 'rgba(255, 255, 255, 0.22)',
+                  flexDirection: "row",
+                  alignItems: "center",
+                  alignSelf: "center",
+                  backgroundColor: "rgba(255, 255, 255, 0.22)",
                   borderWidth: 1,
-                  borderColor: 'rgba(255, 255, 255, 0.4)',
+                  borderColor: "rgba(255, 255, 255, 0.4)",
                   borderRadius: 999,
                   paddingHorizontal: 18,
                   paddingVertical: 10,
@@ -255,11 +263,11 @@ export function AccountPreparationScreen() {
                 <FlaskConical size={18} color="#FFFFFF" strokeWidth={2.5} />
                 <Text
                   style={{
-                    fontFamily: 'Inter_700Bold',
+                    fontFamily: "Inter_700Bold",
                     fontSize: 13,
-                    color: '#FFFFFF',
+                    color: "#FFFFFF",
                     letterSpacing: 0.8,
-                    textTransform: 'uppercase',
+                    textTransform: "uppercase",
                   }}
                 >
                   Research Backed
@@ -267,18 +275,20 @@ export function AccountPreparationScreen() {
               </View>
               <Text
                 style={{
-                  color: 'rgba(255, 255, 255, 0.85)',
-                  fontFamily: 'Inter_400Regular',
+                  color: "rgba(255, 255, 255, 0.85)",
+                  fontFamily: "Inter_400Regular",
                   fontSize: 13,
-                  textAlign: 'center',
+                  textAlign: "center",
                   lineHeight: 22,
                 }}
               >
-                We use the scientifically validated{' '}
-                <Text style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF' }}>
+                We use the scientifically validated{" "}
+                <Text style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF" }}>
                   Plutchik Model
                 </Text>
-                , which includes eight core emotions and their intensities, to ensure a precise and research-based understanding of your feelings.
+                , which includes eight core emotions and their intensities, to
+                ensure a precise and research-based understanding of your
+                feelings.
               </Text>
             </Animated.View>
 
@@ -287,7 +297,11 @@ export function AccountPreparationScreen() {
               entering={FadeInUp.delay(400).duration(500)}
               className="pb-6"
             >
-              <OnboardingCTAButton label="Continue" onPress={handleContinue} disabled={!isComplete} />
+              <OnboardingCTAButton
+                label="Continue"
+                onPress={handleContinue}
+                disabled={!isComplete}
+              />
             </Animated.View>
             {/* Spacer */}
             <View className="flex-1" />

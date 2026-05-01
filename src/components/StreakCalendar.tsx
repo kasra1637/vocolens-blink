@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { View, Text, Pressable, Modal } from 'react-native';
+import React, { useMemo, useState } from "react";
+import { View, Text, Pressable, Modal } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -7,10 +7,15 @@ import Animated, {
   FadeIn,
   FadeInDown,
   FadeOutDown,
-} from 'react-native-reanimated';
-import { tapHaptic } from '@/lib/haptics';
-import { Flame, ChevronLeft, ChevronRight, Calendar } from 'lucide-react-native';
-import { JournalEntry } from '@/lib/types';
+} from "react-native-reanimated";
+import { tapHaptic } from "@/lib/haptics";
+import {
+  Flame,
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+} from "lucide-react-native";
+import { JournalEntry } from "@/lib/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -38,22 +43,32 @@ interface SelectedDayInfo {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
-const DAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const DAY_HEADERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const TIER_ALPHAS = { few: 0.35, several: 0.65, many: 0.95 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function toDateStr(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
+  const pad = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
-  const clean = hex.replace('#', '');
+  const clean = hex.replace("#", "");
   if (clean.length !== 6) return null;
   return {
     r: parseInt(clean.slice(0, 2), 16),
@@ -62,28 +77,45 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   };
 }
 
-function getCellColor(count: number, primaryColor: string, isFuture: boolean): string {
-  if (isFuture || count === 0) return 'transparent';
+function getCellColor(
+  count: number,
+  primaryColor: string,
+  isFuture: boolean,
+): string {
+  if (isFuture || count === 0) return "transparent";
   const rgb = hexToRgb(primaryColor);
-  if (!rgb) return 'rgba(255,255,255,0.40)';
-  const alpha = count <= 2 ? TIER_ALPHAS.few : count <= 4 ? TIER_ALPHAS.several : TIER_ALPHAS.many;
+  if (!rgb) return "rgba(255,255,255,0.40)";
+  const alpha =
+    count <= 2
+      ? TIER_ALPHAS.few
+      : count <= 4
+        ? TIER_ALPHAS.several
+        : TIER_ALPHAS.many;
   return `rgba(${rgb.r},${rgb.g},${rgb.b},${alpha})`;
 }
 
-function legendColor(tier: 'few' | 'several' | 'many', primaryColor: string): string {
+function legendColor(
+  tier: "few" | "several" | "many",
+  primaryColor: string,
+): string {
   const rgb = hexToRgb(primaryColor);
-  if (!rgb) return 'rgba(255,255,255,0.40)';
+  if (!rgb) return "rgba(255,255,255,0.40)";
   return `rgba(${rgb.r},${rgb.g},${rgb.b},${TIER_ALPHAS[tier]})`;
 }
 
 function formatDateLabel(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number);
+  const [year, month, day] = dateStr.split("-").map(Number);
   const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  return d.toLocaleDateString("en-US", { month: "long", day: "numeric" });
 }
 
 // Build the grid for a given year/month (Monday-start week)
-function buildMonthGrid(year: number, month: number, entryMap: Record<string, number>, todayStr: string): DayData[][] {
+function buildMonthGrid(
+  year: number,
+  month: number,
+  entryMap: Record<string, number>,
+  todayStr: string,
+): DayData[][] {
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const totalDays = lastDay.getDate();
@@ -97,7 +129,14 @@ function buildMonthGrid(year: number, month: number, entryMap: Record<string, nu
 
   // Leading empty cells
   for (let i = 0; i < startDow; i++) {
-    row.push({ date: '', dayNumber: 0, count: 0, isFuture: false, isToday: false, isEmpty: true });
+    row.push({
+      date: "",
+      dayNumber: 0,
+      count: 0,
+      isFuture: false,
+      isToday: false,
+      isEmpty: true,
+    });
   }
 
   for (let d = 1; d <= totalDays; d++) {
@@ -107,7 +146,14 @@ function buildMonthGrid(year: number, month: number, entryMap: Record<string, nu
     const isToday = dateStr === todayStr;
     const count = entryMap[dateStr] ?? 0;
 
-    row.push({ date: dateStr, dayNumber: d, count, isFuture, isToday, isEmpty: false });
+    row.push({
+      date: dateStr,
+      dayNumber: d,
+      count,
+      isFuture,
+      isToday,
+      isEmpty: false,
+    });
 
     if (row.length === 7) {
       rows.push(row);
@@ -118,7 +164,14 @@ function buildMonthGrid(year: number, month: number, entryMap: Record<string, nu
   // Trailing empty cells to complete the last row
   if (row.length > 0) {
     while (row.length < 7) {
-      row.push({ date: '', dayNumber: 0, count: 0, isFuture: false, isToday: false, isEmpty: true });
+      row.push({
+        date: "",
+        dayNumber: 0,
+        count: 0,
+        isFuture: false,
+        isToday: false,
+        isEmpty: true,
+      });
     }
     rows.push(row);
   }
@@ -138,12 +191,17 @@ function DayPopup({
   onDismiss: () => void;
 }) {
   const rgb = hexToRgb(primaryColor);
-  const accentBg = rgb ? `rgba(${rgb.r},${rgb.g},${rgb.b},0.18)` : 'rgba(255,255,255,0.12)';
-  const accentBorder = rgb ? `rgba(${rgb.r},${rgb.g},${rgb.b},0.4)` : 'rgba(255,255,255,0.25)';
+  const accentBg = rgb
+    ? `rgba(${rgb.r},${rgb.g},${rgb.b},0.18)`
+    : "rgba(255,255,255,0.12)";
+  const accentBorder = rgb
+    ? `rgba(${rgb.r},${rgb.g},${rgb.b},0.4)`
+    : "rgba(255,255,255,0.25)";
 
   const label = formatDateLabel(info.date);
   const count = info.count;
-  const entryText = count === 0 ? 'No entries' : count === 1 ? '1 entry' : `${count} entries`;
+  const entryText =
+    count === 0 ? "No entries" : count === 1 ? "1 entry" : `${count} entries`;
 
   return (
     <Modal
@@ -154,29 +212,29 @@ function DayPopup({
       statusBarTranslucent
     >
       <Pressable
-        style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         onPress={onDismiss}
       >
         <Animated.View
           entering={FadeInDown.duration(180).springify()}
           exiting={FadeOutDown.duration(140)}
           style={{
-            backgroundColor: 'rgba(20,20,28,0.92)',
+            backgroundColor: "rgba(20,20,28,0.92)",
             borderRadius: 18,
             paddingHorizontal: 28,
             paddingVertical: 20,
-            alignItems: 'center',
+            alignItems: "center",
             borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.12)',
+            borderColor: "rgba(255,255,255,0.12)",
             minWidth: 160,
           }}
         >
           {/* Date label */}
           <Text
             style={{
-              fontFamily: 'Inter_400Regular',
+              fontFamily: "Inter_400Regular",
               fontSize: 13,
-              color: 'rgba(255,255,255,0.5)',
+              color: "rgba(255,255,255,0.5)",
               marginBottom: 10,
               letterSpacing: 0.2,
             }}
@@ -197,24 +255,24 @@ function DayPopup({
           >
             <Text
               style={{
-                fontFamily: 'Inter_700Bold',
+                fontFamily: "Fraunces_700Bold",
                 fontSize: 22,
-                color: '#FFFFFF',
-                textAlign: 'center',
+                color: "#FFFFFF",
+                textAlign: "center",
               }}
             >
               {count}
             </Text>
             <Text
               style={{
-                fontFamily: 'Inter_400Regular',
+                fontFamily: "Inter_400Regular",
                 fontSize: 11,
-                color: 'rgba(255,255,255,0.5)',
-                textAlign: 'center',
+                color: "rgba(255,255,255,0.5)",
+                textAlign: "center",
                 marginTop: 2,
               }}
             >
-              {count === 1 ? 'journal entry' : 'journal entries'}
+              {count === 1 ? "journal entry" : "journal entries"}
             </Text>
           </View>
         </Animated.View>
@@ -225,7 +283,11 @@ function DayPopup({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-export function StreakCalendar({ entries, primaryColor, currentStreak }: StreakCalendarProps) {
+export function StreakCalendar({
+  entries,
+  primaryColor,
+  currentStreak,
+}: StreakCalendarProps) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayStr = toDateStr(today);
@@ -253,7 +315,8 @@ export function StreakCalendar({ entries, primaryColor, currentStreak }: StreakC
     let prev: string | null = null;
     sorted.forEach((dateStr) => {
       if (prev) {
-        const diff = (new Date(dateStr).getTime() - new Date(prev).getTime()) / 86400000;
+        const diff =
+          (new Date(dateStr).getTime() - new Date(prev).getTime()) / 86400000;
         run = diff === 1 ? run + 1 : 1;
       } else {
         run = 1;
@@ -266,19 +329,30 @@ export function StreakCalendar({ entries, primaryColor, currentStreak }: StreakC
 
   const grid = useMemo(
     () => buildMonthGrid(viewYear, viewMonth, entryMap, todayStr),
-    [viewYear, viewMonth, entryMap, todayStr]
+    [viewYear, viewMonth, entryMap, todayStr],
   );
 
   const canGoBack = viewYear > today.getFullYear() - 2;
-  const isCurrentMonth = viewYear === today.getFullYear() && viewMonth === today.getMonth();
+  const isCurrentMonth =
+    viewYear === today.getFullYear() && viewMonth === today.getMonth();
 
   const navigate = (dir: -1 | 1) => {
     tapHaptic();
     let m = viewMonth + dir;
     let y = viewYear;
-    if (m < 0) { m = 11; y--; }
-    if (m > 11) { m = 0; y++; }
-    if (y > today.getFullYear() || (y === today.getFullYear() && m > today.getMonth())) return;
+    if (m < 0) {
+      m = 11;
+      y--;
+    }
+    if (m > 11) {
+      m = 0;
+      y++;
+    }
+    if (
+      y > today.getFullYear() ||
+      (y === today.getFullYear() && m > today.getMonth())
+    )
+      return;
     setViewMonth(m);
     setViewYear(y);
   };
@@ -286,34 +360,57 @@ export function StreakCalendar({ entries, primaryColor, currentStreak }: StreakC
   const handleDayPress = (day: DayData) => {
     if (day.isEmpty || day.isFuture) return;
     tapHaptic();
-    setSelectedDay({ date: day.date, count: day.count, dayNumber: day.dayNumber });
+    setSelectedDay({
+      date: day.date,
+      count: day.count,
+      dayNumber: day.dayNumber,
+    });
   };
 
   return (
     <View style={{ marginBottom: 24 }}>
       {/* ── Header ── */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 16,
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <Calendar size={18} color="#FFFFFF" strokeWidth={2} />
-          <Text style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, color: '#FFFFFF' }}>
+          <Text
+            style={{
+              fontFamily: "Inter_600SemiBold",
+              fontSize: 16,
+              color: "#FFFFFF",
+            }}
+          >
             Journal Calendar
           </Text>
         </View>
         <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
+            flexDirection: "row",
+            alignItems: "center",
             gap: 4,
             paddingHorizontal: 10,
             paddingVertical: 4,
             borderRadius: 20,
-            backgroundColor: 'rgba(255,255,255,0.12)',
+            backgroundColor: "rgba(255,255,255,0.12)",
             borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.25)',
+            borderColor: "rgba(255,255,255,0.25)",
           }}
         >
           <Flame size={13} color="#FFFFFF" strokeWidth={2.5} />
-          <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 13, color: '#FFFFFF' }}>
+          <Text
+            style={{
+              fontFamily: "Inter_700Bold",
+              fontSize: 13,
+              color: "#FFFFFF",
+            }}
+          >
             {currentStreak}
           </Text>
         </View>
@@ -322,9 +419,9 @@ export function StreakCalendar({ entries, primaryColor, currentStreak }: StreakC
       {/* ── Month Navigation ── */}
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
           marginBottom: 16,
         }}
       >
@@ -334,21 +431,40 @@ export function StreakCalendar({ entries, primaryColor, currentStreak }: StreakC
             width: 36,
             height: 36,
             borderRadius: 18,
-            backgroundColor: pressed ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
-            alignItems: 'center',
-            justifyContent: 'center',
+            backgroundColor: pressed
+              ? "rgba(255,255,255,0.15)"
+              : "rgba(255,255,255,0.08)",
+            alignItems: "center",
+            justifyContent: "center",
             borderWidth: 1,
-            borderColor: 'rgba(255,255,255,0.15)',
+            borderColor: "rgba(255,255,255,0.15)",
           })}
         >
-          <ChevronLeft size={18} color="rgba(255,255,255,0.8)" strokeWidth={2} />
+          <ChevronLeft
+            size={18}
+            color="rgba(255,255,255,0.8)"
+            strokeWidth={2}
+          />
         </Pressable>
 
-        <View style={{ alignItems: 'center' }}>
-          <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 18, color: '#FFFFFF' }}>
+        <View style={{ alignItems: "center" }}>
+          <Text
+            style={{
+              fontFamily: "Inter_700Bold",
+              fontSize: 18,
+              color: "#FFFFFF",
+            }}
+          >
             {MONTH_NAMES[viewMonth]}
           </Text>
-          <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 12, color: 'rgba(255,255,255,0.45)', marginTop: 1 }}>
+          <Text
+            style={{
+              fontFamily: "Inter_400Regular",
+              fontSize: 12,
+              color: "rgba(255,255,255,0.45)",
+              marginTop: 1,
+            }}
+          >
             {viewYear}
           </Text>
         </View>
@@ -360,31 +476,37 @@ export function StreakCalendar({ entries, primaryColor, currentStreak }: StreakC
             height: 36,
             borderRadius: 18,
             backgroundColor: isCurrentMonth
-              ? 'rgba(255,255,255,0.03)'
-              : pressed ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.08)',
-            alignItems: 'center',
-            justifyContent: 'center',
+              ? "rgba(255,255,255,0.03)"
+              : pressed
+                ? "rgba(255,255,255,0.15)"
+                : "rgba(255,255,255,0.08)",
+            alignItems: "center",
+            justifyContent: "center",
             borderWidth: 1,
-            borderColor: isCurrentMonth ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.15)',
+            borderColor: isCurrentMonth
+              ? "rgba(255,255,255,0.06)"
+              : "rgba(255,255,255,0.15)",
           })}
         >
           <ChevronRight
             size={18}
-            color={isCurrentMonth ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.8)'}
+            color={
+              isCurrentMonth ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.8)"
+            }
             strokeWidth={2}
           />
         </Pressable>
       </View>
 
       {/* ── Day Headers ── */}
-      <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+      <View style={{ flexDirection: "row", marginBottom: 6 }}>
         {DAY_HEADERS.map((d) => (
-          <View key={d} style={{ flex: 1, alignItems: 'center' }}>
+          <View key={d} style={{ flex: 1, alignItems: "center" }}>
             <Text
               style={{
-                fontFamily: 'Inter_600SemiBold',
+                fontFamily: "Inter_600SemiBold",
                 fontSize: 11,
-                color: 'rgba(255,255,255,0.35)',
+                color: "rgba(255,255,255,0.35)",
                 letterSpacing: 0.3,
               }}
             >
@@ -397,7 +519,7 @@ export function StreakCalendar({ entries, primaryColor, currentStreak }: StreakC
       {/* ── Calendar Grid ── */}
       <Animated.View entering={FadeIn.duration(200)}>
         {grid.map((week, wi) => (
-          <View key={wi} style={{ flexDirection: 'row', marginBottom: 5 }}>
+          <View key={wi} style={{ flexDirection: "row", marginBottom: 5 }}>
             {week.map((day, di) => (
               <DayCell
                 key={`${wi}-${di}`}
@@ -414,16 +536,22 @@ export function StreakCalendar({ entries, primaryColor, currentStreak }: StreakC
       <View
         style={{
           marginTop: 14,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "flex-end",
           gap: 12,
         }}
       >
-        <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
+        <Text
+          style={{
+            fontFamily: "Inter_400Regular",
+            fontSize: 10,
+            color: "rgba(255,255,255,0.3)",
+          }}
+        >
           Less
         </Text>
-        {(['few', 'several', 'many'] as const).map((tier) => (
+        {(["few", "several", "many"] as const).map((tier) => (
           <View
             key={tier}
             style={{
@@ -434,15 +562,29 @@ export function StreakCalendar({ entries, primaryColor, currentStreak }: StreakC
             }}
           />
         ))}
-        <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
+        <Text
+          style={{
+            fontFamily: "Inter_400Regular",
+            fontSize: 10,
+            color: "rgba(255,255,255,0.3)",
+          }}
+        >
           More
         </Text>
       </View>
 
       {/* ── Stats Row ── */}
-      <View style={{ flexDirection: 'row', marginTop: 14, gap: 10 }}>
-        <StatPill label="Days Journaled" value={String(totalDaysJournaled)} primaryColor={primaryColor} />
-        <StatPill label="Best Streak" value={`${longestStreak}d`} primaryColor={primaryColor} />
+      <View style={{ flexDirection: "row", marginTop: 14, gap: 10 }}>
+        <StatPill
+          label="Days Journaled"
+          value={String(totalDaysJournaled)}
+          primaryColor={primaryColor}
+        />
+        <StatPill
+          label="Best Streak"
+          value={`${longestStreak}d`}
+          primaryColor={primaryColor}
+        />
         <StatPill
           label="Current"
           value={`${currentStreak}d`}
@@ -511,31 +653,31 @@ function DayCell({
           {
             flex: 1,
             borderRadius: 8,
-            alignItems: 'center',
-            justifyContent: 'center',
+            alignItems: "center",
+            justifyContent: "center",
             backgroundColor: bg,
             borderWidth: day.isToday ? 1.5 : 1,
             borderColor: day.isToday
-              ? 'rgba(255,255,255,0.95)'
+              ? "rgba(255,255,255,0.95)"
               : hasBg
-              ? 'rgba(255,255,255,0.35)'
-              : day.isFuture
-              ? 'rgba(255,255,255,0.07)'
-              : 'rgba(255,255,255,0.2)',
+                ? "rgba(255,255,255,0.35)"
+                : day.isFuture
+                  ? "rgba(255,255,255,0.07)"
+                  : "rgba(255,255,255,0.2)",
           },
         ]}
       >
         <Text
           style={{
-            fontFamily: day.isToday ? 'Inter_700Bold' : 'Inter_400Regular',
+            fontFamily: day.isToday ? "Inter_700Bold" : "Inter_400Regular",
             fontSize: 13,
             color: hasBg
-              ? '#FFFFFF'
+              ? "#FFFFFF"
               : day.isFuture
-              ? 'rgba(255,255,255,0.15)'
-              : day.isToday
-              ? '#FFFFFF'
-              : 'rgba(255,255,255,0.55)',
+                ? "rgba(255,255,255,0.15)"
+                : day.isToday
+                  ? "#FFFFFF"
+                  : "rgba(255,255,255,0.55)",
           }}
         >
           {day.dayNumber}
@@ -543,12 +685,12 @@ function DayCell({
         {day.count > 0 && !day.isFuture && (
           <View
             style={{
-              position: 'absolute',
+              position: "absolute",
               bottom: 3,
               width: 4,
               height: 4,
               borderRadius: 2,
-              backgroundColor: 'rgba(255,255,255,0.7)',
+              backgroundColor: "rgba(255,255,255,0.7)",
             }}
           />
         )}
@@ -575,29 +717,33 @@ function StatPill({
     <View
       style={{
         flex: 1,
-        alignItems: 'center',
+        alignItems: "center",
         paddingVertical: 12,
         paddingHorizontal: 8,
         borderRadius: 16,
-        backgroundColor: highlight && rgb
-          ? `rgba(${rgb.r},${rgb.g},${rgb.b},0.18)`
-          : 'rgba(255,255,255,0.07)',
+        backgroundColor:
+          highlight && rgb
+            ? `rgba(${rgb.r},${rgb.g},${rgb.b},0.18)`
+            : "rgba(255,255,255,0.07)",
         borderWidth: 1,
-        borderColor: highlight && rgb
-          ? `rgba(${rgb.r},${rgb.g},${rgb.b},0.35)`
-          : 'rgba(255,255,255,0.12)',
+        borderColor:
+          highlight && rgb
+            ? `rgba(${rgb.r},${rgb.g},${rgb.b},0.35)`
+            : "rgba(255,255,255,0.12)",
       }}
     >
-      <Text style={{ fontFamily: 'Inter_700Bold', fontSize: 18, color: '#FFFFFF' }}>
+      <Text
+        style={{ fontFamily: "Inter_700Bold", fontSize: 18, color: "#FFFFFF" }}
+      >
         {value}
       </Text>
       <Text
         style={{
-          fontFamily: 'Inter_400Regular',
+          fontFamily: "Inter_400Regular",
           fontSize: 10,
-          color: 'rgba(255,255,255,0.5)',
+          color: "rgba(255,255,255,0.5)",
           marginTop: 3,
-          textAlign: 'center',
+          textAlign: "center",
         }}
       >
         {label}

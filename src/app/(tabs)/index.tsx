@@ -589,7 +589,7 @@ export default function SpeakScreen() {
         <Animated.View className="items-center">
           <Text
             style={{
-              fontFamily: "Inter_700Bold",
+              fontFamily: "Fraunces_700Bold",
               color: "#FFFFFF",
               fontSize: 22,
             }}

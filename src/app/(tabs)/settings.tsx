@@ -369,7 +369,7 @@ export default function SettingsScreen() {
             <Animated.View>
               <Text
                 className="text-white font-bold mb-2 text-center"
-                style={{ fontFamily: "Inter_700Bold", fontSize: 22 }}
+                style={{ fontFamily: "Fraunces_700Bold", fontSize: 22 }}
               >
                 Settings
               </Text>

@@ -10,28 +10,35 @@
  * - Consistent button design with icons
  */
 
-import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, Alert, Platform } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeInDown, FadeInUp, useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { tapHaptic, selectHaptic, successHaptic } from '@/lib/haptics';
-import { Audio } from 'expo-av';
-import {
-  Eye,
-  Database,
-  Lock,
-  Mic,
-} from 'lucide-react-native';
-import useOnboardingStore, { THEME_COLORS } from '@/lib/state/onboarding-store';
-import { EmotionalCompanion } from '@/components/EmotionalCompanion';
-import { ProgressBar } from '@/components/onboarding/ProgressBar';
-import { BackButton } from '@/components/onboarding/BackButton';
-import { useClickSound } from '@/lib/hooks/useClickSound';
-import { OnboardingCTAButton } from '@/components/onboarding/OnboardingCTAButton';
+import React, { useState, useEffect } from "react";
+import { View, Text, Pressable, Alert, Platform } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+import { tapHaptic, selectHaptic, successHaptic } from "@/lib/haptics";
+import { Audio } from "expo-av";
+import { Eye, Database, Lock, Mic } from "lucide-react-native";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
+import { EmotionalCompanion } from "@/components/EmotionalCompanion";
+import { ProgressBar } from "@/components/onboarding/ProgressBar";
+import { BackButton } from "@/components/onboarding/BackButton";
+import { useClickSound } from "@/lib/hooks/useClickSound";
+import { OnboardingCTAButton } from "@/components/onboarding/OnboardingCTAButton";
 
 // Progress indicator component
-function ProgressDots({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
+function ProgressDots({
+  currentStep,
+  totalSteps,
+}: {
+  currentStep: number;
+  totalSteps: number;
+}) {
   return (
     <View className="flex-row items-center justify-center mb-4">
       {Array.from({ length: totalSteps }).map((_, index) => (
@@ -39,10 +46,10 @@ function ProgressDots({ currentStep, totalSteps }: { currentStep: number; totalS
           key={index}
           className={`h-2 rounded-full mx-1 ${
             index === currentStep
-              ? 'w-8 bg-white'
+              ? "w-8 bg-white"
               : index < currentStep
-              ? 'w-2 bg-white/60'
-              : 'w-2 bg-white/30'
+                ? "w-2 bg-white/60"
+                : "w-2 bg-white/30"
           }`}
         />
       ))}
@@ -55,12 +62,15 @@ export function PrivacyPermissionsScreen() {
   const prevStep = useOnboardingStore((s) => s.prevStep);
   const currentStep = useOnboardingStore((s) => s.currentStep);
   const nextStep = useOnboardingStore((s) => s.nextStep);
-  const setHasCompletedOnboarding = useOnboardingStore((s) => s.setHasCompletedOnboarding);
+  const setHasCompletedOnboarding = useOnboardingStore(
+    (s) => s.setHasCompletedOnboarding,
+  );
   const themeColors = THEME_COLORS[selectedTheme];
   const playClickSound = useClickSound();
 
   const [micPermission, setMicPermission] = useState<boolean>(false);
-  const [permissionStatus, setPermissionStatus] = useState<string>('undetermined');
+  const [permissionStatus, setPermissionStatus] =
+    useState<string>("undetermined");
   const togglePosition = useSharedValue(0);
 
   useEffect(() => {
@@ -70,8 +80,8 @@ export function PrivacyPermissionsScreen() {
   const checkMicPermission = async () => {
     const { status } = await Audio.getPermissionsAsync();
     setPermissionStatus(status);
-    setMicPermission(status === 'granted');
-    togglePosition.value = status === 'granted' ? 1 : 0;
+    setMicPermission(status === "granted");
+    togglePosition.value = status === "granted" ? 1 : 0;
   };
 
   const handleMicToggle = async () => {
@@ -81,9 +91,9 @@ export function PrivacyPermissionsScreen() {
     if (micPermission) {
       // If already granted, inform user they need to manually disable in settings
       Alert.alert(
-        'Microphone Access',
-        'To disable microphone access, please go to your device settings.',
-        [{ text: 'OK', style: 'default' }]
+        "Microphone Access",
+        "To disable microphone access, please go to your device settings.",
+        [{ text: "OK", style: "default" }],
       );
       return;
     }
@@ -91,16 +101,16 @@ export function PrivacyPermissionsScreen() {
     // Request permission
     const { status } = await Audio.requestPermissionsAsync();
 
-    if (status === 'granted') {
+    if (status === "granted") {
       setMicPermission(true);
       setPermissionStatus(status);
       togglePosition.value = withSpring(1, { damping: 15, stiffness: 150 });
       successHaptic();
     } else {
       Alert.alert(
-        'Permission Denied',
-        'Microphone access is required for voice journaling. Please enable it in your device settings.',
-        [{ text: 'OK', style: 'default' }]
+        "Permission Denied",
+        "Microphone access is required for voice journaling. Please enable it in your device settings.",
+        [{ text: "OK", style: "default" }],
       );
     }
   };
@@ -114,18 +124,21 @@ export function PrivacyPermissionsScreen() {
   const privacyFeatures = [
     {
       icon: <Database size={22} color="#FFFFFF" />,
-      title: 'Journal data stays on-device',
-      description: 'Entries, stats & badges are stored locally. No cloud backup, no account server.',
+      title: "Journal data stays on-device",
+      description:
+        "Entries, stats & badges are stored locally. No cloud backup, no account server.",
     },
     {
       icon: <Lock size={22} color="#FFFFFF" />,
-      title: 'PIN-protected access',
-      description: 'Your 4-digit PIN is stored in your device\'s secure hardware keystore — never in plain text.',
+      title: "PIN-protected access",
+      description:
+        "Your 4-digit PIN is stored in your device's secure hardware keystore — never in plain text.",
     },
     {
       icon: <Eye size={22} color="#FFFFFF" />,
-      title: 'No analytics or tracking',
-      description: 'We include zero tracking SDKs. All usage stats are computed locally and never transmitted.',
+      title: "No analytics or tracking",
+      description:
+        "We include zero tracking SDKs. All usage stats are computed locally and never transmitted.",
     },
   ];
 
@@ -152,12 +165,15 @@ export function PrivacyPermissionsScreen() {
         {/* Progress Bar at Top */}
         <ProgressBar currentStep={currentStep} totalSteps={14} />
 
-      <SafeAreaView className="flex-1">
-        <BackButton onPress={handleBack} show={currentStep > 0} />
+        <SafeAreaView className="flex-1">
+          <BackButton onPress={handleBack} show={currentStep > 0} />
 
           <View className="flex-1 px-6 py-3">
             {/* Character at Top */}
-            <View className="items-center justify-center" style={{ height: 120 }}>
+            <View
+              className="items-center justify-center"
+              style={{ height: 120 }}
+            >
               <EmotionalCompanion
                 state="idle"
                 size={120}
@@ -170,10 +186,26 @@ export function PrivacyPermissionsScreen() {
               entering={FadeInDown.delay(100).duration(600)}
               className="items-center mb-3"
             >
-              <Text className="text-center mb-1" style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF', fontSize: 22, opacity: 0.92, letterSpacing: 0.2 }}>
+              <Text
+                className="text-center mb-1"
+                style={{
+                  fontFamily: "Fraunces_700Bold",
+                  color: "#FFFFFF",
+                  fontSize: 22,
+                  opacity: 0.92,
+                  letterSpacing: 0.2,
+                }}
+              >
                 Your privacy
               </Text>
-              <Text style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 15, textAlign: 'center', fontFamily: 'Inter_400Regular' }}>
+              <Text
+                style={{
+                  color: "rgba(255, 255, 255, 0.9)",
+                  fontSize: 15,
+                  textAlign: "center",
+                  fontFamily: "Inter_400Regular",
+                }}
+              >
                 How we protect your privacy
               </Text>
             </Animated.View>
@@ -183,9 +215,9 @@ export function PrivacyPermissionsScreen() {
               entering={FadeInUp.delay(200).duration(500)}
               className="rounded-3xl mb-4"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: "rgba(255, 255, 255, 0.1)",
                 borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.2)',
+                borderColor: "rgba(255, 255, 255, 0.2)",
                 paddingHorizontal: 16,
                 paddingVertical: 4,
               }}
@@ -198,15 +230,30 @@ export function PrivacyPermissionsScreen() {
                 >
                   <View
                     className="w-9 h-9 rounded-xl items-center justify-center mr-3"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                    style={{ backgroundColor: "rgba(255, 255, 255, 0.15)" }}
                   >
                     {feature.icon}
                   </View>
                   <View className="flex-1">
-                    <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 14, marginBottom: 2, fontFamily: 'Inter_700Bold' }}>
+                    <Text
+                      style={{
+                        color: "#FFFFFF",
+                        fontWeight: "bold",
+                        fontSize: 14,
+                        marginBottom: 2,
+                        fontFamily: "Inter_700Bold",
+                      }}
+                    >
                       {feature.title}
                     </Text>
-                    <Text style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 12, lineHeight: 17, fontFamily: 'Inter_400Regular' }}>
+                    <Text
+                      style={{
+                        color: "rgba(255, 255, 255, 0.8)",
+                        fontSize: 12,
+                        lineHeight: 17,
+                        fontFamily: "Inter_400Regular",
+                      }}
+                    >
                       {feature.description}
                     </Text>
                   </View>
@@ -214,18 +261,36 @@ export function PrivacyPermissionsScreen() {
               ))}
 
               {/* Microphone row — same style as above, with toggle */}
-              <View className="flex-row items-center" style={{ paddingVertical: 10 }}>
+              <View
+                className="flex-row items-center"
+                style={{ paddingVertical: 10 }}
+              >
                 <View
                   className="w-9 h-9 rounded-xl items-center justify-center mr-3"
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                  style={{ backgroundColor: "rgba(255, 255, 255, 0.15)" }}
                 >
                   <Mic size={22} color="#FFFFFF" strokeWidth={2} />
                 </View>
                 <View className="flex-1">
-                  <Text style={{ color: '#FFFFFF', fontWeight: 'bold', fontSize: 14, marginBottom: 2, fontFamily: 'Inter_700Bold' }}>
+                  <Text
+                    style={{
+                      color: "#FFFFFF",
+                      fontWeight: "bold",
+                      fontSize: 14,
+                      marginBottom: 2,
+                      fontFamily: "Inter_700Bold",
+                    }}
+                  >
                     Microphone Access
                   </Text>
-                  <Text style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 12, lineHeight: 17, fontFamily: 'Inter_400Regular' }}>
+                  <Text
+                    style={{
+                      color: "rgba(255, 255, 255, 0.8)",
+                      fontSize: 12,
+                      lineHeight: 17,
+                      fontFamily: "Inter_400Regular",
+                    }}
+                  >
                     Required for voice journaling
                   </Text>
                 </View>
@@ -236,8 +301,10 @@ export function PrivacyPermissionsScreen() {
                     width: 60,
                     height: 32,
                     borderRadius: 16,
-                    backgroundColor: micPermission ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.1)',
-                    justifyContent: 'center',
+                    backgroundColor: micPermission
+                      ? "rgba(255, 255, 255, 0.25)"
+                      : "rgba(255, 255, 255, 0.1)",
+                    justifyContent: "center",
                     padding: 2,
                   }}
                 >
@@ -247,12 +314,12 @@ export function PrivacyPermissionsScreen() {
                         width: 28,
                         height: 28,
                         borderRadius: 14,
-                        backgroundColor: '#FFFFFF',
-                        shadowColor: '#000',
+                        backgroundColor: "#FFFFFF",
+                        shadowColor: "#000",
                         shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: 0.2,
                         shadowRadius: 4,
-                        elevation: Platform.OS === 'android' ? 0 : 4,
+                        elevation: Platform.OS === "android" ? 0 : 4,
                       },
                       toggleAnimatedStyle,
                     ]}
@@ -262,12 +329,15 @@ export function PrivacyPermissionsScreen() {
             </Animated.View>
 
             {/* Continue Button */}
-            <Animated.View entering={FadeInUp.delay(300).duration(500)} className="pb-6">
+            <Animated.View
+              entering={FadeInUp.delay(300).duration(500)}
+              className="pb-6"
+            >
               <OnboardingCTAButton label="Continue" onPress={handleContinue} />
             </Animated.View>
             <View style={{ flex: 1 }} />
           </View>
-      </SafeAreaView>
+        </SafeAreaView>
       </LinearGradient>
     </View>
   );

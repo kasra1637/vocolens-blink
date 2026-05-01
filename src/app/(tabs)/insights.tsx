@@ -774,7 +774,11 @@ function WelcomeSection({ user, totalEntries }: WelcomeSectionProps) {
 
       {/* Greeting */}
       <Text
-        style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF", fontSize: 22 }}
+        style={{
+          fontFamily: "Fraunces_700Bold",
+          color: "#FFFFFF",
+          fontSize: 22,
+        }}
         className="mb-1 text-center"
       >
         Hello, {user.name}

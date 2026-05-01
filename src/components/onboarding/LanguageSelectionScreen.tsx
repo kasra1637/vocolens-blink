@@ -93,7 +93,7 @@ export function LanguageSelectionScreen() {
           <Animated.Text
             entering={FadeInDown.delay(60).duration(500)}
             style={{
-              fontFamily: "Inter_700Bold",
+              fontFamily: "Fraunces_700Bold",
               fontSize: 22,
               color: "#FFFFFF",
               opacity: 0.92,

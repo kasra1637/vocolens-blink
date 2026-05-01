@@ -5,10 +5,10 @@
  * Matches the "We hear you" (MoodInsightScreen) design style.
  */
 
-import React, { useEffect } from 'react';
-import { View, Text } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect } from "react";
+import { View, Text } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   FadeInDown,
   FadeInUp,
@@ -18,35 +18,42 @@ import Animated, {
   withSpring,
   withDelay,
   Easing,
-} from 'react-native-reanimated';
-import { successHaptic } from '@/lib/haptics';
-import { Target } from 'lucide-react-native';
-import useOnboardingStore, { THEME_COLORS, GoalType, GoalBlockerType } from '@/lib/state/onboarding-store';
-import { EmotionalCompanion } from '@/components/EmotionalCompanion';
-import { ProgressBar } from '@/components/onboarding/ProgressBar';
-import { BackButton } from '@/components/onboarding/BackButton';
-import { useClickSound } from '@/lib/hooks/useClickSound';
-import { OnboardingCTAButton } from '@/components/onboarding/OnboardingCTAButton';
+} from "react-native-reanimated";
+import { successHaptic } from "@/lib/haptics";
+import { Target } from "lucide-react-native";
+import useOnboardingStore, {
+  THEME_COLORS,
+  GoalType,
+  GoalBlockerType,
+} from "@/lib/state/onboarding-store";
+import { EmotionalCompanion } from "@/components/EmotionalCompanion";
+import { ProgressBar } from "@/components/onboarding/ProgressBar";
+import { BackButton } from "@/components/onboarding/BackButton";
+import { useClickSound } from "@/lib/hooks/useClickSound";
+import { OnboardingCTAButton } from "@/components/onboarding/OnboardingCTAButton";
 
 const GOAL_LABELS: Record<GoalType, string> = {
-  'emotional-processing': 'Emotional Processing',
-  'goal-setting': 'Goal Setting',
-  'self-reflection': 'Self-Reflection',
-  'decision-making': 'Decision Making',
+  "emotional-processing": "Emotional Processing",
+  "goal-setting": "Goal Setting",
+  "self-reflection": "Self-Reflection",
+  "decision-making": "Decision Making",
 };
 
 const BLOCKER_LABELS: Record<GoalBlockerType, string> = {
-  'lack-of-time': 'Lack of Time',
-  'self-doubt': 'Self-Doubt',
-  'lack-of-consistency': 'Lack of Consistency',
-  'not-sure-how': 'Not Sure How',
+  "lack-of-time": "Lack of Time",
+  "self-doubt": "Self-Doubt",
+  "lack-of-consistency": "Lack of Consistency",
+  "not-sure-how": "Not Sure How",
 };
 
 const GOAL_INSIGHT_MESSAGES: Record<GoalType, string> = {
-  'emotional-processing': "Voice journaling is perfect for processing emotions and finding clarity.",
-  'goal-setting': "Daily reflection keeps your goals front and center.",
-  'self-reflection': "Understanding yourself is the foundation of personal growth.",
-  'decision-making': "Talking through decisions brings hidden insights to light.",
+  "emotional-processing":
+    "Voice journaling is perfect for processing emotions and finding clarity.",
+  "goal-setting": "Daily reflection keeps your goals front and center.",
+  "self-reflection":
+    "Understanding yourself is the foundation of personal growth.",
+  "decision-making":
+    "Talking through decisions brings hidden insights to light.",
 };
 
 export function GoalInsightScreen() {
@@ -66,11 +73,11 @@ export function GoalInsightScreen() {
   useEffect(() => {
     progressWidth.value = withDelay(
       400,
-      withTiming(100, { duration: 1200, easing: Easing.out(Easing.cubic) })
+      withTiming(100, { duration: 1200, easing: Easing.out(Easing.cubic) }),
     );
     ringScale.value = withDelay(
       600,
-      withSpring(1, { damping: 12, stiffness: 100 })
+      withSpring(1, { damping: 12, stiffness: 100 }),
     );
   }, []);
 
@@ -92,9 +99,13 @@ export function GoalInsightScreen() {
     prevStep();
   };
 
-  const goalLabel = selectedGoal ? GOAL_LABELS[selectedGoal] : 'Your Goal';
-  const blockerLabel = selectedGoalBlocker ? BLOCKER_LABELS[selectedGoalBlocker] : '';
-  const insightMessage = selectedGoal ? GOAL_INSIGHT_MESSAGES[selectedGoal] : '';
+  const goalLabel = selectedGoal ? GOAL_LABELS[selectedGoal] : "Your Goal";
+  const blockerLabel = selectedGoalBlocker
+    ? BLOCKER_LABELS[selectedGoalBlocker]
+    : "";
+  const insightMessage = selectedGoal
+    ? GOAL_INSIGHT_MESSAGES[selectedGoal]
+    : "";
 
   return (
     <View className="flex-1">
@@ -111,7 +122,10 @@ export function GoalInsightScreen() {
 
           <View className="flex-1 px-6 py-3">
             {/* Character with Success State */}
-            <View className="items-center justify-center" style={{ height: 110 }}>
+            <View
+              className="items-center justify-center"
+              style={{ height: 110 }}
+            >
               <EmotionalCompanion
                 state="success"
                 size={110}
@@ -126,7 +140,13 @@ export function GoalInsightScreen() {
             >
               <Text
                 className="text-center"
-                style={{ fontFamily: 'Inter_700Bold', color: '#FFFFFF', fontSize: 22, opacity: 0.92, letterSpacing: 0.2 }}
+                style={{
+                  fontFamily: "Fraunces_700Bold",
+                  color: "#FFFFFF",
+                  fontSize: 22,
+                  opacity: 0.92,
+                  letterSpacing: 0.2,
+                }}
               >
                 You're on the right path
               </Text>
@@ -140,9 +160,9 @@ export function GoalInsightScreen() {
               <View
                 className="rounded-2xl p-6 mx-2"
                 style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backgroundColor: "rgba(255, 255, 255, 0.08)",
                   borderWidth: 1,
-                  borderColor: 'rgba(255, 255, 255, 0.15)',
+                  borderColor: "rgba(255, 255, 255, 0.15)",
                 }}
               >
                 {/* Icon */}
@@ -153,9 +173,9 @@ export function GoalInsightScreen() {
                         width: 100,
                         height: 100,
                         borderRadius: 50,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "rgba(255, 255, 255, 0.12)",
                       },
                       ringAnimatedStyle,
                     ]}
@@ -168,12 +188,12 @@ export function GoalInsightScreen() {
                 <View className="items-center gap-3">
                   <View
                     className="px-5 py-2 rounded-full"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }}
+                    style={{ backgroundColor: "rgba(255, 255, 255, 0.18)" }}
                   >
                     <Text
                       style={{
-                        fontFamily: 'Inter_700Bold',
-                        color: '#FFFFFF',
+                        fontFamily: "Inter_700Bold",
+                        color: "#FFFFFF",
                         fontSize: 18,
                       }}
                     >
@@ -184,8 +204,8 @@ export function GoalInsightScreen() {
                   {blockerLabel && (
                     <Text
                       style={{
-                        fontFamily: 'Inter_500Medium',
-                        color: 'rgba(255, 255, 255, 0.8)',
+                        fontFamily: "Inter_500Medium",
+                        color: "rgba(255, 255, 255, 0.8)",
                         fontSize: 14,
                       }}
                     >
@@ -198,12 +218,12 @@ export function GoalInsightScreen() {
                 <View className="mt-6">
                   <View
                     className="h-1.5 rounded-full overflow-hidden"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.15)' }}
+                    style={{ backgroundColor: "rgba(255, 255, 255, 0.15)" }}
                   >
                     <Animated.View
                       className="h-full rounded-full"
                       style={[
-                        { backgroundColor: 'rgba(255, 255, 255, 0.75)' },
+                        { backgroundColor: "rgba(255, 255, 255, 0.75)" },
                         progressAnimatedStyle,
                       ]}
                     />
@@ -211,8 +231,8 @@ export function GoalInsightScreen() {
                   <Text
                     className="text-center mt-3"
                     style={{
-                      fontFamily: 'Inter_400Regular',
-                      color: 'rgba(255, 255, 255, 0.65)',
+                      fontFamily: "Inter_400Regular",
+                      color: "rgba(255, 255, 255, 0.65)",
                       fontSize: 12,
                     }}
                   >
@@ -227,10 +247,7 @@ export function GoalInsightScreen() {
               entering={FadeInUp.delay(700).duration(500)}
               className="pb-6"
             >
-              <OnboardingCTAButton
-                label="Continue"
-                onPress={handleContinue}
-              />
+              <OnboardingCTAButton label="Continue" onPress={handleContinue} />
             </Animated.View>
             <View style={{ flex: 1 }} />
           </View>

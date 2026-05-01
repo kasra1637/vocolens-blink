@@ -92,7 +92,7 @@ export default function LanguagePickerModal() {
               <Globe size={20} color="#FFFFFF" strokeWidth={2} />
               <Text
                 style={{
-                  fontFamily: "Inter_700Bold",
+                  fontFamily: "Fraunces_700Bold",
                   fontSize: 20,
                   color: "#FFFFFF",
                 }}
