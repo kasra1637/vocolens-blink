@@ -4,7 +4,7 @@
   "main": "index.ts",
   "scripts": {
     "dev": "EXPO_NO_TELEMETRY=1 EXPO_NO_DEV_CLIENT=true npx expo start --web --port 3000 --no-dev-client --clear",
-    "start": "expo start --tunnel",
+    "start": "expo start --localhost",
     "android": "expo start --android --no-dev-client",
     "ios": "expo start --ios --no-dev-client",
     "web": "DARK_MODE=class EXPO_NO_DEV_CLIENT=true expo start --web --no-dev-client --clear",
