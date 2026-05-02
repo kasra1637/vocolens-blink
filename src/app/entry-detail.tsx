@@ -70,6 +70,10 @@ import {
   BODY_REGION_EMOJIS,
 } from "@/lib/types";
 import { AudioPlayer } from "@/components/AudioPlayer";
+import EmotionCorrectionModal from "@/components/EmotionCorrectionModal";
+import { useEmotionCorrectionStore } from "@/lib/state/emotion-correction-store";
+import { queryKeys } from "@/lib/hooks";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ALL_EMOTIONS: EmotionType[] = [
   "happiness",
@@ -96,6 +100,8 @@ export default function EntryDetailScreen() {
   >("emotions");
   const [transcriptExpanded, setTranscriptExpanded] = useState(false);
   const [barContainerWidth, setBarContainerWidth] = useState(0);
+  const [showRefineModal, setShowRefineModal] = useState(false);
+  const queryClient = useQueryClient();
   const onBarContainerLayout = useCallback((e: LayoutChangeEvent) => {
     setBarContainerWidth(e.nativeEvent.layout.width);
   }, []);
@@ -1343,15 +1349,7 @@ export default function EntryDetailScreen() {
             <Pressable
               onPress={() => {
                 selectHaptic();
-                // Route to reflection screen with entry data for re-analysis
-                router.push({
-                  pathname: "/reflection",
-                  params: {
-                    entryId: entry.id,
-                    transcript: entry.transcript,
-                    mode: "refine",
-                  },
-                });
+                setShowRefineModal(true);
               }}
               className="flex-row items-center justify-center rounded-2xl py-3.5 px-5"
               style={{
@@ -1596,6 +1594,54 @@ export default function EntryDetailScreen() {
           </Animated.View>
         </View>
       </Modal>
+
+      {/* Refine Analysis Modal */}
+      {entry && (
+        <EmotionCorrectionModal
+          key={`refine-${entry.id}-${showRefineModal}`}
+          visible={showRefineModal}
+          entryId={entry.id}
+          aiEmotion={entry.primaryEmotion}
+          aiValence={entry.valence}
+          aiArousal={entry.arousal}
+          aiDistress={entry.distressLevel}
+          onDismiss={() => {
+            tapHaptic();
+            setShowRefineModal(false);
+          }}
+          onSubmit={(correction) => {
+            if (correction.userConfirmedAI) {
+              updateEntry(entry.id, { userValidated: true });
+              successHaptic();
+            } else {
+              const updates: Partial<{
+                primaryEmotion: EmotionType;
+                valence: number;
+                arousal: number;
+                aiCorrected: boolean;
+                userOverrideLabels: Partial<Record<EmotionType, string>>;
+              }> = {
+                aiCorrected: true,
+              };
+              if (correction.userEditedEmotion) {
+                updates.primaryEmotion = correction.userEditedEmotion;
+              }
+              if (correction.userEditedValence !== undefined) {
+                updates.valence = correction.userEditedValence;
+              }
+              if (correction.userEditedArousal !== undefined) {
+                updates.arousal = correction.userEditedArousal;
+              }
+              updateEntry(entry.id, updates as any);
+              successHaptic();
+            }
+            setShowRefineModal(false);
+            queryClient.invalidateQueries({ queryKey: ["insights"] });
+            queryClient.invalidateQueries({ queryKey: ["priorityInsights"] });
+            queryClient.invalidateQueries({ queryKey: ["triggerDetection"] });
+          }}
+        />
+      )}
     </View>
   );
 }
