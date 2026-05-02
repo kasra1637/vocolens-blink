@@ -1,54 +1,39 @@
 /**
- * Onboarding Screen 1: Welcome Screen
+ * Onboarding Screen 0: Welcome Screen
  *
- * Conversion-optimised layout:
- * - Hero character + headline
- * - Value-prop bullets (icon + copy)
- * - Social proof badge
- * - Prominent CTA with trust micro-copy
+ * Two-phase animated headline:
+ *  Phase 1: "Welcome to Vocolens" fades + slides up (~700ms)
+ *  Phase 2: After ~1.2s delay, first headline fades out and
+ *           "Turn your thoughts into clear insights" fades in (~700ms)
+ *  Phase 3: CTA button fades in only after second headline is fully visible
+ *
+ * Uses same background gradient, CTA button, and design patterns
+ * as all other onboarding screens.
  */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { Mic, Brain, TrendingUp, Lock, ShieldCheck } from "lucide-react-native";
+import Animated, {
+  FadeInUp,
+  FadeOutUp,
+  FadeIn,
+  Easing,
+} from "react-native-reanimated";
 import { tapHaptic } from "@/lib/haptics";
 import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import { OnboardingCTAButton } from "@/components/onboarding/OnboardingCTAButton";
-import { EmotionalCompanion } from "@/components/EmotionalCompanion";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
 import { BackButton } from "@/components/onboarding/BackButton";
 import { useClickSound } from "@/lib/hooks/useClickSound";
 
-const BULLETS = [
-  {
-    icon: Mic,
-    text: "Talk for 60 seconds — your journal writes itself",
-    color: "#FFFFFF",
-  },
-  {
-    icon: Brain,
-    text: "AI surfaces emotions & patterns you'd never notice alone",
-    color: "#FFFFFF",
-  },
-  {
-    icon: TrendingUp,
-    text: "Watch yourself grow with personalized daily insights",
-    color: "#FFFFFF",
-  },
-  {
-    icon: Lock,
-    text: "End-to-end encrypted — only you can read your entries",
-    color: "#FFFFFF",
-  },
-  {
-    icon: ShieldCheck,
-    text: "Your data is never sold or shared with anyone",
-    color: "#FFFFFF",
-  },
-];
+const EASE_IN_OUT = Easing.inOut(Easing.quad);
+
+const HEADLINE_ENTER = FadeInUp.duration(700).easing(EASE_IN_OUT);
+const HEADLINE_EXIT = FadeOutUp.duration(500).easing(EASE_IN_OUT);
+const HEADLINE2_ENTER = FadeInUp.duration(700).easing(EASE_IN_OUT);
+const CTA_ENTER = FadeIn.duration(500).easing(EASE_IN_OUT);
 
 export function WelcomeScreen() {
   const nextStep = useOnboardingStore((s) => s.nextStep);
@@ -58,16 +43,30 @@ export function WelcomeScreen() {
   const themeColors = THEME_COLORS[selectedTheme];
   const playClickSound = useClickSound();
 
+  const [phase, setPhase] = useState<1 | 2 | 3>(1);
+
   const handleBack = () => {
     playClickSound();
     tapHaptic();
     prevStep();
   };
+
   const handleGetStarted = () => {
     playClickSound();
     tapHaptic();
     nextStep();
   };
+
+  useEffect(() => {
+    if (phase === 1) {
+      const t = setTimeout(() => setPhase(2), 1200);
+      return () => clearTimeout(t);
+    }
+    if (phase === 2) {
+      const t = setTimeout(() => setPhase(3), 700);
+      return () => clearTimeout(t);
+    }
+  }, [phase]);
 
   return (
     <View className="flex-1">
@@ -88,132 +87,73 @@ export function WelcomeScreen() {
               paddingHorizontal: 24,
               paddingTop: 8,
               paddingBottom: 8,
+              justifyContent: "center",
             }}
           >
-            {/* Character */}
-            <Animated.View
-              entering={FadeInDown.delay(100).duration(600)}
-              style={{ alignItems: "center", marginBottom: 16 }}
-            >
-              <EmotionalCompanion
-                state="idle"
-                size={120}
-                themeColor={themeColors.primary}
-              />
-            </Animated.View>
-
-            {/* Headline */}
-            <Animated.View
-              entering={FadeInDown.delay(200).duration(600)}
-              style={{ alignItems: "center", marginBottom: 8 }}
-            >
-              <Text
-                style={{
-                  fontFamily: "Fraunces_700Bold",
-                  color: "#FFFFFF",
-                  fontSize: 26,
-                  textAlign: "center",
-                  opacity: 0.97,
-                  letterSpacing: 0.2,
-                  lineHeight: 34,
-                }}
-              >
-                Feel heard.{"\n"}Grow every day.
-              </Text>
-            </Animated.View>
-
-            {/* Tagline */}
-            <Animated.View
-              entering={FadeInDown.delay(300).duration(600)}
-              style={{ alignItems: "center", marginBottom: 20 }}
-            >
-              <Text
-                style={{
-                  fontFamily: "Inter_400Regular",
-                  color: "rgba(255,255,255,0.80)",
-                  fontSize: 14,
-                  textAlign: "center",
-                  lineHeight: 22,
-                  letterSpacing: 0.1,
-                }}
-              >
-                Just talk — AI transcribes, analyzes,{"\n"}and helps you grow.
-              </Text>
-            </Animated.View>
-
-            {/* Feature bullets */}
-            <Animated.View
-              entering={FadeInUp.delay(350).duration(600)}
+            {/* Headline area — swap between phase 1 and 2 */}
+            <View
               style={{
-                backgroundColor: "rgba(255,255,255,0.10)",
-                borderRadius: 20,
-                borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.18)",
-                paddingVertical: 14,
-                paddingHorizontal: 18,
-                gap: 12,
-                marginBottom: 16,
+                alignItems: "center",
+                minHeight: 120,
+                justifyContent: "center",
+                marginBottom: 40,
               }}
             >
-              {BULLETS.map(({ icon: Icon, text, color }, i) => (
-                <React.Fragment key={i}>
-                  {i === 3 && (
-                    <View
-                      style={{
-                        height: 1,
-                        backgroundColor: "rgba(255,255,255,0.12)",
-                        marginVertical: 2,
-                      }}
-                    />
-                  )}
-                  <View
+              {phase === 1 && (
+                <Animated.View
+                  entering={HEADLINE_ENTER}
+                  exiting={HEADLINE_EXIT}
+                  style={{ alignItems: "center" }}
+                >
+                  <Text
                     style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 12,
+                      fontFamily: "Fraunces_700Bold",
+                      color: "#FFFFFF",
+                      fontSize: 30,
+                      textAlign: "center",
+                      opacity: 0.97,
+                      letterSpacing: 0.2,
+                      lineHeight: 38,
                     }}
                   >
-                    <View
-                      style={{
-                        width: 34,
-                        height: 34,
-                        borderRadius: 10,
-                        backgroundColor: "rgba(255,255,255,0.18)",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Icon size={16} color={color} strokeWidth={2.2} />
-                    </View>
-                    <Text
-                      style={{
-                        flex: 1,
-                        fontFamily: "Inter_400Regular",
-                        color: "rgba(255,255,255,0.90)",
-                        fontSize: 13,
-                        lineHeight: 19,
-                      }}
-                    >
-                      {text}
-                    </Text>
-                  </View>
-                </React.Fragment>
-              ))}
-            </Animated.View>
+                    Welcome to Vocolens
+                  </Text>
+                </Animated.View>
+              )}
 
-            {/* CTA */}
-            <Animated.View entering={FadeInUp.delay(500).duration(600)}>
-              <OnboardingCTAButton
-                label="Start Journaling Free"
-                onPress={handleGetStarted}
-                paddingVertical={18}
-                fontSize={18}
-              />
-            </Animated.View>
+              {phase === 2 && (
+                <Animated.View
+                  entering={HEADLINE2_ENTER}
+                  style={{ alignItems: "center" }}
+                >
+                  <Text
+                    style={{
+                      fontFamily: "Fraunces_700Bold",
+                      color: "#FFFFFF",
+                      fontSize: 28,
+                      textAlign: "center",
+                      opacity: 0.97,
+                      letterSpacing: 0.2,
+                      lineHeight: 36,
+                    }}
+                  >
+                    Turn your thoughts into{"\n"}clear insights
+                  </Text>
+                </Animated.View>
+              )}
+            </View>
 
-            {/* Spacer */}
-            <View style={{ flex: 1 }} />
+            {/* CTA — only appears after second headline is fully visible */}
+            {phase === 3 && (
+              <Animated.View entering={CTA_ENTER}>
+                <OnboardingCTAButton
+                  label="Start Journaling Free"
+                  onPress={handleGetStarted}
+                  paddingVertical={18}
+                  fontSize={18}
+                />
+              </Animated.View>
+            )}
           </View>
         </SafeAreaView>
       </LinearGradient>
