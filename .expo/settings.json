@@ -1,3 +1,8 @@
 {
-  "urlRandomness": "D0_d4KA"
+  "urlRandomness": "D0_d4KA",
+  "hostType": "localhost",
+  "lanType": "direct",
+  "dev": true,
+  "minify": false,
+  "https": false
 }
