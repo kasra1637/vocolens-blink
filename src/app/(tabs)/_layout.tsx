@@ -85,11 +85,9 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
   const LABELS = ["Record", "Entries", "Insights", "Awards", "Settings"];
 
-  // Theme-derived colors for glass effect
+  // ─── Theme-derived color utilities ──────────────────────────────────────────
   const primaryColor = theme.primary;
-  const primaryRGB = primaryColor.slice(1); // Remove #
 
-  // Parse hex to rgba
   const hexToRgba = (hex: string, alpha: number) => {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
@@ -97,13 +95,19 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
-  // Glass base tint (deep blur) - theme primary at 20%
+  // All surface / border / accent colors derived from theme primary
   const glassTint = hexToRgba(primaryColor, 0.2);
-  // Tint wash - theme primary at 12%
   const tintWash = hexToRgba(primaryColor, 0.12);
-  // Pill gradient - theme colors
+  const specularColor = hexToRgba(primaryColor, 0.18);
+  const bottomShadowColor = hexToRgba(primaryColor, 0.15);
+  const outerBorderColor = hexToRgba(primaryColor, 0.1);
+  const innerBorderColor = hexToRgba(primaryColor, 0.05);
   const pillGradientStart = hexToRgba(primaryColor, 0.35);
   const pillGradientEnd = hexToRgba(primaryColor, 0.15);
+  const pillSpecularColor = hexToRgba(primaryColor, 0.25);
+  const pillBorderColor = hexToRgba(primaryColor, 0.15);
+  const iconGlowColor = hexToRgba(primaryColor, 0.22);
+  const inactiveLabelOpacity = 0.5;
 
   return (
     <View
@@ -112,56 +116,49 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       {/* Glass Tray Container */}
       <View style={styles.tray}>
         {/* Deep blur base layer */}
-        <BlurView
-          intensity={90}
-          tint={isDarkMode ? "dark" : "dark"}
-          style={StyleSheet.absoluteFill}
-        />
+        <BlurView intensity={90} tint="dark" style={StyleSheet.absoluteFill} />
 
         {/* Tint wash layer - subtle theme color */}
         <View style={[styles.tintWash, { backgroundColor: tintWash }]} />
 
         {/* Top light gradient - subtle shine from top */}
         <LinearGradient
-          colors={["rgba(255,255,255,0.08)", "transparent"]}
+          colors={[hexToRgba(primaryColor, 0.08), "transparent"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           style={styles.topLight}
         />
 
-        {/* Specular highlight line - top edge */}
-        <View style={styles.specularLine} />
+        {/* Specular highlight line - top edge (theme-derived) */}
+        <View
+          style={[styles.specularLine, { backgroundColor: specularColor }]}
+        />
 
-        {/* Bottom shadow line */}
-        <View style={styles.bottomShadow} />
+        {/* Bottom shadow line (theme-derived) */}
+        <View
+          style={[styles.bottomShadow, { backgroundColor: bottomShadowColor }]}
+        />
 
-        {/* Fine outer border */}
-        <View style={styles.outerBorder} />
+        {/* Fine outer border (theme-derived) */}
+        <View style={[styles.outerBorder, { borderColor: outerBorderColor }]} />
 
-        {/* Inner border glow */}
-        <View style={styles.innerBorder} />
+        {/* Inner border glow (theme-derived) */}
+        <View style={[styles.innerBorder, { borderColor: innerBorderColor }]} />
 
         {/* Tab Content */}
         <View style={styles.content}>
           {/* Active Tab Pill */}
           <Animated.View
-            style={[
-              styles.pill,
-              pillStyle,
-              {
-                // Pill blur
-                backgroundColor: glassTint,
-              },
-            ]}
+            style={[styles.pill, pillStyle, { backgroundColor: glassTint }]}
           >
             {/* Pill blur layer */}
             <BlurView
               intensity={95}
-              tint={isDarkMode ? "dark" : "dark"}
+              tint="dark"
               style={StyleSheet.absoluteFill}
             />
 
-            {/* Pill gradient - slightly stronger than base */}
+            {/* Pill gradient - theme-colored, stronger than base */}
             <LinearGradient
               colors={[pillGradientStart, pillGradientEnd]}
               start={{ x: 0, y: 0 }}
@@ -169,11 +166,18 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               style={StyleSheet.absoluteFill}
             />
 
-            {/* Pill specular highlight */}
-            <View style={styles.pillSpecular} />
+            {/* Pill specular highlight (theme-derived) */}
+            <View
+              style={[
+                styles.pillSpecular,
+                { backgroundColor: pillSpecularColor },
+              ]}
+            />
 
-            {/* Pill border */}
-            <View style={styles.pillBorder} />
+            {/* Pill border (theme-derived) */}
+            <View
+              style={[styles.pillBorder, { borderColor: pillBorderColor }]}
+            />
           </Animated.View>
 
           {state.routes.map((route, index) => {
@@ -197,7 +201,20 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                 onPress={onPress}
                 style={styles.tabItem}
               >
+                {/* Icon container with optional glow */}
                 <View style={styles.iconContainer}>
+                  {/* Theme-colored glow behind active icon */}
+                  {isFocused && (
+                    <View
+                      style={{
+                        position: "absolute",
+                        width: 32,
+                        height: 32,
+                        borderRadius: 16,
+                        backgroundColor: iconGlowColor,
+                      }}
+                    />
+                  )}
                   {renderIcon(index, isFocused)}
                 </View>
                 <Text
@@ -207,7 +224,9 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                       fontFamily: isFocused
                         ? "Inter_700Bold"
                         : "Inter_400Regular",
-                      color: isFocused ? "#FFFFFF" : "rgba(255,255,255,0.5)",
+                      color: isFocused
+                        ? "#FFFFFF"
+                        : `rgba(255,255,255,${inactiveLabelOpacity})`,
                     },
                   ]}
                 >
@@ -255,7 +274,6 @@ const styles = StyleSheet.create({
     left: 12,
     right: 12,
     height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
     borderRadius: 0.5,
   },
   bottomShadow: {
@@ -264,7 +282,6 @@ const styles = StyleSheet.create({
     left: 12,
     right: 12,
     height: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
     borderRadius: 0.5,
   },
   outerBorder: {
@@ -275,7 +292,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.08)",
   },
   innerBorder: {
     position: "absolute",
@@ -285,7 +301,6 @@ const styles = StyleSheet.create({
     bottom: 1,
     borderRadius: 22,
     borderWidth: 0.5,
-    borderColor: "rgba(255, 255, 255, 0.04)",
   },
   content: {
     flex: 1,
@@ -307,7 +322,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   label: {
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 0.2,
   },
   pill: {
@@ -325,7 +340,6 @@ const styles = StyleSheet.create({
     left: 6,
     right: 6,
     height: 1,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 0.5,
   },
   pillBorder: {
@@ -336,7 +350,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.12)",
   },
 });
 
