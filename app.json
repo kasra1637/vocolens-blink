@@ -8,6 +8,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "root": "src/app",
+    "hostType": "localhost",
     "updates": {
       "url": "https://u.expo.dev/your-project-id-here"
     },

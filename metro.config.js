@@ -9,6 +9,25 @@ const config = getDefaultConfig(__dirname);
 // Disable Watchman for file watching.
 config.resolver.useWatchman = false;
 
+// Completely disable tunneling at Metro level
+config.server = {
+  ...config.server,
+  port: parseInt(process.env.METRO_PORT) || 8081,
+  host: "localhost",
+  runInspectorProxy: false,
+  enhanceMiddleware: (middleware) => {
+    return (req, res, next) => {
+      // Disable any tunnel-related middleware
+      if (req.url && req.url.includes("tunnel")) {
+        res.statusCode = 404;
+        res.end("Tunnel disabled");
+        return;
+      }
+      return middleware(req, res, next);
+    };
+  },
+};
+
 // Configure asset and source extensions.
 const { assetExts, sourceExts } = config.resolver;
 

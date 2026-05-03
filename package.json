@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
-    "dev": "EXPO_TUNNEL=none npx expo start --web --port 8081 --offline --clear",
-    "start": "EXPO_TUNNEL=none expo start --offline",
-    "android": "EXPO_TUNNEL=none expo start --android --offline",
-    "ios": "EXPO_TUNNEL=none expo start --ios --offline",
-    "web": "EXPO_TUNNEL=none npx expo start --web --offline --clear",
-    "preview": "EXPO_TUNNEL=none npx expo start --web --port 3003 --offline --clear",
+    "dev": "EXPO_TUNNEL=none EXPO_OFFLINE=true EXPO_NO_DEV_CLIENT=true npx expo start --web --port 8081 --offline --clear",
+    "start": "EXPO_TUNNEL=none EXPO_OFFLINE=true EXPO_NO_DEV_CLIENT=true expo start --offline",
+    "android": "EXPO_TUNNEL=none EXPO_OFFLINE=true expo start --android --offline",
+    "ios": "EXPO_TUNNEL=none EXPO_OFFLINE=true expo start --ios --offline",
+    "web": "EXPO_TUNNEL=none EXPO_OFFLINE=true EXPO_NO_DEV_CLIENT=true npx expo start --web --offline --clear",
+    "preview": "EXPO_TUNNEL=none EXPO_OFFLINE=true EXPO_NO_DEV_CLIENT=true npx expo start --web --port 3003 --offline --clear",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit"
   },
