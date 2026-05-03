@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'legacy-peer-deps=true' > /tmp/cc-agent/66230881/project/.npmrc"
+            "command": "echo 'legacy-peer-deps=true' > /tmp/cc-agent/66349834/project/.npmrc"
           }
         ]
       }
