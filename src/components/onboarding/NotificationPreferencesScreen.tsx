@@ -259,7 +259,7 @@ export function NotificationPreferencesScreen() {
               <Text
                 className="text-center mb-1"
                 style={{
-                  fontFamily: "Inter_700Bold",
+                  fontFamily: "Fraunces_700Bold",
                   color: "#FFFFFF",
                   fontSize: 22,
                   opacity: 0.92,
@@ -377,41 +377,6 @@ export function NotificationPreferencesScreen() {
                   >
                     Reminder days
                   </Text>
-
-                  {/* Quick presets */}
-                  <View className="flex-row gap-2 mb-3">
-                    {PRESET_LABELS.map((preset) => (
-                      <Pressable
-                        key={preset}
-                        onPress={() => applyPreset(preset)}
-                        style={{
-                          flex: 1,
-                          borderRadius: 12,
-                          paddingVertical: 7,
-                          alignItems: "center",
-                          backgroundColor: isPresetActive(preset)
-                            ? "rgba(255,255,255,0.28)"
-                            : "rgba(255,255,255,0.10)",
-                          borderWidth: 1.5,
-                          borderColor: isPresetActive(preset)
-                            ? "rgba(255,255,255,0.6)"
-                            : "rgba(255,255,255,0.18)",
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color: "#FFFFFF",
-                            fontFamily: "Inter_500Medium",
-                            fontSize: 12,
-                            textTransform: "capitalize",
-                            opacity: isPresetActive(preset) ? 1 : 0.7,
-                          }}
-                        >
-                          {preset}
-                        </Text>
-                      </Pressable>
-                    ))}
-                  </View>
 
                   {/* Day pills */}
                   <View className="flex-row justify-between">
