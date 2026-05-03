@@ -32,6 +32,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from "lucide-react-native";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import { DetectedTrigger } from "@/lib/trigger-detection";
 import { EMOTION_COLORS, EmotionType } from "@/lib/types";
 import { BorderRadius } from "@/lib/theme";
@@ -79,20 +80,23 @@ export function TriggerInsightCard({
   const scale = useSharedValue(1);
   const glow = useSharedValue(0);
 
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
-    shadowOpacity: withTiming(0.1 + glow.value * 0.3),
-    shadowRadius: withTiming(16 + glow.value * 8),
+    shadowOpacity: withSpring(0.1 + glow.value * 0.3),
+    shadowRadius: withSpring(16 + glow.value * 8),
   }));
 
   const handlePressIn = () => {
-    scale.value = withTiming(0.97, { duration: 0 });
-    glow.value = withTiming(1, { duration: 50 });
+    scale.value = withSpring(0.97);
+    glow.value = withSpring(1);
   };
 
   const handlePressOut = () => {
-    scale.value = withTiming(1, { duration: 150 });
-    glow.value = withTiming(0, { duration: 150 });
+    scale.value = withSpring(1);
+    glow.value = withSpring(0);
   };
 
   const handlePress = () => {
@@ -109,10 +113,6 @@ export function TriggerInsightCard({
   const CategoryIcon =
     TRIGGER_ICONS[trigger.trigger] ?? (isPositive ? TrendingUp : TrendingDown);
 
-  // Get primary emotion color
-  const primaryEmotion = trigger.associatedEmotions[0] as EmotionType;
-  const emotionColor = EMOTION_COLORS[primaryEmotion] || primaryColor;
-
   return (
     <Animated.View
       entering={FadeInDown.delay(index * 100)
@@ -127,49 +127,18 @@ export function TriggerInsightCard({
       >
         <View
           style={{
-            backgroundColor: hexToRgba(primaryColor, 0.1),
             borderRadius: BorderRadius.xxlarge,
-            borderWidth: 1,
-            borderColor: hexToRgba(primaryColor, 0.15),
             overflow: "hidden",
-            shadowColor: primaryColor,
+            shadowColor: tintColor,
             shadowOffset: { width: 0, height: 8 },
             shadowRadius: 16,
             elevation: Platform.OS === "android" ? 0 : 6,
           }}
         >
-          <GlassLayers primaryColor={primaryColor} borderRadius={BorderRadius.xxlarge} />
-
-      <Pressable
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        onPress={handlePress}
-      >
-        <View
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-            borderRadius: BorderRadius.xxlarge,
-            borderWidth: 1,
-            borderColor: "rgba(255, 255, 255, 0.2)",
-            overflow: "hidden",
-          }}
-        >
-          {/* Subtle gradient accent */}
-          <LinearGradient
-            colors={
-              isPositive
-                ? ["rgba(255, 255, 255, 0.07)", "rgba(255, 255, 255, 0.02)"]
-                : ["rgba(255, 255, 255, 0.05)", "rgba(255, 255, 255, 0.01)"]
-            }
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 0,
-            }}
+          <GlassLayers
+            primaryColor={primaryColor}
+            tintColor={tintColor}
+            borderRadius={BorderRadius.xxlarge}
           />
 
           <View style={{ padding: 18 }}>
@@ -292,18 +261,26 @@ export function TriggerEmptyState({
   currentEntries,
   minRequired,
 }: TriggerEmptyStateProps) {
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const theme = THEME_COLORS[selectedTheme];
+  const primaryColor = theme.primary;
+  const tintColor = theme.backgroundGradient[2];
+
   return (
     <Animated.View entering={FadeInDown.duration(500)}>
       <View
         style={{
-          backgroundColor: "rgba(255, 255, 255, 0.1)",
           borderRadius: BorderRadius.xxlarge,
-          borderWidth: 1,
-          borderColor: "rgba(255, 255, 255, 0.2)",
           padding: 24,
           alignItems: "center",
+          overflow: "hidden",
         }}
       >
+        <GlassLayers
+          primaryColor={primaryColor}
+          tintColor={tintColor}
+          borderRadius={BorderRadius.xxlarge}
+        />
         <View
           style={{
             width: 40,

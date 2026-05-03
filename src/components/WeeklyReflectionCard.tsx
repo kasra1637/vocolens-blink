@@ -28,6 +28,8 @@ import { useWeeklyReflection } from "@/lib/hooks";
 import { BorderRadius } from "@/lib/theme";
 import { hexToRgba, GlassLayers } from "@/lib/glass";
 
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
+
 interface WeeklyReflectionCardProps {
   primaryColor: string;
   isDarkMode?: boolean;
@@ -37,55 +39,17 @@ export function WeeklyReflectionCard({
   primaryColor,
   isDarkMode = false,
 }: WeeklyReflectionCardProps) {
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const theme = THEME_COLORS[selectedTheme];
+  const tintColor = theme.backgroundGradient[2];
+
   const [expanded, setExpanded] = useState(false);
-  const scale = useSharedValue(1);
-
-  const {
-    data: reflection,
-    isLoading,
-    error,
-    refetch,
-    isFetching,
-  } = useWeeklyReflection(0);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.98);
-  };
-  const handlePressOut = () => {
-    scale.value = withSpring(1);
-  };
-
-  const handleRefresh = () => {
-    selectHaptic();
-    refetch();
-  };
-
-  const handleToggle = () => {
-    tapHaptic();
-    setExpanded((prev) => !prev);
-  };
-
-  const dominantColor = primaryColor;
-
-  return (
-    <Animated.View style={animatedStyle} className="mb-6">
-      <Pressable
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        onPress={handleToggle}
-      >
+// ...
         <View
           style={{
-            backgroundColor: hexToRgba(dominantColor, 0.1),
             borderRadius: BorderRadius.xxlarge,
             overflow: "hidden",
-            borderWidth: 1,
-            borderColor: hexToRgba(dominantColor, 0.15),
-            shadowColor: dominantColor,
+            shadowColor: tintColor,
             shadowOffset: { width: 0, height: 8 },
             shadowOpacity: 0.15,
             shadowRadius: 16,
@@ -94,8 +58,10 @@ export function WeeklyReflectionCard({
         >
           <GlassLayers
             primaryColor={dominantColor}
+            tintColor={tintColor}
             borderRadius={BorderRadius.xxlarge}
           />
+
           {/* Subtle gradient overlay */}
           <LinearGradient
             colors={[`${dominantColor}18`, "rgba(255,255,255,0.0)"]}

@@ -156,7 +156,7 @@ export function ThemeSelectionScreen() {
           </Animated.View>
 
           {/* Swipe carousel */}
-          <Animated.View 
+          <Animated.View
             entering={getStaggeredFadeIn(1)}
             style={{ flex: 1, justifyContent: "center" }}
           >
@@ -204,21 +204,22 @@ export function ThemeSelectionScreen() {
                         paddingVertical: 36,
                         paddingHorizontal: 24,
                         gap: 20,
-                        backgroundColor: isActive
-                          ? "rgba(255,255,255,0.18)"
-                          : "rgba(255,255,255,0.08)",
-                        borderWidth: isActive ? 2 : 1,
-                        borderColor: isActive
-                          ? "rgba(255,255,255,0.70)"
-                          : "rgba(255,255,255,0.20)",
-                        shadowColor: "#000",
+                        overflow: "hidden",
+                        shadowColor: data.primary,
                         shadowOffset: { width: 0, height: 8 },
-                        shadowOpacity: isActive ? 0.2 : 0.1,
+                        shadowOpacity: isActive ? 0.25 : 0.1,
                         shadowRadius: 20,
                         elevation: Platform.OS === "android" ? 0 : 10,
                       }}
                     >
+                      <GlassLayers
+                        primaryColor={data.primary}
+                        tintColor={data.backgroundGradient[2]}
+                        borderRadius={28}
+                        blurIntensity={isActive ? 90 : 60}
+                      />
                       {/* Orb with glow ring when active */}
+
                       <View
                         style={{
                           alignItems: "center",
@@ -360,9 +361,9 @@ export function ThemeSelectionScreen() {
             </View>
 
             <View style={{ width: "100%" }}>
-              <OnboardingCTAButton 
-                label="Continue" 
-                onPress={handleContinue} 
+              <OnboardingCTAButton
+                label="Continue"
+                onPress={handleContinue}
                 pulse
                 primaryColor={activeData.primary}
               />
@@ -371,6 +372,5 @@ export function ThemeSelectionScreen() {
         </SafeAreaView>
       </View>
     </ScreenWrapper>
-  );
   );
 }

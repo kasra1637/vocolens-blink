@@ -138,6 +138,7 @@ export default function SettingsScreen() {
   const Colors = getThemeColors(selectedTheme, isDarkMode);
   const Gradients = getThemeGradients(selectedTheme, isDarkMode);
   const Shadows = getThemeShadows(selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -391,20 +392,17 @@ export default function SettingsScreen() {
               <View
                 className="rounded-3xl overflow-hidden"
                 style={{
-                  backgroundColor: isAtLimit
-                    ? "rgba(255, 80, 80, 0.18)"
-                    : isNearLimit
-                      ? "rgba(255, 180, 50, 0.15)"
-                      : hexToRgba(Colors.primary, 0.1),
-                  borderWidth: 1,
-                  borderColor: isAtLimit
-                    ? "rgba(255, 100, 100, 0.5)"
-                    : isNearLimit
-                      ? "rgba(255, 200, 80, 0.4)"
-                      : hexToRgba(Colors.primary, 0.15),
+                  shadowColor: isAtLimit ? "#FF5050" : tintColor,
+                  shadowOffset: { width: 0, height: 8 },
+                  shadowRadius: 20,
+                  elevation: 4,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+                <GlassLayers 
+                  primaryColor={Colors.primary} 
+                  tintColor={tintColor}
+                  borderRadius={24} 
+                />
                 <View className="p-5">
                   {/* Header row */}
                   <View className="flex-row items-center justify-between mb-4">
@@ -524,12 +522,18 @@ export default function SettingsScreen() {
               <View
                 className="rounded-3xl p-5"
                 style={{
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderWidth: 1,
-                  borderColor: hexToRgba(Colors.primary, 0.15),
+                  overflow: "hidden",
+                  shadowColor: tintColor,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowRadius: 12,
+                  elevation: 3,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+                <GlassLayers 
+                  primaryColor={Colors.primary} 
+                  tintColor={tintColor}
+                  borderRadius={24} 
+                />
                 <View
                   style={{
                     flexDirection: "row",
@@ -692,12 +696,18 @@ export default function SettingsScreen() {
               <View
                 className="rounded-3xl p-5"
                 style={{
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderWidth: 1,
-                  borderColor: hexToRgba(Colors.primary, 0.15),
+                  overflow: "hidden",
+                  shadowColor: tintColor,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowRadius: 12,
+                  elevation: 3,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+                <GlassLayers 
+                  primaryColor={Colors.primary} 
+                  tintColor={tintColor}
+                  borderRadius={24} 
+                />
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1 mr-4">
                     <Text
@@ -750,12 +760,17 @@ export default function SettingsScreen() {
               <View
                 className="rounded-3xl overflow-hidden"
                 style={{
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderWidth: 1,
-                  borderColor: hexToRgba(Colors.primary, 0.15),
+                  shadowColor: tintColor,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowRadius: 12,
+                  elevation: 3,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+                <GlassLayers 
+                  primaryColor={Colors.primary} 
+                  tintColor={tintColor}
+                  borderRadius={24} 
+                />
                 <View
                   className="p-5"
                   style={{
@@ -909,12 +924,17 @@ export default function SettingsScreen() {
                 }}
                 className="rounded-3xl overflow-hidden active:opacity-70"
                 style={{
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderWidth: 1,
-                  borderColor: hexToRgba(Colors.primary, 0.15),
+                  shadowColor: tintColor,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowRadius: 12,
+                  elevation: 3,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+                <GlassLayers 
+                  primaryColor={Colors.primary} 
+                  tintColor={tintColor}
+                  borderRadius={24} 
+                />
                 <View
                   className="p-5"
                   style={{
@@ -1044,12 +1064,17 @@ export default function SettingsScreen() {
               <View
                 className="rounded-3xl overflow-hidden"
                 style={{
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderWidth: 1,
-                  borderColor: hexToRgba(Colors.primary, 0.15),
+                  shadowColor: tintColor,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowRadius: 12,
+                  elevation: 3,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+                <GlassLayers 
+                  primaryColor={Colors.primary} 
+                  tintColor={tintColor}
+                  borderRadius={24} 
+                />
                 <Pressable
                   onPress={handleOpenPinChange}
                   className="p-5 active:opacity-70"
@@ -1272,11 +1297,18 @@ export default function SettingsScreen() {
           <View
             className="rounded-3xl p-6 w-full max-w-md"
             style={{
-              backgroundColor: Colors.surfaceHighlight,
-              ...Shadows.large,
+              overflow: "hidden",
+              shadowColor: tintColor,
+              shadowOffset: { width: 0, height: 12 },
+              shadowRadius: 24,
+              elevation: 8,
             }}
           >
-            <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+            <GlassLayers 
+              primaryColor={Colors.primary} 
+              tintColor={tintColor}
+              borderRadius={24} 
+            />
             {/* Header with centered title */}
             <View
               style={{

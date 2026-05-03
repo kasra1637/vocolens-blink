@@ -46,6 +46,7 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import { useIsFocused } from "@react-navigation/native";
 import { tapHaptic, selectionHaptic } from "@/lib/haptics";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import {
   JournalEntry,
   EMOTION_COLORS,
@@ -141,6 +142,10 @@ export default function ValenceArousalChart({
 }: ValenceArousalChartProps) {
   const isFocused = useIsFocused();
   const [range, setRange] = useState<TimeRange>("30D");
+
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
+
   const [selectedPoint, setSelectedPoint] = useState<ChartPoint | null>(null);
   const [chartWidth, setChartWidth] = useState(280);
 
@@ -236,14 +241,19 @@ export default function ValenceArousalChart({
   return (
     <View
       style={{
-        backgroundColor: hexToRgba(primaryColor, 0.1),
-        borderWidth: 1,
-        borderColor: hexToRgba(primaryColor, 0.15),
         borderRadius: 24,
         overflow: "hidden",
+        shadowColor: tintColor,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 16,
+        elevation: 4,
       }}
     >
-      <GlassLayers primaryColor={primaryColor} borderRadius={24} />
+      <GlassLayers
+        primaryColor={primaryColor}
+        tintColor={tintColor}
+        borderRadius={24}
+      />
       {/* Header */}
       <View style={{ padding: 20, paddingBottom: 0 }}>
         <View
@@ -363,101 +373,109 @@ export default function ValenceArousalChart({
                 marginHorizontal: 20,
                 marginTop: 4,
                 marginBottom: 12,
-                padding: 14,
                 borderRadius: 16,
-                backgroundColor: hexToRgba(primaryColor, 0.1),
-                borderWidth: 1,
-                borderColor: hexToRgba(primaryColor, 0.15),
+                overflow: "hidden",
+                shadowColor: tintColor,
+                shadowOffset: { width: 0, height: 4 },
+                shadowRadius: 8,
+                elevation: 3,
               }}
             >
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  marginBottom: 6,
-                }}
-              >
+              <GlassLayers
+                primaryColor={primaryColor}
+                tintColor={tintColor}
+                borderRadius={16}
+              />
+              <View style={{ padding: 14 }}>
                 <View
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    gap: 8,
-                    flex: 1,
+                    justifyContent: "space-between",
+                    marginBottom: 6,
                   }}
                 >
-                  <Text style={{ fontSize: 20 }}>{selectedPoint.emoji}</Text>
-                  <View style={{ flex: 1 }}>
-                    <Text
-                      style={{
-                        fontFamily: "Inter_600SemiBold",
-                        fontSize: 13,
-                        color: "#FFFFFF",
-                      }}
-                      numberOfLines={1}
-                    >
-                      {selectedPoint.title}
-                    </Text>
-                    <Text
-                      style={{
-                        fontFamily: "Inter_400Regular",
-                        fontSize: 11,
-                        color: "rgba(255,255,255,0.5)",
-                        marginTop: 1,
-                      }}
-                    >
-                      {selectedPoint.date}
-                    </Text>
-                  </View>
-                </View>
-                {selectedPoint.isUserCorrected && (
                   <View
                     style={{
-                      paddingHorizontal: 7,
-                      paddingVertical: 3,
-                      borderRadius: 8,
-                      backgroundColor: hexToRgba(primaryColor, 0.18),
-                      borderWidth: 1,
-                      borderColor: hexToRgba(primaryColor, 0.35),
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 8,
+                      flex: 1,
                     }}
                   >
-                    <Text
+                    <Text style={{ fontSize: 20 }}>{selectedPoint.emoji}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          fontFamily: "Inter_600SemiBold",
+                          fontSize: 13,
+                          color: "#FFFFFF",
+                        }}
+                        numberOfLines={1}
+                      >
+                        {selectedPoint.title}
+                      </Text>
+                      <Text
+                        style={{
+                          fontFamily: "Inter_400Regular",
+                          fontSize: 11,
+                          color: "rgba(255,255,255,0.5)",
+                          marginTop: 1,
+                        }}
+                      >
+                        {selectedPoint.date}
+                      </Text>
+                    </View>
+                  </View>
+                  {selectedPoint.isUserCorrected && (
+                    <View
                       style={{
-                        fontFamily: "Inter_600SemiBold",
-                        fontSize: 9,
-                        color: primaryColor,
-                        textTransform: "uppercase",
-                        letterSpacing: 0.5,
+                        paddingHorizontal: 7,
+                        paddingVertical: 3,
+                        borderRadius: 8,
+                        backgroundColor: hexToRgba(primaryColor, 0.18),
+                        borderWidth: 1,
+                        borderColor: hexToRgba(primaryColor, 0.35),
                       }}
                     >
-                      You edited
-                    </Text>
-                  </View>
-                )}
-              </View>
-              <View style={{ flexDirection: "row", gap: 12 }}>
-                <VABadge
-                  label="Valence"
-                  value={selectedPoint.valence}
-                  unit=""
-                  signed
-                />
-                <VABadge
-                  label="Arousal"
-                  value={selectedPoint.arousal}
-                  unit=""
-                  signed={false}
-                />
-                <VABadge
-                  label="Emotion"
-                  value={
-                    selectedPoint.emotion.charAt(0).toUpperCase() +
-                    selectedPoint.emotion.slice(1)
-                  }
-                  unit=""
-                  isText
-                  color={selectedPoint.color}
-                />
+                      <Text
+                        style={{
+                          fontFamily: "Inter_600SemiBold",
+                          fontSize: 9,
+                          color: primaryColor,
+                          textTransform: "uppercase",
+                          letterSpacing: 0.5,
+                        }}
+                      >
+                        You edited
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <View style={{ flexDirection: "row", gap: 12 }}>
+                  <VABadge
+                    label="Valence"
+                    value={selectedPoint.valence}
+                    unit=""
+                    signed
+                  />
+                  <VABadge
+                    label="Arousal"
+                    value={selectedPoint.arousal}
+                    unit=""
+                    signed={false}
+                  />
+                  <VABadge
+                    label="Emotion"
+                    value={
+                      selectedPoint.emotion.charAt(0).toUpperCase() +
+                      selectedPoint.emotion.slice(1)
+                    }
+                    unit=""
+                    isText
+                    color={selectedPoint.color}
+                  />
+                </View>
               </View>
             </Animated.View>
           )}

@@ -29,7 +29,7 @@ import {
 } from "@/lib/valence-arousal";
 import { tapHaptic, successHaptic } from "@/lib/haptics";
 import useReflectionStore from "@/lib/state/reflection-store";
-import useOnboardingStore from "@/lib/state/onboarding-store";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import useSettingsStore from "@/lib/state/settings-store";
 import { getThemeColors, getThemeGradients } from "@/lib/theme";
 import { useCreateEntry } from "@/lib/hooks";
@@ -81,6 +81,7 @@ export default function ReflectionScreen() {
   const reflectionMode = useSettingsStore((s) => s.emotionReflectionMode);
   const Colors = getThemeColors(selectedTheme, isDarkMode);
   const Gradients = getThemeGradients(selectedTheme, isDarkMode);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   const [step, setStep] = useState<Step>("summary");
   const [emotions, setEmotions] = useState<EmotionType[]>([]);
@@ -276,7 +277,11 @@ export default function ReflectionScreen() {
             </Animated.View>
             <Animated.View entering={getStaggeredFadeIn(1)}>
               <View style={[s.emotionGrid, { overflow: "hidden" }]}>
-                <GlassLayers primaryColor={Colors.primary} borderRadius={20} />
+                <GlassLayers 
+                  primaryColor={Colors.primary} 
+                  tintColor={tintColor}
+                  borderRadius={20} 
+                />
                 {ALL_EMOTIONS.map((emotion) => {
                   const def = getEmotionDefinition(emotion);
                   const sel = emotions.includes(emotion);
@@ -327,12 +332,16 @@ export default function ReflectionScreen() {
                   s.defCard,
                   {
                     overflow: "hidden",
-                    backgroundColor: hexToRgba(Colors.primary, 0.08),
-                    borderColor: hexToRgba(Colors.primary, 0.15),
+                    borderWidth: 0,
+                    backgroundColor: 'transparent',
                   },
                 ]}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={20} />
+                <GlassLayers 
+                  primaryColor={Colors.primary} 
+                  tintColor={tintColor}
+                  borderRadius={20} 
+                />
                 <Text style={s.defEmoji}>
                   {getEmotionDefinition(selectedEmotionDef).emoji}
                 </Text>
@@ -390,12 +399,16 @@ export default function ReflectionScreen() {
                   s.sliderCard,
                   {
                     overflow: "hidden",
-                    backgroundColor: hexToRgba(Colors.primary, 0.08),
-                    borderColor: hexToRgba(Colors.primary, 0.12),
+                    borderWidth: 0,
+                    backgroundColor: 'transparent',
                   },
                 ]}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+                <GlassLayers 
+                  primaryColor={Colors.primary} 
+                  tintColor={tintColor}
+                  borderRadius={24} 
+                />
                 <View style={s.sliderHeader}>
                   <Text style={s.sliderTitle}>Pleasant ↔ Unpleasant</Text>
                   <Text style={[s.sliderValue, { color: primaryEmotionColor }]}>
@@ -457,12 +470,16 @@ export default function ReflectionScreen() {
                   s.distressBanner,
                   {
                     overflow: "hidden",
-                    backgroundColor: hexToRgba(Colors.primary, 0.1),
-                    borderColor: hexToRgba(Colors.primary, 0.2),
+                    borderWidth: 0,
+                    backgroundColor: 'transparent',
                   },
                 ]}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+                <GlassLayers 
+                  primaryColor={Colors.primary} 
+                  tintColor={tintColor}
+                  borderRadius={24} 
+                />
                 <Text style={s.distressText}>
                   {distress === "high"
                     ? "⚠️  High distress detected — grounding may help"
@@ -549,12 +566,16 @@ export default function ReflectionScreen() {
                     s.groundingBtn,
                     {
                       overflow: "hidden",
-                      backgroundColor: hexToRgba(Colors.primary, 0.08),
-                      borderColor: hexToRgba(Colors.primary, 0.15),
+                      borderWidth: 0,
+                      backgroundColor: 'transparent',
                     },
                   ]}
                 >
-                  <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+                  <GlassLayers 
+                    primaryColor={Colors.primary} 
+                    tintColor={tintColor}
+                    borderRadius={24} 
+                  />
                   <Text style={s.groundingEmoji}>🫁</Text>
                   <Text style={s.groundingTitle}>4-7-8 Breathing</Text>
                   <Text style={s.groundingDesc}>Calm your nervous system</Text>
@@ -570,12 +591,16 @@ export default function ReflectionScreen() {
                     s.groundingBtn,
                     {
                       overflow: "hidden",
-                      backgroundColor: hexToRgba(Colors.primary, 0.08),
-                      borderColor: hexToRgba(Colors.primary, 0.15),
+                      borderWidth: 0,
+                      backgroundColor: 'transparent',
                     },
                   ]}
                 >
-                  <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+                  <GlassLayers 
+                    primaryColor={Colors.primary} 
+                    tintColor={tintColor}
+                    borderRadius={24} 
+                  />
                   <Text style={s.groundingEmoji}>🌿</Text>
                   <Text style={s.groundingTitle}>5-4-3-2-1 Senses</Text>
                   <Text style={s.groundingDesc}>Return to the present</Text>

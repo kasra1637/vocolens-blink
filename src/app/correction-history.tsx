@@ -15,7 +15,7 @@ import { ScreenWrapper } from "@/components/ScreenWrapper";
 import { getStaggeredFadeIn } from "@/lib/animations";
 import { useEmotionCorrectionStore } from "@/lib/state/emotion-correction-store";
 import { getThemeColors, getThemeGradients } from "@/lib/theme";
-import useOnboardingStore from "@/lib/state/onboarding-store";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import useSettingsStore from "@/lib/state/settings-store";
 import { tapHaptic, successHaptic } from "@/lib/haptics";
 import { hexToRgba, GlassLayers } from "@/lib/glass";
@@ -27,6 +27,7 @@ export default function CorrectionHistoryScreen() {
   const isDarkMode = useSettingsStore((s) => s.isDarkMode);
   const Colors = getThemeColors(selectedTheme, isDarkMode);
   const Gradients = getThemeGradients(selectedTheme, isDarkMode);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   const {
     corrections,
@@ -146,15 +147,16 @@ export default function CorrectionHistoryScreen() {
               <View
                 style={{
                   flex: 1,
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
                   borderRadius: 20,
                   padding: 16,
-                  borderWidth: 1,
-                  borderColor: hexToRgba(Colors.primary, 0.15),
                   overflow: "hidden",
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={20} />
+                <GlassLayers
+                  primaryColor={Colors.primary}
+                  tintColor={tintColor}
+                  borderRadius={20}
+                />
                 <CheckCircle2 size={20} color="#22C55E" strokeWidth={2} />
                 <Text
                   style={{
@@ -182,15 +184,16 @@ export default function CorrectionHistoryScreen() {
               <View
                 style={{
                   flex: 1,
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
                   borderRadius: 20,
                   padding: 16,
-                  borderWidth: 1,
-                  borderColor: hexToRgba(Colors.primary, 0.15),
                   overflow: "hidden",
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={20} />
+                <GlassLayers
+                  primaryColor={Colors.primary}
+                  tintColor={tintColor}
+                  borderRadius={20}
+                />
                 <TrendingUp size={20} color={Colors.primary} strokeWidth={2} />
                 <Text
                   style={{
@@ -224,15 +227,16 @@ export default function CorrectionHistoryScreen() {
             >
               <View
                 style={{
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
                   borderRadius: 20,
                   padding: 20,
-                  borderWidth: 1,
-                  borderColor: hexToRgba(Colors.primary, 0.15),
                   overflow: "hidden",
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={20} />
+                <GlassLayers
+                  primaryColor={Colors.primary}
+                  tintColor={tintColor}
+                  borderRadius={20}
+                />
                 <Text
                   style={{
                     fontFamily: "Inter_600SemiBold",
@@ -330,17 +334,15 @@ export default function CorrectionHistoryScreen() {
                   <View
                     key={c.id}
                     style={{
-                      backgroundColor: hexToRgba(Colors.primary, 0.08),
                       borderRadius: 16,
                       padding: 16,
                       marginBottom: 10,
-                      borderWidth: 1,
-                      borderColor: hexToRgba(Colors.primary, 0.12),
                       overflow: "hidden",
                     }}
                   >
                     <GlassLayers
                       primaryColor={Colors.primary}
+                      tintColor={tintColor}
                       borderRadius={16}
                     />
                     <View
@@ -425,17 +427,18 @@ export default function CorrectionHistoryScreen() {
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: hexToRgba(Colors.primary, 0.12),
                   borderRadius: 16,
                   paddingVertical: 14,
-                  borderWidth: 1,
-                  borderColor: hexToRgba(Colors.primary, 0.2),
                   overflow: "hidden",
                   opacity: pressed ? 0.7 : 1,
                   transform: [{ scale: pressed ? 0.97 : 1 }],
                 })}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={16} />
+                <GlassLayers
+                  primaryColor={Colors.primary}
+                  tintColor={tintColor}
+                  borderRadius={16}
+                />
                 <Download size={16} color="#FFFFFF" />
                 <Text
                   style={{

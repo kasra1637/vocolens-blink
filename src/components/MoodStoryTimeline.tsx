@@ -38,6 +38,7 @@ import {
   Sparkles,
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import {
   JournalEntry,
   EMOTION_COLORS,
@@ -83,6 +84,9 @@ export function MoodStoryTimeline({
 }: MoodStoryTimelineProps) {
   const [activeTab, setActiveTab] = useState<TabId>("week");
 
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
+
   const handleTabPress = (id: TabId) => {
     tapHaptic();
     setActiveTab(id);
@@ -92,14 +96,19 @@ export function MoodStoryTimeline({
     <View
       className="mb-6"
       style={{
-        backgroundColor: hexToRgba(primaryColor, 0.1),
-        borderWidth: 1,
-        borderColor: hexToRgba(primaryColor, 0.15),
         borderRadius: 24,
         overflow: "hidden",
+        shadowColor: tintColor,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 16,
+        elevation: 4,
       }}
     >
-      <GlassLayers primaryColor={primaryColor} borderRadius={24} />
+      <GlassLayers 
+        primaryColor={primaryColor} 
+        tintColor={tintColor}
+        borderRadius={24} 
+      />
       {/* Header */}
       <View style={{ padding: 20, paddingBottom: 0 }}>
         <View className="flex-row items-center mb-4" style={{ gap: 8 }}>
@@ -937,6 +946,9 @@ function EmotionStoryCard({
   const SPARK_H = 36;
   const SPARK_W = 80;
 
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
+
   const validVals = sparkline.filter((v) => v !== null) as number[];
   const maxV = validVals.length > 0 ? Math.max(...validVals, 1) : 100;
 
@@ -959,11 +971,14 @@ function EmotionStoryCard({
       style={{
         padding: 16,
         borderRadius: 20,
-        backgroundColor: hexToRgba(primaryColor, 0.1),
-        borderWidth: 1,
-        borderColor: hexToRgba(primaryColor, 0.15),
+        overflow: "hidden",
+        shadowColor: tintColor,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 12,
+        elevation: 3,
       }}
     >
+      <GlassLayers primaryColor={primaryColor} tintColor={tintColor} borderRadius={20} />
       <View className="flex-row items-center justify-between">
         <View style={{ flex: 1 }}>
           {/* Label */}

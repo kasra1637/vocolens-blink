@@ -59,7 +59,7 @@ import {
   getThemeShadows,
 } from "@/lib/theme";
 import useJournalStore from "@/lib/state/journal-store";
-import useOnboardingStore from "@/lib/state/onboarding-store";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import useSettingsStore from "@/lib/state/settings-store";
 import { useDeleteEntry } from "@/lib/hooks";
 import { hexToRgba, GlassLayers } from "@/lib/glass";
@@ -118,6 +118,7 @@ export default function EntryDetailScreen() {
   const Colors = getThemeColors(selectedTheme, isDarkMode);
   const Gradients = getThemeGradients(selectedTheme, isDarkMode);
   const Shadows = getThemeShadows(selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   const getEntry = useJournalStore((s) => s.getEntry);
   const updateEntry = useJournalStore((s) => s.updateEntry);
@@ -429,13 +430,18 @@ export default function EntryDetailScreen() {
             <View
               className="rounded-3xl overflow-hidden mb-6"
               style={{
-                backgroundColor: hexToRgba(Colors.primary, 0.1),
-                borderWidth: 1,
-                borderColor: hexToRgba(Colors.primary, 0.15),
                 overflow: "hidden",
+                shadowColor: tintColor,
+                shadowOffset: { width: 0, height: 8 },
+                shadowRadius: 20,
+                elevation: 4,
               }}
             >
-              <GlassLayers primaryColor={Colors.primary} borderRadius={20} />
+              <GlassLayers 
+                primaryColor={Colors.primary} 
+                tintColor={tintColor}
+                borderRadius={20} 
+              />
               <View className="p-5">
                 <View className="flex-row items-center justify-between mb-4">
                   <View className="flex-row items-center">
@@ -829,13 +835,18 @@ export default function EntryDetailScreen() {
               onPress={() => toggleSection("analysis")}
               className="rounded-3xl overflow-hidden mb-6"
               style={{
-                backgroundColor: hexToRgba(Colors.primary, 0.1),
-                borderWidth: 1,
-                borderColor: hexToRgba(Colors.primary, 0.15),
                 overflow: "hidden",
+                shadowColor: tintColor,
+                shadowOffset: { width: 0, height: 4 },
+                shadowRadius: 12,
+                elevation: 3,
               }}
             >
-              <GlassLayers primaryColor={Colors.primary} borderRadius={20} />
+              <GlassLayers 
+                primaryColor={Colors.primary} 
+                tintColor={tintColor}
+                borderRadius={20} 
+              />
               <View className="p-5">
                 <View className="flex-row items-center justify-between mb-3">
                   <View className="flex-row items-center">
@@ -903,13 +914,18 @@ export default function EntryDetailScreen() {
               <View
                 className="rounded-3xl overflow-hidden mb-6"
                 style={{
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderWidth: 1,
-                  borderColor: hexToRgba(Colors.primary, 0.15),
                   overflow: "hidden",
+                  shadowColor: tintColor,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowRadius: 12,
+                  elevation: 3,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={20} />
+                <GlassLayers 
+                  primaryColor={Colors.primary} 
+                  tintColor={tintColor}
+                  borderRadius={20} 
+                />
                 <View className="p-5">
                   <View className="flex-row items-center mb-3">
                     <Target size={18} color="#FFFFFF" strokeWidth={2} />
@@ -966,7 +982,11 @@ export default function EntryDetailScreen() {
             entering={FadeIn.duration(200)}
             className="rounded-3xl overflow-hidden w-full max-w-sm"
           >
-            <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+            <GlassLayers 
+              primaryColor={Colors.primary} 
+              tintColor={tintColor}
+              borderRadius={24} 
+            />
             <LinearGradient
               colors={Gradients.background}
               start={{ x: 0, y: 0 }}

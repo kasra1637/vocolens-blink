@@ -36,7 +36,7 @@ import useBadgesStore from "@/lib/state/badges-store";
 import { useAuthStore } from "@/lib/state/auth-store";
 import { removePin } from "@/lib/auth-service";
 import { PinEntryModal } from "@/components/PinEntryModal";
-import useOnboardingStore from "@/lib/state/onboarding-store";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import useSettingsStore from "@/lib/state/settings-store";
 import { getThemeColors, getThemeGradients, BorderRadius } from "@/lib/theme";
 import { hexToRgba, GlassLayers } from "@/lib/glass";
@@ -54,6 +54,7 @@ export default function PrivacySettingsScreen() {
   const isDarkMode = useSettingsStore((s) => s.isDarkMode);
   const themeColors = getThemeColors(selectedTheme, isDarkMode);
   const themeGradients = getThemeGradients(selectedTheme, isDarkMode);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   const clearAllEntries = useJournalStore((s) => s.clearAllEntries);
   const entries = useJournalStore((s) => s.entries);
@@ -228,15 +229,13 @@ export default function PrivacySettingsScreen() {
             >
             <View
               style={{
-                backgroundColor: hexToRgba(themeColors.primary, 0.1),
-                borderWidth: 1,
-                borderColor: hexToRgba(themeColors.primary, 0.15),
                 borderRadius: BorderRadius.xlarge,
                 overflow: "hidden",
               }}
             >
               <GlassLayers
                 primaryColor={themeColors.primary}
+                tintColor={tintColor}
                 borderRadius={BorderRadius.xlarge}
               />
               <View className="p-5">
@@ -311,15 +310,13 @@ export default function PrivacySettingsScreen() {
           >
             <View
               style={{
-                backgroundColor: hexToRgba(themeColors.primary, 0.1),
-                borderWidth: 1,
-                borderColor: hexToRgba(themeColors.primary, 0.15),
                 borderRadius: BorderRadius.xlarge,
                 overflow: "hidden",
               }}
             >
               <GlassLayers
                 primaryColor={themeColors.primary}
+                tintColor={tintColor}
                 borderRadius={BorderRadius.xlarge}
               />
               <View className="p-5">
@@ -391,15 +388,13 @@ export default function PrivacySettingsScreen() {
           <Animated.View entering={getStaggeredFadeIn(3)}>
             <View
               style={{
-                backgroundColor: hexToRgba(themeColors.primary, 0.1),
-                borderWidth: 1,
-                borderColor: hexToRgba(themeColors.primary, 0.15),
                 borderRadius: BorderRadius.xlarge,
                 overflow: "hidden",
               }}
             >
               <GlassLayers
                 primaryColor={themeColors.primary}
+                tintColor={tintColor}
                 borderRadius={BorderRadius.xlarge}
               />
               <View className="p-5">

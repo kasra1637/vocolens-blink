@@ -37,6 +37,7 @@ export default function LanguagePickerModal() {
   const isDarkMode = useSettingsStore((s) => s.isDarkMode);
   const theme = THEME_COLORS[selectedTheme];
   const primaryColor = theme.primary;
+  const tintColor = theme.backgroundGradient[2];
   const selectedLanguage = useOnboardingStore(
     (s) => s.selectedTranscriptionLanguage,
   );
@@ -142,17 +143,18 @@ export default function LanguagePickerModal() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                backgroundColor: hexToRgba(primaryColor, 0.1),
                 borderRadius: 14,
                 paddingHorizontal: 14,
                 paddingVertical: 10,
-                borderWidth: 1,
-                borderColor: hexToRgba(primaryColor, 0.15),
                 marginBottom: 16,
                 overflow: "hidden",
               }}
             >
-              <GlassLayers primaryColor={primaryColor} borderRadius={14} />
+              <GlassLayers
+                primaryColor={primaryColor}
+                tintColor={tintColor}
+                borderRadius={14}
+              />
               <Search size={15} color="rgba(255,255,255,0.55)" />
               <TextInput
                 value={query}
@@ -186,15 +188,22 @@ export default function LanguagePickerModal() {
                   key={lang.code}
                   onPress={() => handleSelect(lang.code)}
                   style={({ pressed }) => ({
-                    backgroundColor: isSelected ? selectedBg : surfaceBg,
                     borderRadius: 14,
                     marginBottom: 8,
-                    borderWidth: 1.5,
-                    borderColor: isSelected ? borderSel : "transparent",
+                    overflow: "hidden",
                     opacity: pressed ? 0.75 : 1,
                     transform: [{ scale: pressed ? 0.97 : 1 }],
+                    // Use a slightly thicker border for selected state
+                    borderWidth: isSelected ? 1.5 : 0,
+                    borderColor: isSelected ? borderSel : "transparent",
                   })}
                 >
+                  <GlassLayers
+                    primaryColor={primaryColor}
+                    tintColor={tintColor}
+                    borderRadius={14}
+                    blurIntensity={isSelected ? 95 : 80}
+                  />
                   <View
                     style={{
                       flexDirection: "row",

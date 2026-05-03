@@ -58,7 +58,7 @@ import GroundingToolsModal from "@/components/GroundingToolsModal";
 import { analyzeTranscript } from "@/lib/journal-service";
 import { buildPersonalizationPrompt } from "@/lib/personalization";
 import useReflectionStore from "@/lib/state/reflection-store";
-import useOnboardingStore from "@/lib/state/onboarding-store";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import useSettingsStore from "@/lib/state/settings-store";
 import {
   useUsageMinutes,
@@ -193,6 +193,7 @@ export default function SpeakScreen() {
   const Colors = getThemeColors(selectedTheme, isDarkMode);
   const Gradients = getThemeGradients(selectedTheme, isDarkMode);
   const Shadows = getThemeShadows(selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   // Usage limit tracking
   const usageMinutes = useUsageMinutes();
@@ -695,17 +696,18 @@ export default function SpeakScreen() {
             <View
               className="rounded-3xl p-4"
               style={{
-                backgroundColor: isAtLimit
-                  ? "rgba(255, 60, 60, 0.18)"
-                  : "rgba(255, 185, 50, 0.15)",
-                borderWidth: 1,
-                borderColor: isAtLimit
-                  ? "rgba(255, 100, 100, 0.45)"
-                  : "rgba(255, 210, 80, 0.4)",
                 overflow: "hidden",
+                shadowColor: isAtLimit ? "#FF5050" : tintColor,
+                shadowOffset: { width: 0, height: 4 },
+                shadowRadius: 12,
+                elevation: 3,
               }}
             >
-              <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+              <GlassLayers 
+                primaryColor={Colors.primary} 
+                tintColor={tintColor}
+                borderRadius={24} 
+              />
               <View className="flex-row items-start">
                 <Text style={{ fontSize: 18, marginRight: 10 }}>
                   {isAtLimit ? "🔒" : "⚠️"}
@@ -819,13 +821,18 @@ export default function SpeakScreen() {
             <View
               className="rounded-3xl overflow-hidden"
               style={{
-                backgroundColor: hexToRgba(Colors.primary, 0.1),
-                borderWidth: 1,
-                borderColor: hexToRgba(Colors.primary, 0.15),
-                ...Shadows.medium,
+                overflow: "hidden",
+                shadowColor: tintColor,
+                shadowOffset: { width: 0, height: 4 },
+                shadowRadius: 12,
+                elevation: 3,
               }}
             >
-              <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+              <GlassLayers 
+                primaryColor={Colors.primary} 
+                tintColor={tintColor}
+                borderRadius={24} 
+              />
               <View className="p-4">
                 {/* Topic Selector */}
                 <View className="flex-row items-center justify-between mb-3">
@@ -871,14 +878,10 @@ export default function SpeakScreen() {
                   <Animated.View
                     exiting={FadeOut.duration(200)}
                     className="mb-3 rounded-2xl overflow-hidden"
-                    style={{
-                      backgroundColor: hexToRgba(Colors.primary, 0.1),
-                      borderWidth: 1,
-                      borderColor: hexToRgba(Colors.primary, 0.15),
-                    }}
                   >
                     <GlassLayers
                       primaryColor={Colors.primary}
+                      tintColor={tintColor}
                       borderRadius={16}
                     />
                     {(Object.keys(TOPIC_LABELS) as TopicCategory[]).map(
@@ -950,11 +953,18 @@ export default function SpeakScreen() {
             exiting={FadeOut.duration(300)}
             className="w-full rounded-3xl overflow-hidden"
             style={{
-              backgroundColor: "transparent",
-              ...Shadows.medium,
+              shadowColor: tintColor,
+              shadowOffset: { width: 0, height: 4 },
+              shadowRadius: 12,
+              elevation: 3,
               maxHeight: 220,
             }}
           >
+            <GlassLayers 
+              primaryColor={Colors.primary} 
+              tintColor={tintColor}
+              borderRadius={24} 
+            />
             <ScrollView
               className="p-5"
               showsVerticalScrollIndicator={false}

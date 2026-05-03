@@ -115,6 +115,7 @@ export default function EntriesScreen() {
   const Colors = getThemeColors(selectedTheme, isDarkMode);
   const Gradients = getThemeGradients(selectedTheme, isDarkMode);
   const Shadows = getThemeShadows(selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   // Get entries from store
   const entries = useJournalStore((s) => s.entries);
@@ -287,12 +288,14 @@ export default function EntriesScreen() {
           <View
             className="rounded-3xl overflow-hidden mb-6"
             style={{
-              backgroundColor: hexToRgba(Colors.primary, 0.1),
-              borderWidth: 1,
-              borderColor: hexToRgba(Colors.primary, 0.15),
+              overflow: "hidden",
             }}
           >
-            <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+            <GlassLayers 
+              primaryColor={Colors.primary} 
+              tintColor={tintColor}
+              borderRadius={24} 
+            />
             <View className="p-4">
               {/* Section Header */}
               <View className="flex-row items-center mb-3">
@@ -378,14 +381,10 @@ export default function EntriesScreen() {
                 <Animated.View
                   exiting={FadeOut.duration(200)}
                   className="mt-2 rounded-2xl overflow-hidden"
-                  style={{
-                    backgroundColor: hexToRgba(Colors.primary, 0.1),
-                    borderWidth: 1,
-                    borderColor: hexToRgba(Colors.primary, 0.15),
-                  }}
                 >
                   <GlassLayers
                     primaryColor={Colors.primary}
+                    tintColor={tintColor}
                     borderRadius={16}
                   />
                   {SORT_OPTIONS.map((sort) => (
@@ -425,14 +424,10 @@ export default function EntriesScreen() {
                 <Animated.View
                   exiting={FadeOut.duration(200)}
                   className="mt-2 rounded-2xl overflow-hidden"
-                  style={{
-                    backgroundColor: hexToRgba(Colors.primary, 0.1),
-                    borderWidth: 1,
-                    borderColor: hexToRgba(Colors.primary, 0.15),
-                  }}
                 >
                   <GlassLayers
                     primaryColor={Colors.primary}
+                    tintColor={tintColor}
                     borderRadius={16}
                   />
                   <View
@@ -483,6 +478,7 @@ export default function EntriesScreen() {
               onDelete={() => handleDeleteRequest(entry.id)}
               surfaceElevatedColor={Colors.surfaceElevated}
               primaryColor={Colors.primary}
+              tintColor={tintColor}
               isDarkMode={isDarkMode}
             />
           </Animated.View>
@@ -524,7 +520,11 @@ export default function EntriesScreen() {
             entering={FadeIn.duration(200)}
             className="rounded-3xl overflow-hidden w-full max-w-sm"
           >
-            <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+            <GlassLayers 
+              primaryColor={Colors.primary} 
+              tintColor={tintColor}
+              borderRadius={24} 
+            />
             <LinearGradient
               colors={Gradients.background}
               start={{ x: 0, y: 0 }}
@@ -618,6 +618,7 @@ interface EntryCardProps {
   onDelete: () => void;
   surfaceElevatedColor: string;
   primaryColor: string;
+  tintColor: string;
   isDarkMode?: boolean;
 }
 
@@ -627,6 +628,7 @@ function EntryCard({
   onDelete,
   surfaceElevatedColor,
   primaryColor,
+  tintColor,
   isDarkMode = false,
 }: EntryCardProps) {
   const scale = useSharedValue(1);
@@ -652,21 +654,23 @@ function EntryCard({
       <Animated.View
         style={[
           {
-            backgroundColor: hexToRgba(primaryColor, 0.1),
-            borderWidth: 1,
-            borderColor: hexToRgba(primaryColor, 0.15),
             borderRadius: 24,
             marginBottom: 16,
-            shadowColor: primaryColor,
+            shadowColor: tintColor,
             shadowOffset: { width: 0, height: 8 },
             shadowRadius: 20,
             elevation: Platform.OS === "android" ? 0 : 6,
+            overflow: "hidden",
           },
           animatedStyle,
         ]}
       >
 
-        <GlassLayers primaryColor={primaryColor} borderRadius={24} />
+        <GlassLayers 
+          primaryColor={primaryColor} 
+          tintColor={tintColor}
+          borderRadius={24} 
+        />
         <View className="p-5">
           {/* Header */}
           <View className="flex-row items-start justify-between mb-2">

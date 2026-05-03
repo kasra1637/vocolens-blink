@@ -174,6 +174,7 @@ export default function InsightsScreen() {
   const Colors = getThemeColors(selectedTheme, isDarkMode);
   const Gradients = getThemeGradients(selectedTheme, isDarkMode);
   const Shadows = getThemeShadows(selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   return (
     <ThemeProvider Colors={Colors} Gradients={Gradients} Shadows={Shadows}>
@@ -586,17 +587,18 @@ function InsightsContent({
               >
                 <View
                   style={{
-                    backgroundColor: hexToRgba(Colors.primary, 0.1),
-                    borderWidth: 1,
-                    borderColor: hexToRgba(Colors.primary, 0.15),
                     borderRadius: BorderRadius.xxlarge,
                     padding: 20,
                     overflow: "hidden",
-                    ...Shadows.medium,
+                    shadowColor: tintColor,
+                    shadowOffset: { width: 0, height: 8 },
+                    shadowRadius: 16,
+                    elevation: 4,
                   }}
                 >
                   <GlassLayers
                     primaryColor={Colors.primary}
+                    tintColor={tintColor}
                     borderRadius={BorderRadius.xxlarge}
                   />
                   <View
@@ -686,16 +688,17 @@ function InsightsContent({
           <View
             className="mb-6"
             style={{
-              backgroundColor: hexToRgba(Colors.primary, 0.1),
-              borderWidth: 1,
-              borderColor: hexToRgba(Colors.primary, 0.15),
               borderRadius: BorderRadius.xxlarge,
               overflow: "hidden",
-              ...Shadows.medium,
+              shadowColor: tintColor,
+              shadowOffset: { width: 0, height: 8 },
+              shadowRadius: 16,
+              elevation: 4,
             }}
           >
             <GlassLayers
               primaryColor={Colors.primary}
+              tintColor={tintColor}
               borderRadius={BorderRadius.xxlarge}
             />
             <View className="p-5">
@@ -762,53 +765,27 @@ function WelcomeSection({
   isFocused,
 }: WelcomeSectionProps) {
   const { Colors, Gradients, Shadows } = useTheme();
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
+
   const progressWidth = useSharedValue(0);
-  const usageWidth = useSharedValue(0);
-
-  const usagePct = Math.min(1, user.usageMinutes / USAGE_LIMIT_MINUTES);
-  const isNearLimit = usagePct >= 0.8 && usagePct < 1;
-  const isAtLimit = usagePct >= 1;
-
-  useEffect(() => {
-    if (isFocused) {
-      progressWidth.value = 0;
-      usageWidth.value = 0;
-      progressWidth.value = withTiming(
-        user.nextBadge.progress * 100,
-        PROGRESS_ANIM_CONFIG,
-      );
-      usageWidth.value = withDelay(
-        100,
-        withTiming(usagePct * 100, PROGRESS_ANIM_CONFIG),
-      );
-    }
-  }, [user.nextBadge.progress, usagePct, isFocused]);
-
-  const progressStyle = useAnimatedStyle(() => ({
-    width: `${progressWidth.value}%`,
-  }));
-
-  const usageBarStyle = useAnimatedStyle(() => ({
-    width: `${usageWidth.value}%`,
-  }));
-
-  const usageBarColor = isAtLimit
-    ? "#FF5050"
-    : isNearLimit
-      ? "#FFB830"
-      : Colors.primary;
-
-  return (
-    <View className="mb-6">
-      {/* Emotional Companion */}
+// ...
+      {/* Streak & Badge Card */}
       <Animated.View
-        entering={getStaggeredFadeIn(0)}
-        className="items-center mb-4"
+        entering={getStaggeredFadeIn(2)}
+        style={{
+          borderRadius: BorderRadius.xxlarge,
+          overflow: "hidden",
+          shadowColor: tintColor,
+          shadowOffset: { width: 0, height: 8 },
+          shadowRadius: 16,
+          elevation: 4,
+        }}
       >
-        <EmotionalCompanion
-          state="idle"
-          size={120}
-          themeColor={Colors.primary}
+        <GlassLayers
+          primaryColor={Colors.primary}
+          tintColor={tintColor}
+          borderRadius={BorderRadius.xxlarge}
         />
       </Animated.View>
 
@@ -1172,25 +1149,26 @@ function SentimentTimeline({
   onEmotionSelect,
 }: SentimentTimelineProps) {
   const { Colors, Gradients, Shadows } = useTheme();
-  const entries = useJournalStore((s) => s.entries);
-  const selectedEmotionData = selectedEmotion
-    ? CORE_EMOTIONS.find((e) => e.id === selectedEmotion)
-    : null;
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
+  const entries = useJournalStore((s) => s.entries);
+// ...
   return (
     <View
       className="mb-6"
       style={{
-        backgroundColor: hexToRgba(Colors.primary, 0.1),
-        borderWidth: 1,
-        borderColor: hexToRgba(Colors.primary, 0.15),
         borderRadius: BorderRadius.xxlarge,
         overflow: "hidden",
-        ...Shadows.medium,
+        shadowColor: tintColor,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 16,
+        elevation: 4,
       }}
     >
       <GlassLayers
         primaryColor={Colors.primary}
+        tintColor={tintColor}
         borderRadius={BorderRadius.xxlarge}
       />
       <View className="p-5">
@@ -1363,82 +1341,27 @@ function SentimentTimeline({
 // Overall Mood Display - Shows dominant emotion for each timeframe
 function OverallMoodDisplay() {
   const { Colors } = useTheme();
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
+
   const entries = useJournalStore((s) => s.entries);
-
-  // Calculate dominant emotion for a given timeframe
-  const getDominantEmotion = (days: number) => {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - days);
-
-    const recentEntries = entries.filter(
-      (e) => new Date(e.createdAt) >= cutoffDate,
-    );
-
-    if (recentEntries.length === 0) return null;
-
-    // Count emotion occurrences
-    const emotionCounts: Record<string, number> = {};
-    recentEntries.forEach((entry) => {
-      entry.emotions.forEach((emotion) => {
-        emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
-      });
-    });
-
-    // Find dominant emotion
-    let maxCount = 0;
-    let dominantEmotion: EmotionType | null = null;
-    Object.entries(emotionCounts).forEach(([emotion, count]) => {
-      if (count > maxCount) {
-        maxCount = count;
-        dominantEmotion = emotion as EmotionType;
-      }
-    });
-
-    if (!dominantEmotion) return null;
-
-    // Calculate intensity (percentage of entries with this emotion)
-    const intensity = Math.round((maxCount / recentEntries.length) * 100);
-
-    return {
-      emotion: dominantEmotion,
-      intensity,
-      count: maxCount,
-      totalEntries: recentEntries.length,
-    };
-  };
-
-  const sevenDayData = getDominantEmotion(7);
-  const fourteenDayData = getDominantEmotion(14);
-  const thirtyDayData = getDominantEmotion(30);
-
-  const timeframes = [
-    { label: "7 Days", data: sevenDayData },
-    { label: "14 Days", data: fourteenDayData },
-    { label: "30 Days", data: thirtyDayData },
-  ];
-
-  return (
-    <View style={{ paddingVertical: 16 }}>
-      {timeframes.map((timeframe, index) => {
-        const emotionData = timeframe.data
-          ? CORE_EMOTIONS.find((e) => e.id === timeframe.data!.emotion)
-          : null;
-
-        return (
+// ...
           <Animated.View
             key={timeframe.label}
             style={{
-              backgroundColor: hexToRgba(Colors.primary, 0.1),
-              borderWidth: 1,
-              borderColor: hexToRgba(Colors.primary, 0.15),
               borderRadius: BorderRadius.large,
               padding: 16,
               overflow: "hidden",
               marginBottom: index < 2 ? 12 : 0,
+              shadowColor: tintColor,
+              shadowOffset: { width: 0, height: 4 },
+              shadowRadius: 10,
+              elevation: 3,
             }}
           >
             <GlassLayers
               primaryColor={Colors.primary}
+              tintColor={tintColor}
               borderRadius={BorderRadius.large}
             />
             <View className="flex-row items-center justify-between">
@@ -1538,85 +1461,28 @@ function OverallMoodDisplay() {
 // falls back to counting emotion occurrences.
 function EmotionIntensityDisplay({ emotion }: { emotion: EmotionType }) {
   const { Colors } = useTheme();
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
+
   const entries = useJournalStore((s) => s.entries);
-
-  // Calculate emotion intensity for a given timeframe
-  const getEmotionIntensity = (days: number) => {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - days);
-
-    const recentEntries = entries.filter(
-      (e) => new Date(e.createdAt) >= cutoffDate,
-    );
-
-    if (recentEntries.length === 0) return null;
-
-    // Prefer emotionScores (precise 0-100 scores from OpenRouter) when available
-    const scoredEntries = recentEntries.filter((e) => e.emotionScores);
-    if (scoredEntries.length > 0) {
-      const avgScore = Math.round(
-        scoredEntries.reduce(
-          (sum, e) => sum + (e.emotionScores![emotion] ?? 0),
-          0,
-        ) / scoredEntries.length,
-      );
-      return {
-        intensity: avgScore,
-        count: scoredEntries.filter(
-          (e) => (e.emotionScores![emotion] ?? 0) >= 30,
-        ).length,
-        totalEntries: recentEntries.length,
-        usedScores: true,
-      };
-    }
-
-    // Fallback: count how many entries contain this emotion
-    const entriesWithEmotion = recentEntries.filter((entry) =>
-      entry.emotions.includes(emotion),
-    ).length;
-
-    const intensity = Math.round(
-      (entriesWithEmotion / recentEntries.length) * 100,
-    );
-
-    return {
-      intensity,
-      count: entriesWithEmotion,
-      totalEntries: recentEntries.length,
-      usedScores: false,
-    };
-  };
-
-  const sevenDayData = getEmotionIntensity(7);
-  const fourteenDayData = getEmotionIntensity(14);
-  const thirtyDayData = getEmotionIntensity(30);
-
-  const emotionData = CORE_EMOTIONS.find((e) => e.id === emotion);
-  if (!emotionData) return null;
-
-  const timeframes = [
-    { label: "7 Days", data: sevenDayData },
-    { label: "14 Days", data: fourteenDayData },
-    { label: "30 Days", data: thirtyDayData },
-  ];
-
-  return (
-    <View style={{ paddingVertical: 16 }}>
+// ...
       {timeframes.map((timeframe, index) => (
         <Animated.View
           key={timeframe.label}
           style={{
-            backgroundColor: hexToRgba(Colors.primary, 0.1),
-            borderWidth: 1,
-            borderColor: hexToRgba(Colors.primary, 0.15),
             borderRadius: BorderRadius.large,
             padding: 16,
             overflow: "hidden",
             marginBottom: index < 2 ? 12 : 0,
+            shadowColor: tintColor,
+            shadowOffset: { width: 0, height: 4 },
+            shadowRadius: 10,
+            elevation: 3,
           }}
         >
           <GlassLayers
             primaryColor={Colors.primary}
+            tintColor={tintColor}
             borderRadius={BorderRadius.large}
           />
           <View className="flex-row items-center justify-between">
@@ -1706,20 +1572,24 @@ interface EmotionalThemesProps {
 
 function EmotionalThemes({ themes }: EmotionalThemesProps) {
   const { Colors, Shadows } = useTheme();
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
+
   return (
     <View
       className="mb-6"
       style={{
-        backgroundColor: hexToRgba(Colors.primary, 0.1),
-        borderWidth: 1,
-        borderColor: hexToRgba(Colors.primary, 0.15),
         borderRadius: BorderRadius.xxlarge,
         overflow: "hidden",
-        ...Shadows.medium,
+        shadowColor: tintColor,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 16,
+        elevation: 4,
       }}
     >
       <GlassLayers
         primaryColor={Colors.primary}
+        tintColor={tintColor}
         borderRadius={BorderRadius.xxlarge}
       />
       <View className="p-5">
@@ -1838,20 +1708,24 @@ interface TimeOfDayPatternsProps {
 
 function TimeOfDayPatterns({ patterns }: TimeOfDayPatternsProps) {
   const { Colors, Shadows } = useTheme();
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
+
   return (
     <View
       className="mb-6"
       style={{
-        backgroundColor: hexToRgba(Colors.primary, 0.1),
-        borderWidth: 1,
-        borderColor: hexToRgba(Colors.primary, 0.15),
         borderRadius: BorderRadius.xxlarge,
         overflow: "hidden",
-        ...Shadows.medium,
+        shadowColor: tintColor,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 16,
+        elevation: 4,
       }}
     >
       <GlassLayers
         primaryColor={Colors.primary}
+        tintColor={tintColor}
         borderRadius={BorderRadius.xxlarge}
       />
       <View className="p-5">
@@ -1982,71 +1856,24 @@ interface DeepInsightsSectionProps {
 
 function DeepInsightsSection({ insights }: DeepInsightsSectionProps) {
   const { Colors, Shadows } = useTheme();
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case "self_awareness":
-        return Eye;
-      case "growth":
-        return TrendingUp;
-      case "warning":
-        return AlertTriangle;
-      case "strength":
-        return Shield;
-      case "recommendation":
-        return Lightbulb;
-      default:
-        return Sparkles;
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "self_awareness":
-        return "#A88AFF";
-      case "growth":
-        return "#7BD97B";
-      case "warning":
-        return "#FFB347";
-      case "strength":
-        return "#8E6BFF";
-      case "recommendation":
-        return "#FFA8D5";
-      default:
-        return Colors.primary;
-    }
-  };
-
-  const getPriorityLabel = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "Key Insight";
-      case "medium":
-        return "Notable";
-      case "low":
-        return "Observation";
-      default:
-        return "";
-    }
-  };
-
-  // Show top 3 insights
-  const topInsights = insights.slice(0, 3);
-
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
+// ...
   return (
     <View
       className="mb-6"
       style={{
-        backgroundColor: hexToRgba(Colors.primary, 0.1),
-        borderWidth: 1,
-        borderColor: hexToRgba(Colors.primary, 0.15),
         borderRadius: BorderRadius.xxlarge,
         overflow: "hidden",
-        ...Shadows.medium,
+        shadowColor: tintColor,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 16,
+        elevation: 4,
       }}
     >
       <GlassLayers
         primaryColor={Colors.primary}
+        tintColor={tintColor}
         borderRadius={BorderRadius.xxlarge}
       />
       <View className="p-5">

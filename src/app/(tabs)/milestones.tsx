@@ -69,7 +69,7 @@ import {
 } from "@/lib/theme";
 import useBadgesStore from "@/lib/state/badges-store";
 import useUserStatsStore from "@/lib/state/user-stats-store";
-import useOnboardingStore from "@/lib/state/onboarding-store";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import useSettingsStore from "@/lib/state/settings-store";
 import { Badge, BadgeCategory, BadgeRarity } from "@/lib/types";
 import { hexToRgba, GlassLayers } from "@/lib/glass";
@@ -360,20 +360,25 @@ function StatsOverview({ stats, isDarkMode = false }: StatsOverviewProps) {
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
   const darkMode = useSettingsStore((s) => s.isDarkMode);
   const Colors = getThemeColors(selectedTheme, darkMode);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   return (
     <View
       className="mb-6"
       style={{
-        backgroundColor: hexToRgba(Colors.primary, 0.1),
-        borderWidth: 1,
-        borderColor: hexToRgba(Colors.primary, 0.15),
         borderRadius: BorderRadius.xxlarge,
         overflow: "hidden",
-        ...StaticShadows.medium,
+        shadowColor: tintColor,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 20,
+        elevation: Platform.OS === "android" ? 0 : 6,
       }}
     >
-      <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+      <GlassLayers 
+        primaryColor={Colors.primary} 
+        tintColor={tintColor}
+        borderRadius={24} 
+      />
       <View className="p-5">
         <View className="flex-row justify-between">
           <StatItem
@@ -479,25 +484,30 @@ function CategoryDropdown({
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
   const darkMode = useSettingsStore((s) => s.isDarkMode);
   const Colors = getThemeColors(selectedTheme, darkMode);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   return (
     <View style={{ position: "relative", zIndex: 100 }}>
       <Pressable
         onPress={onToggle}
         style={{
-          backgroundColor: hexToRgba(Colors.primary, 0.1),
-          borderWidth: 1,
-          borderColor: hexToRgba(Colors.primary, 0.15),
           borderRadius: BorderRadius.large,
           padding: 14,
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
           overflow: "hidden",
-          ...StaticShadows.small,
+          shadowColor: tintColor,
+          shadowOffset: { width: 0, height: 4 },
+          shadowRadius: 8,
+          elevation: Platform.OS === "android" ? 0 : 4,
         }}
       >
-        <GlassLayers primaryColor={Colors.primary} borderRadius={16} />
+        <GlassLayers 
+          primaryColor={Colors.primary} 
+          tintColor={tintColor}
+          borderRadius={16} 
+        />
         <View className="flex-row items-center">
           <Icon size={20} color="#FFFFFF" strokeWidth={2} />
           <Text
@@ -520,13 +530,17 @@ function CategoryDropdown({
           exiting={FadeOut.duration(200)}
           className="mt-2 rounded-2xl overflow-hidden"
           style={{
-            backgroundColor: hexToRgba(Colors.primary, 0.1),
-            borderWidth: 1,
-            borderColor: hexToRgba(Colors.primary, 0.15),
-            ...StaticShadows.small,
+            shadowColor: tintColor,
+            shadowOffset: { width: 0, height: 4 },
+            shadowRadius: 8,
+            elevation: Platform.OS === "android" ? 0 : 4,
           }}
         >
-          <GlassLayers primaryColor={Colors.primary} borderRadius={16} />
+          <GlassLayers 
+            primaryColor={Colors.primary} 
+            tintColor={tintColor}
+            borderRadius={16} 
+          />
           {options.map((option) => {
             const OptionIcon = option.icon;
             const isSelected = option.value === selectedOption.value;
@@ -582,6 +596,7 @@ function BadgeCard({ badge, index, onPress }: BadgeCardProps) {
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
   const isDarkMode = useSettingsStore((s) => s.isDarkMode);
   const Colors = getThemeColors(selectedTheme, isDarkMode);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -590,17 +605,21 @@ function BadgeCard({ badge, index, onPress }: BadgeCardProps) {
   }));
 
   const handlePressIn = () => {
-    scale.value = withTiming(BUTTON_PRESS_SCALE, { duration: 0 });
+    scale.value = withTiming(0.97, { duration: 0 });
     glow.value = withTiming(1, { duration: 50 });
   };
 
   const handlePressOut = () => {
-    scale.value = withTiming(1, { duration: BUTTON_RELEASE_DURATION });
-    glow.value = withTiming(0, { duration: BUTTON_RELEASE_DURATION });
+    scale.value = withTiming(1, { duration: 150 });
+    glow.value = withTiming(0, { duration: 150 });
   };
 
   const formatUnlockDate = (dateString?: string) => {
-// ...
+    if (!dateString) return "";
+    const d = new Date(dateString);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
+
   return (
     <Animated.View 
       entering={getStaggeredFadeIn(3 + index)}
@@ -613,39 +632,20 @@ function BadgeCard({ badge, index, onPress }: BadgeCardProps) {
       >
         <View
           style={{
-            backgroundColor: hexToRgba(Colors.primary, 0.1),
-            borderWidth: 1,
-            borderColor: hexToRgba(Colors.primary, 0.15),
             borderRadius: BorderRadius.xlarge,
             padding: 16,
-            opacity: 1,
             overflow: "hidden",
-            shadowColor: Colors.primary,
+            shadowColor: tintColor,
             shadowOffset: { width: 0, height: 8 },
             shadowRadius: 20,
             elevation: Platform.OS === "android" ? 0 : 6,
           }}
         >
-
-
-      <Pressable
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-      >
-        <View
-          style={{
-            backgroundColor: hexToRgba(Colors.primary, 0.1),
-            borderWidth: 1,
-            borderColor: hexToRgba(Colors.primary, 0.15),
-            borderRadius: BorderRadius.xlarge,
-            padding: 16,
-            opacity: 1,
-            overflow: "hidden",
-            ...StaticShadows.medium,
-          }}
-        >
-          <GlassLayers primaryColor={Colors.primary} borderRadius={20} />
+          <GlassLayers 
+            primaryColor={Colors.primary} 
+            tintColor={tintColor}
+            borderRadius={20} 
+          />
           {/* Badge Icon */}
           <View className="items-center mb-3">
             <View
@@ -807,6 +807,7 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
   const isDarkMode = useSettingsStore((s) => s.isDarkMode);
   const Colors = getThemeColors(selectedTheme, isDarkMode);
+  const tintColor = THEME_COLORS[selectedTheme].backgroundGradient[2];
 
   React.useEffect(() => {
     // No glow animation needed for unlocked badges
@@ -845,18 +846,22 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
       >
         <Animated.View
           style={{
-            backgroundColor: hexToRgba(Colors.primary, 0.1),
             borderRadius: BorderRadius.xxlarge,
             padding: 28,
             width: "100%",
             maxWidth: 400,
-            borderWidth: 1,
-            borderColor: hexToRgba(Colors.primary, 0.15),
             overflow: "hidden",
-            ...StaticShadows.large,
+            shadowColor: tintColor,
+            shadowOffset: { width: 0, height: 12 },
+            shadowRadius: 24,
+            elevation: Platform.OS === "android" ? 0 : 8,
           }}
         >
-          <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+          <GlassLayers 
+            primaryColor={Colors.primary} 
+            tintColor={tintColor}
+            borderRadius={24} 
+          />
           {/* Close Button */}
           <Pressable
             onPress={onClose}
