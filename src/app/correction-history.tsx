@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ScrollView, Pressable, Share, Alert } from "react-native";
+import { View, Text, ScrollView, Pressable, Share, Alert, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -316,93 +316,138 @@ export default function CorrectionHistoryScreen() {
               </Text>
             </View>
           ) : (
-            corrections.slice(0, 20).map((c, i) => {
-              const isConfirmation =
-                c.aiEmotion === c.userEmotion && c.aiValence === c.userValence;
-              return (
-                <View
-                  key={c.id}
-                  style={{
-                    backgroundColor: hexToRgba(Colors.primary, 0.08),
-                    borderRadius: 16,
-                    padding: 16,
-                    marginBottom: 10,
-                    borderWidth: 1,
-                    borderColor: hexToRgba(Colors.primary, 0.12),
-                    overflow: "hidden",
-                  }}
-                >
-                  <GlassLayers
-                    primaryColor={Colors.primary}
-                    borderRadius={16}
-                  />
+            <View>
+              {corrections.slice(0, 20).map((c, i) => {
+                const isConfirmation =
+                  c.aiEmotion === c.userEmotion && c.aiValence === c.userValence;
+                return (
                   <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
+                    key={c.id}
+                    style={[
+                      styles.container,
+                      {
+                        backgroundColor: hexToRgba(Colors.primary, 0.08),
+                        borderColor: hexToRgba(Colors.primary, 0.12),
+                      },
+                    ]}
                   >
-                    <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      {isConfirmation ? (
-                        <CheckCircle2 size={14} color="#22C55E" />
-                      ) : (
-                        <RefreshCw size={14} color="#EAB308" />
-                      )}
-                      <Text
-                        style={{
-                          fontFamily: "Inter_600SemiBold",
-                          color: "#FFFFFF",
-                          fontSize: 13,
-                          marginLeft: 6,
-                          textTransform: "capitalize",
-                        }}
+                    <GlassLayers
+                      primaryColor={Colors.primary}
+                      borderRadius={16}
+                    />
+                    {/* Row 1: Status and Emotion */}
+                    <View style={styles.emotionPair}>
+                      {/* Confirmation Badge */}
+                      <View
+                        style={[
+                          styles.confirmationBadge,
+                          {
+                            backgroundColor:
+                              c.correctionMode === "user_accepted"
+                                ? hexToRgba(Colors.primary, 0.2)
+                                : hexToRgba(Colors.accent, 0.15),
+                          },
+                        ]}
                       >
-                        {isConfirmation ? "Confirmed" : "Adjusted"}{" "}
-                        {c.aiEmotion}
-                      </Text>
+                        {c.correctionMode === "user_accepted" ? (
+                          <CheckCircle2 size={14} color={Colors.primary} />
+                        ) : (
+                          <RefreshCw size={14} color={Colors.accent} />
+                        )}
+                      </View>
+                      {/* Row 2: Emotion Pair */}
+                      <View style={styles.emotionPair}>
+                        <View
+                          style={[
+                            styles.emotionBadge,
+                            {
+                              backgroundColor: hexToRgba(Colors.secondary, 0.15),
+                              borderColor: hexToRgba(Colors.secondary, 0.3),
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.emotionText,
+                              { color: Colors.secondary },
+                            ]}
+                          >
+                            {c.userEmotion}
+                          </Text>
+                        </View>
+                        <Text style={styles.arrow}>→</Text>
+                        <View
+                          style={[
+                            styles.emotionBadge,
+                            {
+                              backgroundColor: hexToRgba(Colors.primary, 0.15),
+                              borderColor: hexToRgba(Colors.primary, 0.3),
+                            },
+                          ]}
+                        >
+                          <Text
+                            style={[
+                              styles.emotionText,
+                              { color: Colors.primary },
+                            ]}
+                          >
+                            {c.aiEmotion}
+                          </Text>
+                        </View>
+                      </View>
+                      {/* Row 3: Delta */}
+                      <View style={styles.delta}>
+                        <Text style={styles.deltaLabel}>Valence: </Text>
+                        <Text
+                          style={[styles.deltaValue, { color: Colors.primary }]}
+                        >
+                          {c.userValence > c.aiValence ? "+" : ""}
+                          {(c.userValence - c.aiValence).toFixed(1)}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.deltaSeparator,
+                            { color: "rgba(255,255,255,0.4)" },
+                          ]}
+                        >
+                          {" "}•{" "}
+                        </Text>
+                        <Text style={styles.deltaLabel}>Arousal: </Text>
+                        <Text
+                          style={[styles.deltaValue, { color: Colors.accent }]}
+                        >
+                          {c.userArousal > c.aiArousal ? "+" : ""}
+                          {(c.userArousal - c.aiArousal).toFixed(1)}
+                        </Text>
+                      </View>
                     </View>
                     <Text
                       style={{
                         fontFamily: "Inter_400Regular",
                         color: "rgba(255,255,255,0.5)",
                         fontSize: 11,
+                        marginTop: 6,
                       }}
                     >
                       {formatDate(c.timestamp)}
                     </Text>
+                    {c.reason && (
+                      <Text
+                        style={{
+                          fontFamily: "Inter_400Regular",
+                          color: "rgba(255,255,255,0.5)",
+                          fontSize: 12,
+                          marginTop: 4,
+                          fontStyle: "italic",
+                        }}
+                      >
+                        "{c.reason}"
+                      </Text>
+                    )}
                   </View>
-                  {!isConfirmation && (
-                    <Text
-                      style={{
-                        fontFamily: "Inter_400Regular",
-                        color: "rgba(255,255,255,0.6)",
-                        fontSize: 12,
-                        marginTop: 4,
-                      }}
-                    >
-                      → {c.userEmotion} · V: {c.aiValence}→{c.userValence} · A:{" "}
-                      {c.aiArousal}→{c.userArousal}
-                    </Text>
-                  )}
-                  {c.reason && (
-                    <Text
-                      style={{
-                        fontFamily: "Inter_400Regular",
-                        color: "rgba(255,255,255,0.5)",
-                        fontSize: 12,
-                        marginTop: 4,
-                        fontStyle: "italic",
-                      }}
-                    >
-                      "{c.reason}"
-                    </Text>
-                  )}
-                </View>
-              );
-            })
+                );
+              })}
+            </View>
           )}
         </Animated.View>
 
@@ -445,3 +490,69 @@ export default function CorrectionHistoryScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 10,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  headerBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  confirmationBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emotionPair: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 6,
+    flexWrap: "wrap",
+  },
+  emotionBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  emotionText: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+  },
+  arrow: {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 12,
+  },
+  delta: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+    flexWrap: "wrap",
+  },
+  deltaLabel: {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    marginRight: 2,
+  },
+  deltaValue: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    marginRight: 4,
+  },
+  deltaSeparator: {
+    fontSize: 10,
+  },
+});
