@@ -659,9 +659,9 @@ function EntryCard({
       <View
         style={[
           {
-            backgroundColor: hexToRgba(primaryColor, 0.1),
+            backgroundColor: hexToRgba(primaryColor, 0.05),
             borderWidth: 1,
-            borderColor: hexToRgba(primaryColor, 0.15),
+            borderColor: hexToRgba(primaryColor, 0.08),
             borderRadius: 24,
             marginBottom: 16,
             shadowColor: "#000",
@@ -855,7 +855,7 @@ function EntryCard({
                         key={index}
                         className="px-2 py-1 rounded-full"
                         style={{
-                          backgroundColor: hexToRgba(primaryColor, 0.1),
+                          backgroundColor: hexToRgba(primaryColor, 0.05),
                         }}
                       >
                         <Text
@@ -873,7 +873,7 @@ function EntryCard({
                     3 && (
                     <View
                       className="px-2 py-1 rounded-full"
-                      style={{ backgroundColor: hexToRgba(primaryColor, 0.1) }}
+                      style={{ backgroundColor: hexToRgba(primaryColor, 0.05) }}
                     >
                       <Text
                         style={{
