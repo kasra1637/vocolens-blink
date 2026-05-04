@@ -144,7 +144,7 @@ export function AccountPreparationScreen() {
               <Text
                 style={{
                   color: "#FFFFFF",
-                  fontFamily: "Inter_700Bold",
+                  fontFamily: "Fraunces_700Bold",
                   fontSize: 24,
                   textAlign: "center",
                   marginBottom: 10,
@@ -263,7 +263,7 @@ export function AccountPreparationScreen() {
                 <FlaskConical size={18} color="#FFFFFF" strokeWidth={2.5} />
                 <Text
                   style={{
-                    fontFamily: "Inter_700Bold",
+                    fontFamily: "Fraunces_700Bold",
                     fontSize: 13,
                     color: "#FFFFFF",
                     letterSpacing: 0.8,
