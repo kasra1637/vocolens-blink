@@ -168,7 +168,7 @@ export function GlassLayers({
       <View
         style={[
           StyleSheet.absoluteFill,
-          { backgroundColor: hexToRgba(finalTint, 0.1) },
+          { backgroundColor: hexToRgba(finalTint, 0.05) },
         ]}
       />
 
@@ -176,8 +176,8 @@ export function GlassLayers({
       {/* Simulation: absolute gradient with 1px inset body */}
       <LinearGradient
         colors={[
-          "rgba(255,255,255,0.45)",
-          "rgba(255,255,255,0.05)",
+          "rgba(255,255,255,0.25)",
+          "rgba(255,255,255,0.03)",
           "transparent",
         ]}
         start={{ x: 0, y: 0 }}
@@ -197,18 +197,18 @@ export function GlassLayers({
           backgroundColor: hexToRgba(finalTint, 0.05), // extra subtle depth
           overflow: "hidden",
           borderTopWidth: 1,
-          borderTopColor: "rgba(255, 255, 255, 0.35)",
+          borderTopColor: "rgba(255, 255, 255, 0.2)",
           borderLeftWidth: 1,
-          borderLeftColor: "rgba(255, 255, 255, 0.35)",
+          borderLeftColor: "rgba(255, 255, 255, 0.2)",
           borderBottomWidth: 1,
-          borderBottomColor: "rgba(255, 255, 255, 0.08)",
+          borderBottomColor: "rgba(255, 255, 255, 0.04)",
           borderRightWidth: 1,
-          borderRightColor: "rgba(255, 255, 255, 0.08)",
+          borderRightColor: "rgba(255, 255, 255, 0.04)",
         }}
       >
         {/* Inner highlight gradient */}
         <LinearGradient
-          colors={["rgba(255, 255, 255, 0.25)", "transparent"]}
+          colors={["rgba(255, 255, 255, 0.15)", "transparent"]}
           style={{
             position: "absolute",
             top: 0,
@@ -225,7 +225,7 @@ export function GlassLayers({
             left: 10,
             right: 10,
             height: 1,
-            backgroundColor: "rgba(255, 255, 255, 0.15)",
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
           }}
         />
 
