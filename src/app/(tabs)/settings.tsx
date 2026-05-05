@@ -136,9 +136,9 @@ export default function SettingsScreen() {
   const Gradients = getThemeGradients(selectedTheme, isDarkMode);
   const Shadows = getThemeShadows(selectedTheme);
 
-  // Glassmorphic style matching LanguageSelectionScreen — dynamic to active theme
-  const surfaceBg = hexToRgba(Colors.primary, 0.18);
-  const borderColor = hexToRgba(Colors.primary, 0.15);
+  // Glassmorphic style — exact match to onboarding selection cards (white opacity, theme-adaptive)
+  const surfaceBg = "rgba(255, 255, 255, 0.12)";
+  const borderColor = "rgba(255, 255, 255, 0.20)";
 
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -393,16 +393,19 @@ export default function SettingsScreen() {
                     ? "rgba(255, 80, 80, 0.18)"
                     : isNearLimit
                       ? "rgba(255, 180, 50, 0.15)"
-                      : hexToRgba(Colors.primary, 0.1),
-                  borderWidth: 1,
+                      : "rgba(255, 255, 255, 0.12)",
+                  borderWidth: 2,
                   borderColor: isAtLimit
                     ? "rgba(255, 100, 100, 0.5)"
                     : isNearLimit
                       ? "rgba(255, 200, 80, 0.4)"
-                      : hexToRgba(Colors.primary, 0.15),
+                      : "rgba(255, 255, 255, 0.20)",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
                 <View className="p-5">
                   {/* Header row */}
                   <View className="flex-row items-center justify-between mb-4">
@@ -523,11 +526,14 @@ export default function SettingsScreen() {
                 className="rounded-3xl p-5"
                 style={{
                   backgroundColor: surfaceBg,
-                  borderWidth: 1,
+                  borderWidth: 2,
                   borderColor: borderColor,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
                 <View
                   style={{
                     flexDirection: "row",
@@ -678,11 +684,14 @@ export default function SettingsScreen() {
                 className="rounded-3xl p-5"
                 style={{
                   backgroundColor: surfaceBg,
-                  borderWidth: 1,
+                  borderWidth: 2,
                   borderColor: borderColor,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1 mr-4">
                     <Text
@@ -737,11 +746,14 @@ export default function SettingsScreen() {
                 className="rounded-3xl p-5"
                 style={{
                   backgroundColor: surfaceBg,
-                  borderWidth: 1,
+                  borderWidth: 2,
                   borderColor: borderColor,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
                 <View className="flex-row items-center justify-between">
                   <View className="flex-1 mr-4">
                     <Text
@@ -795,11 +807,14 @@ export default function SettingsScreen() {
                 className="rounded-3xl overflow-hidden"
                 style={{
                   backgroundColor: surfaceBg,
-                  borderWidth: 1,
+                  borderWidth: 2,
                   borderColor: borderColor,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
                 <View
                   className="p-5"
                   style={{
@@ -954,11 +969,14 @@ export default function SettingsScreen() {
                 className="rounded-3xl overflow-hidden active:opacity-70"
                 style={{
                   backgroundColor: surfaceBg,
-                  borderWidth: 1,
+                  borderWidth: 2,
                   borderColor: borderColor,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
                 <View
                   className="p-5"
                   style={{
@@ -1020,11 +1038,14 @@ export default function SettingsScreen() {
                 className="rounded-3xl overflow-hidden"
                 style={{
                   backgroundColor: surfaceBg,
-                  borderWidth: 1,
+                  borderWidth: 2,
                   borderColor: borderColor,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
                 <Pressable
                   onPress={handleOpenPinChange}
                   className="p-5 active:opacity-70"
@@ -1718,6 +1739,11 @@ export default function SettingsScreen() {
         title={alertTitle}
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
+      />
+    </View>
+  );
+}
+       onClose={() => setAlertVisible(false)}
       />
     </View>
   );
