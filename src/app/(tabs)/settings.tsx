@@ -38,7 +38,6 @@ import {
   Trash2,
   Download,
   Globe,
-  FileText,
 } from "lucide-react-native";
 import Animated from "react-native-reanimated";
 import {
