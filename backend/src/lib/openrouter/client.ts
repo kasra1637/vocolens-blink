@@ -1,11 +1,11 @@
 /**
- * OpenRouter API Client
+ * OpenRouter API Client — Claude 3.5 Sonnet
+ * Simplified text-only pipeline: Deepgram transcribes; Claude analyses.
  */
 
 import {
   OPENROUTER_BASE_URL,
-  AUDIO_MODEL,
-  TEXT_FALLBACK_MODEL,
+  MODEL,
   getApiKey,
 } from "./types.ts";
 import type {
@@ -15,7 +15,7 @@ import type {
   AICompletionRequest,
   EmotionType,
 } from "./types.ts";
-import { AUDIO_SYSTEM_PROMPT, TEXT_SYSTEM_PROMPT } from "./prompts.ts";
+import { SYSTEM_PROMPT } from "./prompts.ts";
 import { parseAnalysisJson } from "./parser.ts";
 
 function buildHeaders(apiKey: string): Record<string, string> {
@@ -27,96 +27,33 @@ function buildHeaders(apiKey: string): Record<string, string> {
   };
 }
 
-export async function analyzeTranscript(
-  transcript: string,
-  audioBase64?: string
-): Promise<AnalysisResult> {
+/** Text-only analysis via Claude 3.5 Sonnet (Deepgram handles transcription) */
+export async function analyzeTranscript(transcript: string): Promise<AnalysisResult> {
   const apiKey = getApiKey();
 
   if (!apiKey || !apiKey.startsWith("sk-or-")) {
-    throw new Error(
-      "[OpenRouter] OPENROUTER_API_KEY is missing or invalid. " +
-      "Ensure it is set in /home/user/workspace/backend/.env and starts with sk-or-"
-    );
+    throw new Error("[OpenRouter] OPENROUTER_API_KEY is missing or invalid.");
   }
 
-  // PATH 1: Audio provided → openai/gpt-4o-audio-preview
-  if (audioBase64 && audioBase64.length > 100) {
-    console.log(`[OpenRouter] Sending request → model=${AUDIO_MODEL} (audio+text multimodal)`);
-
-    try {
-      const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-        method: "POST",
-        headers: buildHeaders(apiKey),
-        body: JSON.stringify({
-          model: AUDIO_MODEL,
-          messages: [
-            { role: "system", content: AUDIO_SYSTEM_PROMPT },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "input_audio",
-                  input_audio: { data: audioBase64, format: "wav" },
-                },
-                {
-                  type: "text",
-                  text: `Transcript of the audio above:\n\n"${transcript}"\n\nAnalyse both the vocal characteristics (prosody, tone, pitch, pace, energy) AND the text. Return JSON only.`,
-                },
-              ],
-            },
-          ],
-          temperature: 0.6,
-          max_tokens: 1400,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json() as {
-          choices?: Array<{ message?: { content?: string } }>;
-          model?: string;
-          error?: { message: string };
-        };
-
-        const content = data.choices?.[0]?.message?.content;
-        if (content) {
-          const resolvedModel = data.model ?? AUDIO_MODEL;
-          console.log(`[OpenRouter] ✓ GPT-4o Audio Preview response received | resolved_model=${resolvedModel}`);
-          return parseAnalysisJson(content, true, resolvedModel);
-        }
-
-        console.warn(`[OpenRouter] Audio model returned empty content — falling back to text model`);
-      } else {
-        const errBody = await response.json().catch(() => ({ error: { message: response.statusText } })) as { error?: { message: string } };
-        console.warn(`[OpenRouter] Audio model error ${response.status}: ${errBody?.error?.message} — falling back to text model`);
-      }
-    } catch (err) {
-      console.warn(`[OpenRouter] Audio model request threw: ${err} — falling back to text model`);
-    }
-  } else {
-    console.log(`[OpenRouter] No audio provided — using text-only path`);
-  }
-
-  // PATH 2: Text only → openai/gpt-4o
-  console.log(`[OpenRouter] Sending request → model=${TEXT_FALLBACK_MODEL} (text-only)`);
+  console.log(`[OpenRouter] Sending request → model=${MODEL}`);
 
   const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: buildHeaders(apiKey),
     body: JSON.stringify({
-      model: TEXT_FALLBACK_MODEL,
+      model: MODEL,
       messages: [
-        { role: "system", content: TEXT_SYSTEM_PROMPT },
+        { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: `Analyse this journal entry:\n\n"${transcript}"` },
       ],
       temperature: 0.7,
-      max_tokens: 1200,
+      max_tokens: 1400,
     }),
   });
 
   if (!response.ok) {
     const errText = await response.text();
-    throw new Error(`[OpenRouter] Text model error (${response.status}): ${errText}`);
+    throw new Error(`[OpenRouter] Claude error (${response.status}): ${errText}`);
   }
 
   const data = await response.json() as {
@@ -126,24 +63,24 @@ export async function analyzeTranscript(
 
   const content = data.choices?.[0]?.message?.content;
   if (!content) {
-    throw new Error("[OpenRouter] Text model returned empty content");
+    throw new Error("[OpenRouter] Claude returned empty content");
   }
 
-  const resolvedModel = data.model ?? TEXT_FALLBACK_MODEL;
-  console.log(`[OpenRouter] ✓ GPT-4o text response received | resolved_model=${resolvedModel}`);
+  const resolvedModel = data.model ?? MODEL;
+  console.log(`[OpenRouter] ✓ Claude response received | resolved_model=${resolvedModel}`);
   return parseAnalysisJson(content, false, resolvedModel);
 }
 
 export async function analyzeTranscriptWithRetry(
   transcript: string,
   maxRetries = 3,
-  audioBase64?: string
+  _audioBase64?: string, // kept for API compatibility; audio no longer sent to model
 ): Promise<AnalysisResult> {
   let lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      return await analyzeTranscript(transcript, audioBase64);
+      return await analyzeTranscript(transcript);
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));
       console.warn(`[OpenRouter] Attempt ${attempt}/${maxRetries} failed: ${lastError.message}`);

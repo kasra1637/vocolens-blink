@@ -25,8 +25,10 @@ load_dotenv('/app/.env.local')
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-AUDIO_MODEL = "openai/gpt-4o-audio-preview"
-TEXT_FALLBACK_MODEL = "openai/gpt-4o"
+MODEL = "anthropic/claude-3.5-sonnet-20241022"
+# kept for compatibility
+AUDIO_MODEL = MODEL
+TEXT_FALLBACK_MODEL = MODEL
 USAGE_LIMIT_MINUTES = 300
 
 # Plutchik intensity labels
@@ -42,6 +44,70 @@ PLUTCHIK_LABELS = {
 }
 
 VALID_EMOTIONS = ["happiness", "sadness", "anger", "disgust", "fear", "surprise", "trust", "anticipation"]
+
+# Plutchik primary dyads: blend → (emotion1, emotion2)
+BLENDED_EMOTION_RULES = {
+    "Love":           ("happiness", "trust"),
+    "Optimism":       ("anticipation", "happiness"),
+    "Submission":     ("trust", "fear"),
+    "Awe":            ("fear", "surprise"),
+    "Disapproval":    ("surprise", "sadness"),
+    "Remorse":        ("sadness", "disgust"),
+    "Contempt":       ("disgust", "anger"),
+    "Aggressiveness": ("anger", "anticipation"),
+}
+
+OPPOSITE_PAIRS = [
+    ("happiness", "sadness"),
+    ("anger",     "fear"),
+    ("trust",     "disgust"),
+    ("anticipation", "surprise"),
+]
+
+CLAUDE_SYSTEM_PROMPT = """You are an expert emotional intelligence analyst specialising in Plutchik's wheel of emotions.
+Analyse the journal transcript text and return ONLY a valid JSON object — no markdown, no explanation.
+
+{
+  "emotions": ["emotion1", "emotion2"],
+  "primaryEmotion": "emotion",
+  "emotionIntensity": 75,
+  "emotionScores": {
+    "happiness": 80, "sadness": 10, "anger": 5, "disgust": 2,
+    "fear": 15, "surprise": 20, "trust": 60, "anticipation": 45
+  },
+  "topThreeEmotions": [
+    { "emotion": "happiness", "score": 80, "intensityLabel": "Ecstasy" },
+    { "emotion": "trust",     "score": 60, "intensityLabel": "Admiration" },
+    { "emotion": "surprise",  "score": 20, "intensityLabel": "Distraction" }
+  ],
+  "blendedEmotions": ["Love", "Optimism"],
+  "ambivalenceFlags": ["happiness↔sadness"],
+  "topics": ["topic1", "topic2"],
+  "analysis": "compassionate analysis paragraph (2-3 sentences)",
+  "reflection": "warm empathetic second-person reflection (2-3 sentences) for TTS playback",
+  "insights": ["insight1", "insight2"],
+  "confidence": 0.85,
+  "valence": 45,
+  "arousal": 62,
+  "suggestedBodySensations": ["tight shoulders", "racing heart"],
+  "distressLevel": "low"
+}
+
+Rules:
+- emotionScores: all 8 emotions scored 0-100
+- emotions: only emotions with score >= 30, max 4
+- primaryEmotion: highest scoring emotion
+- emotionIntensity: 0-100 overall intensity
+- topThreeEmotions: top 3 by score with Plutchik intensity label
+- blendedEmotions: Plutchik primary dyads when BOTH component emotions >= 40
+  Values: Love(happiness+trust), Optimism(anticipation+happiness), Submission(trust+fear),
+  Awe(fear+surprise), Disapproval(surprise+sadness), Remorse(sadness+disgust),
+  Contempt(disgust+anger), Aggressiveness(anger+anticipation)
+- ambivalenceFlags: opposite pairs both >= 35 -> "e1↔e2"
+  Pairs: happiness↔sadness, anger↔fear, trust↔disgust, anticipation↔surprise
+- valence: -100 to +100 | arousal: 0-100 | distressLevel: low|moderate|high
+- reflection: warm, second-person ("you"), suitable for TTS
+- Only valid base emotions: happiness, sadness, anger, disgust, fear, surprise, trust, anticipation"""
 
 # In-memory usage store (resets on restart, same as original Hono backend)
 usage_store: dict = {}
@@ -81,6 +147,40 @@ def get_intensity_label(emotion: str, score: float) -> str:
 
 def build_intensity_labels(scores: dict) -> dict:
     return {e: get_intensity_label(e, scores.get(e, 0)) for e in VALID_EMOTIONS}
+
+
+def compute_top_three_emotions(scores: dict) -> list:
+    sorted_emotions = sorted(
+        [(e, scores.get(e, 0)) for e in VALID_EMOTIONS],
+        key=lambda x: x[1], reverse=True
+    )[:3]
+    return [
+        {
+            "emotion": e,
+            "score": score,
+            "rank": i + 1,
+            "intensityLabel": get_intensity_label(e, score),
+        }
+        for i, (e, score) in enumerate(sorted_emotions)
+    ]
+
+
+def compute_blended_emotions(scores: dict) -> list:
+    threshold = 40
+    result = []
+    for blend, (e1, e2) in BLENDED_EMOTION_RULES.items():
+        if scores.get(e1, 0) >= threshold and scores.get(e2, 0) >= threshold:
+            result.append(blend)
+    return result
+
+
+def detect_ambivalence(scores: dict) -> list:
+    threshold = 35
+    return [
+        f"{e1}↔{e2}"
+        for e1, e2 in OPPOSITE_PAIRS
+        if scores.get(e1, 0) >= threshold and scores.get(e2, 0) >= threshold
+    ]
 
 
 def compute_valence(scores: dict) -> float:
@@ -141,7 +241,38 @@ def parse_analysis_json(content: str, audio_analyzed: bool, model_used: str) -> 
     distress_raw = result.get("distressLevel")
     distress = distress_raw if distress_raw in ("low", "moderate", "high") else compute_distress_level(valence, arousal)
 
-    print(f"[OpenRouter] Analysis complete | model={model_used} | audioAnalyzed={audio_analyzed} | primary={primary_emotion} | valence={valence} | arousal={arousal} | distress={distress}")
+    # top-3: prefer AI, fall back to server-side compute
+    valid_blends = list(BLENDED_EMOTION_RULES.keys())
+    raw_top3 = result.get("topThreeEmotions")
+    if isinstance(raw_top3, list) and raw_top3:
+        ai_top_three = [
+            {
+                "emotion": r["emotion"],
+                "score": max(0, min(100, float(r.get("score", 0)))),
+                "rank": i + 1,
+                "intensityLabel": r.get("intensityLabel") or get_intensity_label(r["emotion"], float(r.get("score", 0))),
+            }
+            for i, r in enumerate(raw_top3[:3])
+            if r.get("emotion") in VALID_EMOTIONS
+        ]
+    else:
+        ai_top_three = compute_top_three_emotions(emotion_scores)
+
+    raw_blended = result.get("blendedEmotions")
+    ai_blended = (
+        [b for b in raw_blended if b in valid_blends]
+        if isinstance(raw_blended, list) and raw_blended
+        else compute_blended_emotions(emotion_scores)
+    )
+
+    raw_ambivalence = result.get("ambivalenceFlags")
+    ai_ambivalence = (
+        list(raw_ambivalence)
+        if isinstance(raw_ambivalence, list) and raw_ambivalence
+        else detect_ambivalence(emotion_scores)
+    )
+
+    print(f"[OpenRouter] Analysis complete | model={model_used} | primary={primary_emotion} | blended={','.join(ai_blended) or 'none'} | ambivalence={','.join(ai_ambivalence) or 'none'}")
 
     return {
         "emotions": emotions,
@@ -160,6 +291,9 @@ def parse_analysis_json(content: str, audio_analyzed: bool, model_used: str) -> 
         "arousal": arousal,
         "suggestedBodySensations": list(result.get("suggestedBodySensations") or [])[:3],
         "distressLevel": distress,
+        "aiTopThreeEmotions": ai_top_three,
+        "aiBlendedEmotions": ai_blended,
+        "aiAmbivalenceFlags": ai_ambivalence,
     }
 
 
@@ -172,76 +306,7 @@ def build_openrouter_headers(api_key: str) -> dict:
     }
 
 
-AUDIO_SYSTEM_PROMPT = """You are an expert emotional intelligence analyst specializing in Plutchik's wheel of emotions.
-You have been given a voice journal entry as raw audio. Analyse BOTH the audio speech characteristics (prosody, tone, pitch, pacing, vocal energy, pauses, tremor, rhythm) AND the transcript text content together to produce the most accurate emotional assessment possible.
-
-Return ONLY a valid JSON object — no markdown, no explanation:
-{
-  "emotions": ["emotion1", "emotion2"],
-  "primaryEmotion": "emotion",
-  "emotionIntensity": 75,
-  "emotionScores": {
-    "happiness": 80, "sadness": 10, "anger": 5, "disgust": 2,
-    "fear": 15, "surprise": 20, "trust": 60, "anticipation": 45
-  },
-  "topics": ["topic1", "topic2"],
-  "analysis": "compassionate paragraph referencing both what was said and how it was said (vocal tone, pace, energy)",
-  "reflection": "warm empathetic second-person reflection (2-3 sentences) for TTS playback",
-  "insights": ["insight noting vocal cues", "content insight"],
-  "confidence": 0.92,
-  "valence": 45,
-  "arousal": 62,
-  "suggestedBodySensations": ["tight shoulders", "racing heart"],
-  "distressLevel": "low"
-}
-
-Rules:
-- emotionScores: all 8 emotions scored 0-100; weight vocal prosody equally with text content
-- emotions array: only emotions with score >= 30, max 4
-- primaryEmotion: highest scoring emotion
-- emotionIntensity: 0-100 overall intensity from both voice energy and content
-- valence: -100 (very unpleasant) to +100 (very pleasant)
-- arousal: 0 (very calm) to 100 (very activated)
-- distressLevel: "low" | "moderate" | "high"
-- suggestedBodySensations: array of 1-3 body sensations commonly associated with these emotions
-- reflection: warm, second-person ("you"), suitable for TTS
-- Only valid emotions: happiness, sadness, anger, disgust, fear, surprise, trust, anticipation"""
-
-TEXT_SYSTEM_PROMPT = """You are an expert emotional intelligence analyst specializing in Plutchik's wheel of emotions.
-Analyse the journal transcript and return ONLY a valid JSON object — no markdown, no explanation:
-{
-  "emotions": ["emotion1", "emotion2"],
-  "primaryEmotion": "emotion",
-  "emotionIntensity": 75,
-  "emotionScores": {
-    "happiness": 80, "sadness": 10, "anger": 5, "disgust": 2,
-    "fear": 15, "surprise": 20, "trust": 60, "anticipation": 45
-  },
-  "topics": ["topic1", "topic2"],
-  "analysis": "compassionate analysis paragraph",
-  "reflection": "warm empathetic second-person reflection (2-3 sentences) for TTS playback",
-  "insights": ["insight1", "insight2"],
-  "confidence": 0.85,
-  "valence": 45,
-  "arousal": 62,
-  "suggestedBodySensations": ["tight shoulders", "racing heart"],
-  "distressLevel": "low"
-}
-
-Rules:
-- emotionScores: all 8 emotions scored 0-100
-- emotions array: only emotions with score >= 30, max 4
-- primaryEmotion: highest scoring emotion
-- emotionIntensity: 0-100 overall intensity
-- valence: -100 (very unpleasant) to +100 (very pleasant)
-- arousal: 0 (very calm) to 100 (very activated)
-- distressLevel: "low" | "moderate" | "high"
-- suggestedBodySensations: array of 1-3 body sensations
-- reflection: warm, second-person ("you"), suitable for TTS
-- Only valid emotions: happiness, sadness, anger, disgust, fear, surprise, trust, anticipation"""
-
-
-# ── Journal Analysis ──────────────────────────────────────────────────────────
+# ── Journal Analysis — Claude 3.5 Sonnet text-only ────────────────────────────
 async def analyze_transcript(transcript: str, audio_base64: Optional[str] = None) -> dict:
     api_key = get_api_key()
     if not api_key or not api_key.startswith("sk-or-"):
@@ -249,65 +314,30 @@ async def analyze_transcript(transcript: str, audio_base64: Optional[str] = None
 
     headers = build_openrouter_headers(api_key)
 
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        # PATH 1: Audio provided → gpt-4o-audio-preview
-        if audio_base64 and len(audio_base64) > 100:
-            print(f"[OpenRouter] Sending request → model={AUDIO_MODEL} (audio+text multimodal)")
-            try:
-                payload = {
-                    "model": AUDIO_MODEL,
-                    "messages": [
-                        {"role": "system", "content": AUDIO_SYSTEM_PROMPT},
-                        {
-                            "role": "user",
-                            "content": [
-                                {"type": "input_audio", "input_audio": {"data": audio_base64, "format": "wav"}},
-                                {"type": "text", "text": f'Transcript of the audio above:\n\n"{transcript}"\n\nAnalyse both the vocal characteristics (prosody, tone, pitch, pace, energy) AND the text. Return JSON only.'},
-                            ],
-                        },
-                    ],
-                    "temperature": 0.6,
-                    "max_tokens": 1400,
-                }
-                resp = await client.post(f"{OPENROUTER_BASE_URL}/chat/completions", headers=headers, json=payload)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    content = data.get("choices", [{}])[0].get("message", {}).get("content")
-                    if content:
-                        resolved_model = data.get("model") or AUDIO_MODEL
-                        print(f"[OpenRouter] ✓ GPT-4o Audio Preview response received | resolved_model={resolved_model}")
-                        return parse_analysis_json(content, True, resolved_model)
-                    print("[OpenRouter] Audio model returned empty content — falling back to text model")
-                else:
-                    err = resp.json().get("error", {}).get("message", resp.status_code)
-                    print(f"[OpenRouter] Audio model error {resp.status_code}: {err} — falling back to text model")
-            except Exception as e:
-                print(f"[OpenRouter] Audio model request threw: {e} — falling back to text model")
-        else:
-            print("[OpenRouter] No audio provided — using text-only path")
+    # Text-only pipeline: Deepgram transcribes; Claude analyses
+    print(f"[OpenRouter] Sending request → model={MODEL}")
+    payload = {
+        "model": MODEL,
+        "messages": [
+            {"role": "system", "content": CLAUDE_SYSTEM_PROMPT},
+            {"role": "user", "content": f'Analyse this journal entry:\n\n"{transcript}"'},
+        ],
+        "temperature": 0.7,
+        "max_tokens": 1400,
+    }
 
-        # PATH 2: Text only → gpt-4o
-        print(f"[OpenRouter] Sending request → model={TEXT_FALLBACK_MODEL} (text-only)")
-        payload = {
-            "model": TEXT_FALLBACK_MODEL,
-            "messages": [
-                {"role": "system", "content": TEXT_SYSTEM_PROMPT},
-                {"role": "user", "content": f'Analyse this journal entry:\n\n"{transcript}"'},
-            ],
-            "temperature": 0.7,
-            "max_tokens": 1200,
-        }
+    async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.post(f"{OPENROUTER_BASE_URL}/chat/completions", headers=headers, json=payload)
         if resp.status_code != 200:
-            raise ValueError(f"[OpenRouter] Text model error ({resp.status_code}): {resp.text}")
+            raise ValueError(f"[OpenRouter] Claude error ({resp.status_code}): {resp.text}")
 
         data = resp.json()
         content = data.get("choices", [{}])[0].get("message", {}).get("content")
         if not content:
-            raise ValueError("[OpenRouter] Text model returned empty content")
+            raise ValueError("[OpenRouter] Claude returned empty content")
 
-        resolved_model = data.get("model") or TEXT_FALLBACK_MODEL
-        print(f"[OpenRouter] ✓ GPT-4o text response received | resolved_model={resolved_model}")
+        resolved_model = data.get("model") or MODEL
+        print(f"[OpenRouter] ✓ Claude response received | resolved_model={resolved_model}")
         return parse_analysis_json(content, False, resolved_model)
 
 
@@ -315,7 +345,7 @@ async def analyze_transcript_with_retry(transcript: str, max_retries: int = 3, a
     last_error = None
     for attempt in range(1, max_retries + 1):
         try:
-            return await analyze_transcript(transcript, audio_base64)
+            return await analyze_transcript(transcript)
         except Exception as e:
             last_error = e
             print(f"[OpenRouter] Attempt {attempt}/{max_retries} failed: {e}")
@@ -401,7 +431,7 @@ def journal_status():
     configured = is_openrouter_configured()
     return {
         "openrouter": "connected" if configured else "not_configured",
-        "model": f"{AUDIO_MODEL} (with {TEXT_FALLBACK_MODEL} text fallback)",
+        "model": MODEL,
         "baseUrl": "https://openrouter.ai",
         "status": "ok" if configured else "missing_api_key",
     }

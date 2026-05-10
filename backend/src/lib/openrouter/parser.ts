@@ -1,18 +1,70 @@
 /**
- * OpenRouter Response Parser
+ * OpenRouter Response Parser — Claude 3.5 Sonnet
+ * Parses Claude's JSON, with server-side fallbacks for
+ * topThreeEmotions, blendedEmotions, and ambivalenceFlags.
  */
 
-import { buildIntensityLabels } from "./types.ts";
+import {
+  buildIntensityLabels,
+  getIntensityLabel,
+  BLENDED_EMOTION_LABELS,
+  OPPOSITE_EMOTION_PAIRS,
+} from "./types.ts";
 import type {
   EmotionType,
   EmotionScores,
   AnalysisResult,
+  RankedEmotion,
+  BlendedEmotionType,
 } from "./types.ts";
+
+// ── Server-side fallback compute ──────────────────────────────────────────────
+
+export function computeTopThreeEmotions(scores: EmotionScores): RankedEmotion[] {
+  const entries = (Object.entries(scores) as [EmotionType, number][])
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3);
+
+  return entries.map(([emotion, score], i) => ({
+    emotion,
+    score,
+    rank: (i + 1) as 1 | 2 | 3,
+    intensityLabel: getIntensityLabel(emotion, score),
+  }));
+}
+
+export function computeBlendedEmotions(scores: EmotionScores): BlendedEmotionType[] {
+  const THRESHOLD = 40;
+  const result: BlendedEmotionType[] = [];
+
+  for (const [blend, [e1, e2]] of Object.entries(BLENDED_EMOTION_LABELS) as [BlendedEmotionType, [EmotionType, EmotionType]][]) {
+    if (scores[e1] >= THRESHOLD && scores[e2] >= THRESHOLD) {
+      result.push(blend);
+    }
+  }
+
+  return result;
+}
+
+export function detectAmbivalence(scores: EmotionScores): string[] {
+  const THRESHOLD = 35;
+  const flags: string[] = [];
+
+  for (const [e1, e2] of OPPOSITE_EMOTION_PAIRS) {
+    if (scores[e1] >= THRESHOLD && scores[e2] >= THRESHOLD) {
+      flags.push(`${e1}↔${e2}`);
+    }
+  }
+
+  return flags;
+}
+
+// ── Main parser ───────────────────────────────────────────────────────────────
 
 export function parseAnalysisJson(
   content: string,
   audioAnalyzed: boolean,
-  modelUsed: string
+  modelUsed: string,
 ): AnalysisResult {
   const jsonStr = content
     .replace(/^```json\s*/i, "")
@@ -48,7 +100,42 @@ export function parseAnalysisJson(
     ? (result.primaryEmotion as EmotionType)
     : (emotions[0] ?? "happiness");
 
-  // Compute valence-arousal from emotion scores if not provided by AI
+  // ── top-3: prefer AI response, fall back to server-side compute ──
+  let aiTopThreeEmotions: RankedEmotion[];
+  if (Array.isArray(result.topThreeEmotions) && result.topThreeEmotions.length > 0) {
+    aiTopThreeEmotions = (result.topThreeEmotions as { emotion: string; score: number; intensityLabel: string }[])
+      .filter((r) => validEmotions.includes(r.emotion as EmotionType))
+      .slice(0, 3)
+      .map((r, i) => ({
+        emotion: r.emotion as EmotionType,
+        score: Math.max(0, Math.min(100, Number(r.score) || 0)),
+        rank: (i + 1) as 1 | 2 | 3,
+        intensityLabel: r.intensityLabel || getIntensityLabel(r.emotion as EmotionType, Number(r.score) || 0),
+      }));
+  } else {
+    aiTopThreeEmotions = computeTopThreeEmotions(emotionScores);
+  }
+
+  // ── blended: prefer AI response, fall back to server-side compute ──
+  const validBlends = Object.keys(BLENDED_EMOTION_LABELS) as BlendedEmotionType[];
+  let aiBlendedEmotions: BlendedEmotionType[];
+  if (Array.isArray(result.blendedEmotions) && result.blendedEmotions.length > 0) {
+    aiBlendedEmotions = (result.blendedEmotions as string[])
+      .filter((b) => validBlends.includes(b as BlendedEmotionType))
+      .slice(0, 4) as BlendedEmotionType[];
+  } else {
+    aiBlendedEmotions = computeBlendedEmotions(emotionScores);
+  }
+
+  // ── ambivalence: prefer AI response, fall back to server-side compute ──
+  let aiAmbivalenceFlags: string[];
+  if (Array.isArray(result.ambivalenceFlags) && result.ambivalenceFlags.length > 0) {
+    aiAmbivalenceFlags = (result.ambivalenceFlags as string[]).slice(0, 4);
+  } else {
+    aiAmbivalenceFlags = detectAmbivalence(emotionScores);
+  }
+
+  // Valence / arousal
   const computedValence = computeValence(emotionScores);
   const computedArousal = computeArousal(emotionScores);
   const valence = typeof result.valence === "number" ? result.valence : computedValence;
@@ -56,7 +143,7 @@ export function parseAnalysisJson(
   const distressLevel = validateDistressLevel(result.distressLevel) || computeDistressLevel(valence, arousal);
 
   console.log(
-    `[OpenRouter] Analysis complete | model=${modelUsed} | audioAnalyzed=${audioAnalyzed} | primary=${primaryEmotion} | valence=${valence} | arousal=${arousal} | distress=${distressLevel}`
+    `[OpenRouter] Analysis complete | model=${modelUsed} | primary=${primaryEmotion} | blended=${aiBlendedEmotions.join(",")||"none"} | ambivalence=${aiAmbivalenceFlags.join(",")||"none"}`,
   );
 
   return {
@@ -78,10 +165,14 @@ export function parseAnalysisJson(
       ? (result.suggestedBodySensations as string[]).slice(0, 3)
       : [],
     distressLevel,
+    aiTopThreeEmotions,
+    aiBlendedEmotions,
+    aiAmbivalenceFlags,
   };
 }
 
-// Valence: weighted average of pleasant vs unpleasant emotions
+// ── Internal helpers ──────────────────────────────────────────────────────────
+
 function computeValence(scores: EmotionScores): number {
   const positive = scores.happiness + scores.trust + scores.anticipation + scores.surprise;
   const negative = scores.sadness + scores.fear + scores.anger + scores.disgust;
@@ -90,10 +181,7 @@ function computeValence(scores: EmotionScores): number {
   return Math.round(((positive - negative) / total) * 100);
 }
 
-// Arousal: weighted average of high-arousal vs low-arousal emotions
 function computeArousal(scores: EmotionScores): number {
-  // High arousal: anger, fear, surprise, anticipation
-  // Low arousal: sadness, trust, disgust, happiness (moderate)
   const high = scores.anger + scores.fear + scores.surprise + scores.anticipation;
   const low = scores.sadness + scores.trust + scores.disgust + scores.happiness * 0.5;
   const total = high + low;

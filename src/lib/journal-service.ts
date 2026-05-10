@@ -4,6 +4,8 @@ import {
   EmotionType,
   EmotionScores,
   EmotionIntensityLabels,
+  RankedEmotion,
+  BlendedEmotionType,
   TopicCategory,
   generateId,
   buildIntensityLabels,
@@ -49,6 +51,9 @@ export async function analyzeTranscript(
   arousal: number;
   suggestedBodySensations: string[];
   distressLevel: "low" | "moderate" | "high";
+  aiTopThreeEmotions?: RankedEmotion[];
+  aiBlendedEmotions?: BlendedEmotionType[];
+  aiAmbivalenceFlags?: string[];
 }> {
   // Ensure we have a transcript
   if (!transcript || transcript.trim().length === 0) {
@@ -79,6 +84,9 @@ export async function analyzeTranscript(
       arousal: result.arousal ?? 50,
       suggestedBodySensations: result.suggestedBodySensations ?? [],
       distressLevel: result.distressLevel ?? "low",
+      aiTopThreeEmotions: result.aiTopThreeEmotions,
+      aiBlendedEmotions: result.aiBlendedEmotions,
+      aiAmbivalenceFlags: result.aiAmbivalenceFlags,
     };
   } catch (error) {
     console.warn(
@@ -600,6 +608,9 @@ export async function createJournalEntry(
     arousal: number;
     suggestedBodySensations: string[];
     distressLevel: "low" | "moderate" | "high";
+    aiTopThreeEmotions?: RankedEmotion[];
+    aiBlendedEmotions?: BlendedEmotionType[];
+    aiAmbivalenceFlags?: string[];
   };
 
   // If reflection override is provided, skip AI analysis and use user-adjusted data
@@ -706,6 +717,9 @@ export async function createJournalEntry(
     topics: analysis.topics,
     aiAnalysis: analysis.analysis,
     aiReflection: analysis.reflection,
+    aiTopThreeEmotions: analysis.aiTopThreeEmotions,
+    aiBlendedEmotions: analysis.aiBlendedEmotions,
+    aiAmbivalenceFlags: analysis.aiAmbivalenceFlags,
     conversationTopic,
     conversationPrompt,
   });

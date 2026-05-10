@@ -71,6 +71,7 @@ import {
   BODY_REGION_EMOJIS,
 } from "@/lib/types";
 import { AudioPlayer } from "@/components/AudioPlayer";
+import EmotionBreakdownCard from "@/components/EmotionBreakdownCard";
 import EmotionCorrectionModal from "@/components/EmotionCorrectionModal";
 import { useEmotionCorrectionStore } from "@/lib/state/emotion-correction-store";
 import { queryKeys } from "@/lib/hooks";
@@ -665,8 +666,7 @@ export default function EntryDetailScreen() {
         </Animated.View>
 
         {/* Audio Playback */}
-        {entry.audioUri && (
-          <Animated.View
+        {entry.audioUri && (          <Animated.View
             entering={FadeInDown.delay(350).duration(600)}
             className="mb-6"
           >
@@ -697,6 +697,18 @@ export default function EntryDetailScreen() {
             </View>
           </Animated.View>
         )}
+
+        {/* EmotionBreakdownCard — Claude 3.5 Sonnet Plutchik deep analysis */}
+        {(entry.aiTopThreeEmotions?.length || entry.aiBlendedEmotions?.length || entry.aiAmbivalenceFlags?.length) ? (
+          <View style={{ paddingHorizontal: 0, marginBottom: 4 }}>
+            <EmotionBreakdownCard
+              aiTopThreeEmotions={entry.aiTopThreeEmotions}
+              aiBlendedEmotions={entry.aiBlendedEmotions}
+              aiAmbivalenceFlags={entry.aiAmbivalenceFlags}
+              themeColor={Colors.primary}
+            />
+          </View>
+        ) : null}
 
         {/* Emotion Breakdown - Collapsible */}
         <Animated.View entering={FadeInDown.delay(400).duration(600)}>

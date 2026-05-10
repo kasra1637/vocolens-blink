@@ -122,7 +122,69 @@ export type BodySensation =
   | "breathlessness"
   | "none";
 
-// Journal Entry
+// ── Plutchik deep breakdown types (Claude 3.5 Sonnet migration) ──────────────
+
+/** A single emotion ranked by score in the top-3 */
+export interface RankedEmotion {
+  emotion: EmotionType;
+  score: number;
+  rank: 1 | 2 | 3;
+  intensityLabel: string; // e.g. "Ecstasy", "Joy", "Serenity"
+}
+
+/** Plutchik primary dyads (adjacent-wheel blended emotions) */
+export type BlendedEmotionType =
+  | "Love"            // happiness + trust
+  | "Optimism"        // anticipation + happiness
+  | "Submission"      // trust + fear
+  | "Awe"             // fear + surprise
+  | "Disapproval"     // surprise + sadness
+  | "Remorse"         // sadness + disgust
+  | "Contempt"        // disgust + anger
+  | "Aggressiveness"; // anger + anticipation
+
+export const BLENDED_EMOTION_LABELS: Record<BlendedEmotionType, [EmotionType, EmotionType]> = {
+  Love:            ["happiness", "trust"],
+  Optimism:        ["anticipation", "happiness"],
+  Submission:      ["trust", "fear"],
+  Awe:             ["fear", "surprise"],
+  Disapproval:     ["surprise", "sadness"],
+  Remorse:         ["sadness", "disgust"],
+  Contempt:        ["disgust", "anger"],
+  Aggressiveness:  ["anger", "anticipation"],
+};
+
+/** Opposite Plutchik pairs — both high → ambivalence */
+export const OPPOSITE_EMOTION_PAIRS: [EmotionType, EmotionType][] = [
+  ["happiness", "sadness"],
+  ["anger",     "fear"],
+  ["trust",     "disgust"],
+  ["anticipation", "surprise"],
+];
+
+/**
+ * Returns the Plutchik intensity sub-label for a score 0-100.
+ * Uses 3-tier thresholds: low (0-35), mid (36-69), high (70-100).
+ */
+export function getIntensityLabel(emotion: EmotionType, score: number): string {
+  const map: Record<EmotionType, [string, string, string]> = {
+    happiness:    ["Serenity",     "Joy",          "Ecstasy"],
+    trust:        ["Acceptance",   "Trust",        "Admiration"],
+    fear:         ["Apprehension", "Fear",         "Terror"],
+    surprise:     ["Distraction",  "Surprise",     "Amazement"],
+    sadness:      ["Pensiveness",  "Sadness",      "Grief"],
+    disgust:      ["Boredom",      "Disgust",      "Loathing"],
+    anger:        ["Annoyance",    "Anger",        "Rage"],
+    anticipation: ["Interest",     "Anticipation", "Vigilance"],
+  };
+  const tiers = map[emotion];
+  if (!tiers) return emotion;
+  if (score <= 35) return tiers[0];
+  if (score <= 69) return tiers[1];
+  return tiers[2];
+}
+
+// ── Journal Entry ─────────────────────────────────────────────────────────────
 export interface JournalEntry {
   id: string;
   title: string;
@@ -156,6 +218,10 @@ export interface JournalEntry {
   userOverrideLabels?: Partial<Record<EmotionType, string>>; // user-edited intensity labels
   userValidated?: boolean; // user confirmed the analysis is correct
   aiCorrected?: boolean; // user corrected the AI's analysis
+  // AI deep breakdown — Claude 3.5 Sonnet (never touched by user corrections)
+  aiTopThreeEmotions?: RankedEmotion[];
+  aiBlendedEmotions?: BlendedEmotionType[];
+  aiAmbivalenceFlags?: string[]; // e.g. ["happiness↔sadness"]
 }
 
 // Daily Mood Summary
