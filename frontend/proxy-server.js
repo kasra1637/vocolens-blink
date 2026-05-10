@@ -350,7 +350,7 @@ function buildPage(tunnelInfo) {
       renderQR(currentExpoUrl);
     }
 
-    // Poll for tunnel URL until ready
+    // Always poll every 3 s — catches tunnel restarts / URL changes seamlessly
     function poll() {
       fetch('/tunnel-url')
         .then(function(r) { return r.json(); })
@@ -359,16 +359,20 @@ function buildPage(tunnelInfo) {
             currentExpoUrl = d.expoUrl;
             renderQR(d.expoUrl);
           }
+          if (!d.ready && currentExpoUrl) {
+            // Tunnel dropped — show "reconnecting" state
+            currentExpoUrl = null;
+            document.getElementById('qr-status').className = 'qr-status loading';
+            document.getElementById('qr-status').textContent = '⏳ Tunnel reconnecting…';
+            document.getElementById('expo-url').className = 'expo-url';
+          }
         })
         .catch(function() {});
     }
 
-    if (!currentExpoUrl) {
-      var interval = setInterval(function() {
-        poll();
-        if (currentExpoUrl) clearInterval(interval);
-      }, 3000);
-    }
+    // Kick off immediately then repeat every 3 s — never stops
+    poll();
+    setInterval(poll, 3000);
   </script>
 </body>
 </html>`;

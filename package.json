@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "scripts": {
+    "postinstall": "bash /app/scripts/cleanup-watchable.sh && sudo supervisorctl restart frontend 2>/dev/null || true",
     "dev": "EXPO_TUNNEL=none EXPO_OFFLINE=true EXPO_NO_DEV_CLIENT=true npx expo start --web --port 8081 --offline --clear",
     "start": "EXPO_TUNNEL=none EXPO_OFFLINE=true EXPO_NO_DEV_CLIENT=true expo start --offline",
     "android": "EXPO_TUNNEL=none EXPO_OFFLINE=true expo start --android --offline",
