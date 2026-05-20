@@ -1,36 +1,19 @@
 // metro.config.js
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
-const path = require("path");
 
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
 
-// Disable Watchman for file watching.
+// Watchman is unavailable in this container environment
 config.resolver.useWatchman = false;
 
-// Completely disable tunneling at Metro level
-config.server = {
-  ...config.server,
-  port: parseInt(process.env.METRO_PORT) || parseInt(process.env.PORT) || 3000,
-  enhanceMiddleware: (middleware) => {
-    return (req, res, next) => {
-      // Disable any tunnel-related middleware
-      if (req.url && req.url.includes("tunnel")) {
-        res.statusCode = 404;
-        res.end("Tunnel disabled");
-        return;
-      }
-      return middleware(req, res, next);
-    };
-  },
-};
-
-// Configure asset and source extensions.
+// SVG support via react-native-svg-transformer
 const { assetExts, sourceExts } = config.resolver;
 
 config.transformer = {
   ...config.transformer,
+  babelTransformerPath: require.resolve("react-native-svg-transformer"),
   getTransformOptions: async () => ({
     transform: {
       experimentalImportSupport: false,
@@ -44,26 +27,26 @@ config.resolver = {
   assetExts: assetExts.filter((ext) => ext !== "svg"),
   sourceExts: [...sourceExts, "svg"],
   useWatchman: false,
+
   resolveRequest: (context, moduleName, platform) => {
-    // Mock native-only modules on web
+    // Stub native-only packages when bundling for web
     if (platform === "web") {
-      const nativeOnlyModules = [
+      const webStubs = [
         "react-native-pager-view",
         "reanimated-tab-view",
         "@bottom-tabs/react-navigation",
+        // These require custom native modules — stub on web only
+        "react-native-purchases",
+        "react-native-purchases-ui",
+        "react-native-mmkv",
+        "react-native-vision-camera",
       ];
-
-      if (nativeOnlyModules.some((mod) => moduleName.includes(mod))) {
-        return {
-          type: "empty",
-        };
+      if (webStubs.some((mod) => moduleName.startsWith(mod))) {
+        return { type: "empty" };
       }
     }
-
-    // Fallback to default resolution
     return context.resolveRequest(context, moduleName, platform);
   },
 };
 
-// Integrate NativeWind with the Metro configuration.
 module.exports = withNativeWind(config, { input: "./global.css" });
