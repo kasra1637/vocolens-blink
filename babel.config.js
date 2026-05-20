@@ -2,7 +2,13 @@ module.exports = function (api) {
   api.cache(true);
   return {
     presets: [
-      ["babel-preset-expo", { jsxImportSource: "nativewind", unstable_transformImportMeta: true }],
+      [
+        "babel-preset-expo",
+        {
+          jsxImportSource: "nativewind",
+          unstable_transformImportMeta: true,
+        },
+      ],
       "nativewind/babel",
     ],
     plugins: [
@@ -15,7 +21,8 @@ module.exports = function (api) {
         },
       ],
       "@babel/plugin-proposal-export-namespace-from",
-      "react-native-reanimated/plugin",
+      // Reanimated v4: worklets plugin replaces the old reanimated/plugin
+      "react-native-worklets/plugin",
     ],
   };
 };

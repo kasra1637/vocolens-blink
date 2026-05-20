@@ -3,8 +3,8 @@ import { View, Pressable, StyleSheet, Platform } from 'react-native';
 import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withDelay, withTiming,
 } from 'react-native-reanimated';
-import { useTheme } from '@react-navigation/native';
 import { Mic } from 'lucide-react-native';
+import useOnboardingStore, { THEME_COLORS } from '@/lib/state/onboarding-store';
 
 const BUTTON_SIZE = 92;
 const RIPPLE_COUNT = 3;
@@ -47,8 +47,8 @@ function AnimatedRipple({ color, delay, lighter }: { color: string; delay: numbe
 }
 
 export function RecordFab({ onPress, disabled = false }: { onPress: () => void, disabled?: boolean }) {
-  const { colors } = useTheme();
-  const accent = colors.primary ?? '#007AFF';
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const accent = THEME_COLORS[selectedTheme].primary;
   const lighter = lighten(accent, 0.18);
 
   return (

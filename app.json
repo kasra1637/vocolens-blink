@@ -7,34 +7,19 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "root": "src/app",
-    "hostType": "localhost",
-    "updates": {
-      "url": "https://u.expo.dev/your-project-id-here"
-    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vocolens.app"
     },
     "android": {
-      "edgeToEdgeEnabled": true
-    },
-    "plugins": [
-      "expo-router",
-      "expo-asset",
-      "expo-video",
-      "expo-web-browser",
-      "react-native-edge-to-edge"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    },
-    "extra": {
-      "eas": {
-        "projectId": "your-project-id-here"
-      }
+      "edgeToEdgeEnabled": true,
+      "package": "com.vocolens.app"
     },
     "web": {
       "bundler": "metro"
+    },
+    "experiments": {
+      "typedRoutes": true
     },
     "plugins": [
       "expo-router",
