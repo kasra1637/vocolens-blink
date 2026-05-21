@@ -352,7 +352,7 @@ export default function EntryDetailScreen() {
             />
           ) : (
             <Text
-              style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF" }}
+              style={{ fontFamily: "Fraunces_700Bold", color: "#FFFFFF" }}
               className="text-2xl mb-2"
             >
               {entry.title}
@@ -635,20 +635,20 @@ export default function EntryDetailScreen() {
                       {transcriptExpanded ? (
                         <ChevronUp
                           size={14}
-                          color={Colors.primary}
+                          color="#FFFFFF"
                           strokeWidth={2}
                         />
                       ) : (
                         <ChevronDown
                           size={14}
-                          color={Colors.primary}
+                          color="#FFFFFF"
                           strokeWidth={2}
                         />
                       )}
                       <Text
                         style={{
                           fontFamily: "Inter_500Medium",
-                          color: Colors.primary,
+                          color: "#FFFFFF",
                           fontSize: 13,
                           marginLeft: 4,
                         }}
@@ -872,7 +872,7 @@ export default function EntryDetailScreen() {
                                   className="h-full rounded-full"
                                   style={{
                                     width: barWidth,
-                                    backgroundColor: Colors.primary,
+                                    backgroundColor: "#FFFFFF",
                                     opacity: barOpacity,
                                   }}
                                 />
@@ -988,7 +988,7 @@ export default function EntryDetailScreen() {
                                   className="h-full rounded-full"
                                   style={{
                                     width: barWidth,
-                                    backgroundColor: Colors.primary,
+                                    backgroundColor: "#FFFFFF",
                                   }}
                                 />
                               </View>
@@ -1173,7 +1173,7 @@ export default function EntryDetailScreen() {
                             className="h-full rounded-full"
                             style={{
                               width: `${entry.arousal}%`,
-                              backgroundColor: Colors.primary,
+                              backgroundColor: "#FFFFFF",
                             }}
                           />
                         </View>
