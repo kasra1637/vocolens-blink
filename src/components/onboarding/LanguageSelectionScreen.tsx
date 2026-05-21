@@ -22,9 +22,6 @@ import { OnboardingCTAButton } from "@/components/onboarding/OnboardingCTAButton
 import { useClickSound } from "@/lib/hooks/useClickSound";
 import { LANGUAGES } from "@/lib/languages";
 
-// Number of featured languages shown above the Continue button
-const FEATURED_COUNT = 4;
-
 export function LanguageSelectionScreen() {
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
   const selectedLanguage = useOnboardingStore(
@@ -56,10 +53,9 @@ export function LanguageSelectionScreen() {
     );
   }, [query]);
 
-  // When searching, show all results together; when not searching, split into featured + rest
+  // When searching show all filtered results, otherwise show only the 4 featured languages
   const isSearching = query.trim().length > 0;
-  const featuredLangs = isSearching ? [] : filtered.slice(0, FEATURED_COUNT);
-  const remainingLangs = isSearching ? filtered : filtered.slice(FEATURED_COUNT);
+  const featuredLangs = LANGUAGES.slice(0, 4); // English, Spanish, French, Danish
 
   const handleSelect = (code: string) => {
     tapHaptic();
@@ -259,20 +255,10 @@ export function LanguageSelectionScreen() {
             showsVerticalScrollIndicator={true}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Featured languages (visible without scrolling) */}
-            {featuredLangs.map(renderLanguageRow)}
+            {/* Language rows — featured 4 when not searching, full filtered list when searching */}
+            {(isSearching ? filtered : featuredLangs).map(renderLanguageRow)}
 
-            {/* Continue button — immediately after Danish / featured section */}
-            {!isSearching && (
-              <View style={{ marginTop: 4, marginBottom: 16 }}>
-                <OnboardingCTAButton onPress={handleContinue} label="Continue" />
-              </View>
-            )}
-
-            {/* Remaining languages (scrollable) */}
-            {remainingLangs.map(renderLanguageRow)}
-
-            {filtered.length === 0 && (
+            {isSearching && filtered.length === 0 && (
               <Text
                 style={{
                   fontFamily: "Inter_400Regular",
@@ -286,12 +272,10 @@ export function LanguageSelectionScreen() {
               </Text>
             )}
 
-            {/* When searching, show Continue at the bottom */}
-            {isSearching && (
-              <View style={{ marginTop: 16 }}>
-                <OnboardingCTAButton onPress={handleContinue} label="Continue" />
-              </View>
-            )}
+            {/* Continue button — always at the bottom of the visible list */}
+            <View style={{ marginTop: 4, marginBottom: 8 }}>
+              <OnboardingCTAButton onPress={handleContinue} label="Continue" />
+            </View>
           </ScrollView>
         </Animated.View>
       </LinearGradient>
