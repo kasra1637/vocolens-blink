@@ -97,11 +97,11 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
   // All surface / border / accent colors derived from theme primary
   const glassTint = hexToRgba(primaryColor, 0.2);
-  const tintWash = hexToRgba(primaryColor, 0.12);
-  const specularColor = hexToRgba(primaryColor, 0.18);
-  const bottomShadowColor = hexToRgba(primaryColor, 0.15);
-  const outerBorderColor = hexToRgba(primaryColor, 0.1);
-  const innerBorderColor = hexToRgba(primaryColor, 0.05);
+  const tintWash = hexToRgba(primaryColor, 0.22);
+  const specularColor = hexToRgba(primaryColor, 0.30);
+  const bottomShadowColor = hexToRgba(primaryColor, 0.20);
+  const outerBorderColor = hexToRgba(primaryColor, 0.28);
+  const innerBorderColor = hexToRgba(primaryColor, 0.12);
   const pillGradientStart = hexToRgba(primaryColor, 0.35);
   const pillGradientEnd = hexToRgba(primaryColor, 0.15);
   const pillSpecularColor = hexToRgba(primaryColor, 0.25);
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 24,
     overflow: "hidden",
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    backgroundColor: "rgba(0, 0, 0, 0.72)",
   },
   tintWash: {
     ...StyleSheet.absoluteFillObject,
@@ -262,14 +262,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 0,
+    paddingHorizontal: 4,
   },
   tabItem: {
     flex: 1,
     height: "100%",
     alignItems: "center",
     justifyContent: "center",
-    gap: 2,
+    gap: 3,
+    paddingHorizontal: 2,
   },
   iconContainer: {
     height: 32,

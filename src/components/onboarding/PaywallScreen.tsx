@@ -402,45 +402,55 @@ export function PaywallScreen() {
             {/* ── Outcome-driven benefits ── */}
             <Animated.View
               entering={FadeIn.delay(120).duration(700).easing(SOFT)}
-              style={{ marginTop: 16, marginBottom: 16 }}
+              style={{ marginTop: 14, marginBottom: 14 }}
             >
-              {[
-                { icon: "✦", text: "Understand what you're really feeling — not just surface emotions" },
-                { icon: "✦", text: "Reduce stress & anxiety with guided voice reflection" },
-                { icon: "✦", text: "Track your emotional growth over weeks and months" },
-                { icon: "✦", text: "Make clearer decisions by uncovering hidden patterns" },
-              ].map((item, idx) => (
-                <View
-                  key={idx}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "flex-start",
-                    marginBottom: idx < 3 ? 10 : 0,
-                  }}
-                >
-                  <Text
+              <View
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.08)",
+                  borderRadius: 18,
+                  borderWidth: 1,
+                  borderColor: "rgba(255,255,255,0.14)",
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  gap: 11,
+                }}
+              >
+                {[
+                  { emoji: "🧠", text: "Understand what you're really feeling — not just surface emotions" },
+                  { emoji: "🌊", text: "Reduce stress & anxiety with guided voice reflection" },
+                  { emoji: "📈", text: "Track your emotional growth over weeks and months" },
+                  { emoji: "🔍", text: "Spot your emotional triggers — topics that consistently affect your mood" },
+                ].map((item, idx) => (
+                  <View
+                    key={idx}
                     style={{
-                      color: "rgba(255,255,255,0.80)",
-                      fontSize: 12,
-                      marginRight: 8,
-                      marginTop: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
                     }}
                   >
-                    {item.icon}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: "Inter_400Regular",
-                      color: "rgba(255,255,255,0.80)",
-                      fontSize: 13,
-                      lineHeight: 19,
-                      flex: 1,
-                    }}
-                  >
-                    {item.text}
-                  </Text>
-                </View>
-              ))}
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        marginRight: 12,
+                        lineHeight: 20,
+                      }}
+                    >
+                      {item.emoji}
+                    </Text>
+                    <Text
+                      style={{
+                        fontFamily: "Inter_400Regular",
+                        color: "rgba(255,255,255,0.88)",
+                        fontSize: 13,
+                        lineHeight: 19,
+                        flex: 1,
+                      }}
+                    >
+                      {item.text}
+                    </Text>
+                  </View>
+                ))}
+              </View>
             </Animated.View>
 
             {/* ── Annual plan card (only plan on main screen) ── */}
