@@ -4,6 +4,11 @@
  * Collects the user's first name immediately after the Personalize
  * Permission screen. The name is persisted in the onboarding store
  * and surfaced as a personalized greeting in later insight screens.
+ *
+ * Layout mirrors MoodSelectionScreen exactly:
+ *  - Fixed height:120 character container at the top
+ *  - Content flows downward with a flex:1 spacer at the bottom
+ *  - No KeyboardAvoidingView — screen stays locked when keyboard opens
  */
 
 import React, { useState, useRef } from "react";
@@ -11,8 +16,6 @@ import {
   View,
   Text,
   TextInput,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -59,7 +62,7 @@ export function NameCollectionScreen() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View className="flex-1">
       <LinearGradient
         colors={themeColors.backgroundGradient}
         style={{ flex: 1 }}
@@ -68,152 +71,147 @@ export function NameCollectionScreen() {
       >
         <ProgressBar currentStep={currentStep} totalSteps={20} />
 
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView className="flex-1">
           <BackButton onPress={handleBack} show={currentStep > 0} />
 
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
-          >
+          {/* Same column layout as MoodSelectionScreen */}
+          <View className="flex-1 px-6 py-3">
+
+            {/* Character — identical container to MoodSelectionScreen */}
             <View
-              style={{
-                flex: 1,
-                paddingHorizontal: 24,
-                justifyContent: "center",
-              }}
+              className="items-center justify-center"
+              style={{ height: 120 }}
             >
-              {/* Companion */}
-              <Animated.View
-                entering={FadeIn.delay(50).duration(800).easing(SOFT)}
-                style={{ alignItems: "center", marginBottom: 8 }}
-              >
-                <EmotionalCompanion
-                  state="idle"
-                  size={112}
-                  themeColor={themeColors.primary}
-                />
-              </Animated.View>
+              <EmotionalCompanion
+                state="idle"
+                size={120}
+                themeColor={themeColors.primary}
+              />
+            </View>
 
-              {/* Title */}
-              <Animated.View
-                entering={FadeIn.delay(150).duration(900).easing(SOFT)}
-                style={{ alignItems: "center", marginBottom: 8 }}
+            {/* Title */}
+            <Animated.View
+              entering={FadeIn.delay(100).duration(900).easing(SOFT)}
+              className="items-center mb-2"
+            >
+              <Text
+                className="text-center"
+                style={{
+                  fontFamily: "Fraunces_700Bold",
+                  color: "#FFFFFF",
+                  fontSize: 26,
+                  opacity: 0.92,
+                  letterSpacing: 0.2,
+                }}
               >
-                <Text
+                How should we call you?
+              </Text>
+            </Animated.View>
+
+            {/* Subtitle */}
+            <Animated.View
+              entering={FadeIn.delay(200).duration(900).easing(SOFT)}
+              className="items-center mb-6"
+            >
+              <Text
+                style={{
+                  fontFamily: "Inter_400Regular",
+                  color: "rgba(255,255,255,0.68)",
+                  fontSize: 14,
+                  textAlign: "center",
+                  lineHeight: 22,
+                  letterSpacing: 0.1,
+                  maxWidth: 280,
+                }}
+              >
+                I'll use it to make your experience feel personal.
+              </Text>
+            </Animated.View>
+
+            {/* Text input */}
+            <Animated.View
+              entering={FadeIn.delay(300).duration(900).easing(SOFT)}
+              style={{ marginBottom: 16 }}
+            >
+              <Pressable onPress={() => inputRef.current?.focus()}>
+                <View
                   style={{
-                    fontFamily: "Fraunces_700Bold",
-                    color: "#FFFFFF",
-                    fontSize: 28,
-                    textAlign: "center",
-                    opacity: 0.95,
-                    letterSpacing: 0.2,
-                    lineHeight: 34,
+                    borderWidth: 2,
+                    borderColor: isReady
+                      ? "rgba(255,255,255,0.70)"
+                      : "rgba(255,255,255,0.28)",
+                    borderRadius: 18,
+                    backgroundColor: isReady
+                      ? "rgba(255,255,255,0.16)"
+                      : "rgba(255,255,255,0.08)",
+                    paddingHorizontal: 20,
+                    paddingVertical: 18,
                   }}
                 >
-                  How should we call you?
-                </Text>
-              </Animated.View>
-
-              {/* Subtitle */}
-              <Animated.View
-                entering={FadeIn.delay(260).duration(900).easing(SOFT)}
-                style={{ alignItems: "center", marginBottom: 36 }}
-              >
-                <Text
-                  style={{
-                    fontFamily: "Inter_400Regular",
-                    color: "rgba(255,255,255,0.68)",
-                    fontSize: 14,
-                    textAlign: "center",
-                    lineHeight: 22,
-                    letterSpacing: 0.1,
-                    maxWidth: 280,
-                  }}
-                >
-                  I'll use it to make your experience feel personal.
-                </Text>
-              </Animated.View>
-
-              {/* Text input */}
-              <Animated.View
-                entering={FadeIn.delay(360).duration(900).easing(SOFT)}
-                style={{ marginBottom: 28 }}
-              >
-                <Pressable onPress={() => inputRef.current?.focus()}>
-                  <View
+                  <TextInput
+                    ref={inputRef}
+                    value={name}
+                    onChangeText={(text) => {
+                      setName(text);
+                      if (text.trim().length === 1 && name.trim().length === 0) {
+                        selectHaptic();
+                      }
+                    }}
+                    placeholder="Enter your first name"
+                    placeholderTextColor="rgba(255,255,255,0.38)"
+                    autoCorrect={false}
+                    autoCapitalize="words"
+                    returnKeyType="done"
+                    onSubmitEditing={handleContinue}
+                    // Prevent the keyboard from scrolling/resizing the view
+                    scrollEnabled={false}
                     style={{
-                      borderWidth: 2,
-                      borderColor: isReady
-                        ? "rgba(255,255,255,0.70)"
-                        : "rgba(255,255,255,0.28)",
-                      borderRadius: 18,
-                      backgroundColor: isReady
-                        ? "rgba(255,255,255,0.16)"
-                        : "rgba(255,255,255,0.08)",
-                      paddingHorizontal: 20,
-                      paddingVertical: Platform.OS === "ios" ? 18 : 14,
+                      fontFamily: "Inter_600SemiBold",
+                      color: "#FFFFFF",
+                      fontSize: 18,
+                      textAlign: "center",
+                      padding: 0,
+                      margin: 0,
+                    }}
+                  />
+                </View>
+              </Pressable>
+
+              {/* Nice-to-meet-you hint */}
+              {trimmed.length > 0 && (
+                <Animated.View
+                  entering={FadeIn.duration(400).easing(SOFT)}
+                  style={{ alignItems: "center", marginTop: 10 }}
+                >
+                  <Text
+                    style={{
+                      fontFamily: "Inter_400Regular",
+                      color: "rgba(255,255,255,0.55)",
+                      fontSize: 12,
+                      letterSpacing: 0.2,
                     }}
                   >
-                    <TextInput
-                      ref={inputRef}
-                      value={name}
-                      onChangeText={(text) => {
-                        setName(text);
-                        if (text.trim().length === 1 && name.trim().length === 0) {
-                          selectHaptic();
-                        }
-                      }}
-                      placeholder="Enter your first name"
-                      placeholderTextColor="rgba(255,255,255,0.38)"
-                      autoCorrect={false}
-                      autoCapitalize="words"
-                      returnKeyType="done"
-                      onSubmitEditing={handleContinue}
-                      style={{
-                        fontFamily: "Inter_600SemiBold",
-                        color: "#FFFFFF",
-                        fontSize: 18,
-                        textAlign: "center",
-                        padding: 0,
-                        margin: 0,
-                      }}
-                    />
-                  </View>
-                </Pressable>
+                    👋 Nice to meet you, {trimmed}!
+                  </Text>
+                </Animated.View>
+              )}
+            </Animated.View>
 
-                {/* Animated underline hint */}
-                {trimmed.length > 0 && (
-                  <Animated.View
-                    entering={FadeIn.duration(400).easing(SOFT)}
-                    style={{ alignItems: "center", marginTop: 10 }}
-                  >
-                    <Text
-                      style={{
-                        fontFamily: "Inter_400Regular",
-                        color: "rgba(255,255,255,0.55)",
-                        fontSize: 12,
-                        letterSpacing: 0.2,
-                      }}
-                    >
-                      👋 Nice to meet you, {trimmed}!
-                    </Text>
-                  </Animated.View>
-                )}
-              </Animated.View>
+            {/* CTA — same position as MoodSelectionScreen's Continue button */}
+            <Animated.View
+              entering={FadeIn.delay(440).duration(800).easing(SOFT)}
+              className="pb-6"
+            >
+              <OnboardingCTAButton
+                label="Continue"
+                onPress={handleContinue}
+                disabled={!isReady}
+              />
+            </Animated.View>
 
-              {/* CTA */}
-              <Animated.View
-                entering={FadeIn.delay(480).duration(800).easing(SOFT)}
-              >
-                <OnboardingCTAButton
-                  label="Continue"
-                  onPress={handleContinue}
-                  disabled={!isReady}
-                />
-              </Animated.View>
-            </View>
-          </KeyboardAvoidingView>
+            {/* Spacer pushes everything up, mirrors other screens */}
+            <View style={{ flex: 1 }} />
+          </View>
         </SafeAreaView>
       </LinearGradient>
     </View>

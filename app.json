@@ -11,7 +11,8 @@
       "bundleIdentifier": "com.vocolens.app"
     },
     "android": {
-      "package": "com.vocolens.app"
+      "package": "com.vocolens.app",
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "bundler": "metro"
