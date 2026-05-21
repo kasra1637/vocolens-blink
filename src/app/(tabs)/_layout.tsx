@@ -12,43 +12,35 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
-import Animated, {
-  useSharedValue,
-  withTiming,
-  Easing,
-  useReducedMotion,
-} from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { useClientOnlyValue } from "@/lib/useClientOnlyValue";
 import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import useSettingsStore from "@/lib/state/settings-store";
 
-const ICON_SIZE = 22;
-// No rounded corners — completely flush with the screen edge on all sides
-const TOP_RADIUS = 0;
+const ICON_SIZE = 24;
 
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const reducedMotion = useReducedMotion();
 
   // Theme colors - reactively update when theme changes
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
   const isDarkMode = useSettingsStore((s) => s.isDarkMode);
   const theme = THEME_COLORS[selectedTheme];
+  const primaryColor = theme.primary;
 
-  // Shared value for the active tab index animation
-  const activeIndex = useSharedValue(state.index);
+  const hexToRgba = (hex: string, alpha: number) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
 
-  React.useEffect(() => {
-    activeIndex.value = withTiming(state.index, {
-      duration: reducedMotion ? 0 : 600,
-      easing: Easing.bezier(0.33, 1, 0.68, 1),
-    });
-  }, [state.index, reducedMotion]);
+  // Derive the darkest colour from the theme's background gradient for seamless merge
+  const barBg = theme.backgroundGradient[2];
 
   const renderIcon = (index: number, isFocused: boolean) => {
-    const color = isFocused ? "#FFFFFF" : "rgba(255,255,255,0.5)";
+    const color = isFocused ? "#FFFFFF" : "rgba(255,255,255,0.45)";
 
     switch (index) {
       case 0:
@@ -68,56 +60,22 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 
   const LABELS = ["Record", "Entries", "Insights", "Awards", "Settings"];
 
-  // ─── Theme-derived color utilities ──────────────────────────────────────────
-  const primaryColor = theme.primary;
-
-  const hexToRgba = (hex: string, alpha: number) => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  };
-
-  // All surface / border / accent colors derived from theme primary
-  const tintWash = hexToRgba(primaryColor, 0.22);
-  const specularColor = hexToRgba(primaryColor, 0.30);
-  const outerBorderColor = hexToRgba(primaryColor, 0.28);
-  const innerBorderColor = hexToRgba(primaryColor, 0.12);
-  const inactiveLabelOpacity = 0.5;
-
-  // Height of the icon+label row — safe-area padding added below as extra fill
-  const TAB_ROW_HEIGHT = 64;
-
   return (
-    // Full-width container anchored to the bottom — completely flush, no gaps
-    <View style={[styles.container, { backgroundColor: "rgba(0,0,0,0.72)" }]}>
-      {/* ── Glassmorphic surface ────────────────────────────────────────────── */}
+    <View style={[styles.container, { backgroundColor: barBg }]}>
+      {/* Blur layer for glassmorphic depth */}
+      <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFill} />
 
-      {/* Deep blur base */}
-      <BlurView intensity={90} tint="dark" style={StyleSheet.absoluteFill} />
+      {/* Darkened overlay to ensure readability */}
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.45)" }]} />
 
-      {/* Solid dark base so blur has something to tint against */}
-      <View style={[StyleSheet.absoluteFill, styles.darkBase]} />
+      {/* Subtle theme tint wash */}
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: hexToRgba(primaryColor, 0.12) }]} />
 
-      {/* Theme-tinted colour wash */}
-      <View style={[StyleSheet.absoluteFill, styles.tintWash, { backgroundColor: tintWash }]} />
+      {/* Thin top separator line */}
+      <View style={[styles.topLine, { backgroundColor: hexToRgba(primaryColor, 0.20) }]} />
 
-      {/* Top-edge light gradient (shine) */}
-      <LinearGradient
-        colors={[hexToRgba(primaryColor, 0.12), "transparent"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={styles.topLight}
-      />
-
-      {/* Specular highlight line on the very top edge — top only, no side borders */}
-      <View style={[styles.specularLine, { backgroundColor: specularColor }]} />
-
-      {/* Single top border line only — no sides, no corners, no rounding */}
-      <View style={[styles.topBorder, { backgroundColor: outerBorderColor }]} />
-
-      {/* ── Tab row ─────────────────────────────────────────────────────────── */}
-      <View style={[styles.content, { height: TAB_ROW_HEIGHT + insets.bottom, paddingBottom: insets.bottom }]}>
+      {/* Tab row — paddingBottom handles safe area inside the bar */}
+      <View style={[styles.tabRow, { paddingBottom: insets.bottom }]}>
         {state.routes.map((route, index) => {
           const isFocused = state.index === index;
 
@@ -139,19 +97,21 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
               onPress={onPress}
               style={styles.tabItem}
             >
+              {/* Active indicator dot */}
+              {isFocused && (
+                <View style={[styles.activeDot, { backgroundColor: primaryColor }]} />
+              )}
+
               <View style={styles.iconContainer}>
                 {renderIcon(index, isFocused)}
               </View>
               <Text
                 numberOfLines={1}
-                adjustsFontSizeToFit
                 style={[
                   styles.label,
                   {
-                    fontFamily: isFocused ? "Inter_700Bold" : "Inter_400Regular",
-                    color: isFocused
-                      ? "#FFFFFF"
-                      : `rgba(255,255,255,${inactiveLabelOpacity})`,
+                    fontFamily: isFocused ? "Inter_600SemiBold" : "Inter_400Regular",
+                    color: isFocused ? "#FFFFFF" : "rgba(255,255,255,0.45)",
                   },
                 ]}
               >
@@ -166,63 +126,44 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 }
 
 const styles = StyleSheet.create({
-  // Full-width, anchored to bottom — no border radius, no overflow hidden, no gaps
   container: {
     width: "100%",
-    zIndex: 100,
   },
-  darkBase: {
-    backgroundColor: "rgba(0, 0, 0, 0.72)",
-  },
-  tintWash: {
-    // filled dynamically
-  },
-  topLight: {
+  topLine: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    height: 30,
+    height: StyleSheet.hairlineWidth,
   },
-  specularLine: {
-    position: "absolute",
-    top: 0.5,
-    left: 16,
-    right: 16,
-    height: 1,
-    borderRadius: 0.5,
-  },
-  // Single 1px line across the very top — no side/bottom borders, no radius
-  topBorder: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 1,
-  },
-  content: {
+  tabRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 4,
+    paddingTop: 10,
   },
   tabItem: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    gap: 3,
-    paddingHorizontal: 2,
-    paddingTop: 4,
-    height: "100%",
+    gap: 4,
+    paddingBottom: 6,
+  },
+  activeDot: {
+    position: "absolute",
+    top: -6,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
   },
   iconContainer: {
-    height: 32,
-    width: 32,
+    height: 28,
+    width: 28,
     alignItems: "center",
     justifyContent: "center",
   },
   label: {
-    fontSize: 11,
-    letterSpacing: 0.1,
+    fontSize: 10,
+    letterSpacing: 0.2,
     textAlign: "center",
   },
 });

@@ -413,6 +413,8 @@ function InsightsContent({
     ];
   }, [entries]);
 
+  const userName = useOnboardingStore((s) => s.userName);
+
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -432,8 +434,6 @@ function InsightsContent({
       </View>
     );
   }
-
-  const userName = useOnboardingStore((s) => s.userName);
 
   const user = {
     name: userName ? userName.split(" ")[0] : "Friend",
