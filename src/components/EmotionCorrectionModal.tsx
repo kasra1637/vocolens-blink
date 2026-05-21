@@ -789,7 +789,9 @@ export default function EmotionCorrectionModal({
                 onPress={handleSubmitWithReason}
                 style={{
                   flex: 2,
-                  backgroundColor: Colors.primary,
+                  backgroundColor: hexToRgba(Colors.primary, 0.25),
+                  borderWidth: 1.5,
+                  borderColor: hexToRgba(Colors.primary, 0.55),
                   borderRadius: 16,
                   paddingVertical: 16,
                   alignItems: "center",
