@@ -11,7 +11,6 @@
       "bundleIdentifier": "com.vocolens.app"
     },
     "android": {
-      "edgeToEdgeEnabled": true,
       "package": "com.vocolens.app"
     },
     "web": {
