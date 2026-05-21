@@ -3,7 +3,8 @@
  *
  * Lets the user pick their preferred language for voice transcription.
  * Presents all Deepgram Nova-2 supported languages in a searchable scrollable list.
- * Saves the choice to the onboarding store so every recording session uses it.
+ * The Continue button is positioned directly under the 4th language (Danish)
+ * so it's immediately visible — users scroll down to see more languages.
  */
 
 import React, { useState, useMemo } from "react";
@@ -12,7 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn, Easing } from "react-native-reanimated";
 const SOFT = Easing.bezier(0.16, 1, 0.3, 1);
-import { Check, Search } from "lucide-react-native";
+import { Check, Search, ChevronDown } from "lucide-react-native";
 import { tapHaptic, selectHaptic, confirmHaptic } from "@/lib/haptics";
 import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
@@ -20,6 +21,9 @@ import { BackButton } from "@/components/onboarding/BackButton";
 import { OnboardingCTAButton } from "@/components/onboarding/OnboardingCTAButton";
 import { useClickSound } from "@/lib/hooks/useClickSound";
 import { LANGUAGES } from "@/lib/languages";
+
+// Number of featured languages shown above the Continue button
+const FEATURED_COUNT = 4;
 
 export function LanguageSelectionScreen() {
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
@@ -52,6 +56,11 @@ export function LanguageSelectionScreen() {
     );
   }, [query]);
 
+  // When searching, show all results together; when not searching, split into featured + rest
+  const isSearching = query.trim().length > 0;
+  const featuredLangs = isSearching ? [] : filtered.slice(0, FEATURED_COUNT);
+  const remainingLangs = isSearching ? filtered : filtered.slice(FEATURED_COUNT);
+
   const handleSelect = (code: string) => {
     tapHaptic();
     setSelectedTranscriptionLanguage(code);
@@ -73,10 +82,85 @@ export function LanguageSelectionScreen() {
   const surfaceBg = isDark
     ? "rgba(255,255,255,0.07)"
     : "rgba(255,255,255,0.18)";
-  const selectedBg = isDark
+  const selectedBgColor = isDark
     ? "rgba(163,139,250,0.22)"
     : "rgba(255,255,255,0.38)";
   const borderSel = isDark ? "rgba(163,139,250,0.6)" : "rgba(255,255,255,0.8)";
+
+  // Shared language row renderer
+  const renderLanguageRow = (lang: (typeof LANGUAGES)[0]) => {
+    const isSelected = lang.code === selectedLanguage;
+    return (
+      <Pressable
+        key={lang.code}
+        onPress={() => handleSelect(lang.code)}
+        style={({ pressed }) => ({
+          backgroundColor: isSelected ? selectedBgColor : surfaceBg,
+          borderRadius: 14,
+          marginBottom: 8,
+          borderWidth: 1.5,
+          borderColor: isSelected ? borderSel : "transparent",
+          opacity: pressed ? 0.75 : 1,
+        })}
+      >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            paddingHorizontal: 14,
+            paddingVertical: 13,
+          }}
+        >
+          <Text style={{ fontSize: 22, marginRight: 12, color: "#FFFFFF" }}>
+            {lang.flag}
+          </Text>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text
+              style={{
+                fontFamily: "Inter_700Bold",
+                fontSize: 14,
+                color: "#FFFFFF",
+                letterSpacing: 0.1,
+              }}
+            >
+              {lang.name}
+            </Text>
+            {lang.native !== lang.name && (
+              <Text
+                style={{
+                  fontFamily: "Inter_400Regular",
+                  fontSize: 12,
+                  color: "rgba(255,255,255,0.6)",
+                  marginTop: 1,
+                }}
+              >
+                {lang.native}
+              </Text>
+            )}
+          </View>
+          <View
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 11,
+              marginLeft: 10,
+              backgroundColor: isSelected ? accentColor : "transparent",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {isSelected && (
+              <Check
+                size={13}
+                color={isDark ? "#1A1A2E" : theme.primary}
+                strokeWidth={3}
+              />
+            )}
+          </View>
+        </View>
+      </Pressable>
+    );
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -161,7 +245,7 @@ export function LanguageSelectionScreen() {
           </View>
         </Animated.View>
 
-        {/* Language list — fills available space, Continue button anchored inside at the bottom */}
+        {/* Language list */}
         <Animated.View
           entering={FadeIn.delay(200).duration(500).easing(SOFT)}
           style={{ flex: 1 }}
@@ -169,98 +253,39 @@ export function LanguageSelectionScreen() {
           <ScrollView
             contentContainerStyle={{
               paddingHorizontal: 24,
-              paddingTop: 4,
+              paddingTop: 8,
               paddingBottom: 24,
             }}
             showsVerticalScrollIndicator={true}
             keyboardShouldPersistTaps="handled"
           >
-            {filtered.map((lang) => {
-              const isSelected = lang.code === selectedLanguage;
-              return (
-                <Pressable
-                  key={lang.code}
-                  onPress={() => handleSelect(lang.code)}
-                  style={({ pressed }) => ({
-                    backgroundColor: isSelected ? selectedBg : surfaceBg,
-                    borderRadius: 14,
-                    marginBottom: 8,
-                    borderWidth: 1.5,
-                    borderColor: isSelected ? borderSel : "transparent",
-                    opacity: pressed ? 0.75 : 1,
-                  })}
-                >
-                  <View
+            {/* Featured languages (visible without scrolling) */}
+            {featuredLangs.map(renderLanguageRow)}
+
+            {/* Continue button — immediately after Danish / featured section */}
+            {!isSearching && (
+              <View style={{ marginTop: 4, marginBottom: 16 }}>
+                <OnboardingCTAButton onPress={handleContinue} label="Continue" />
+
+                {/* Scroll hint */}
+                <View style={{ alignItems: "center", marginTop: 14 }}>
+                  <Text
                     style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      paddingHorizontal: 14,
-                      paddingVertical: 13,
+                      fontFamily: "Inter_400Regular",
+                      fontSize: 12,
+                      color: "rgba(255,255,255,0.5)",
+                      marginBottom: 4,
                     }}
                   >
-                    {/* Flag */}
-                    <Text
-                      style={{
-                        fontSize: 22,
-                        marginRight: 12,
-                        color: "#FFFFFF",
-                      }}
-                    >
-                      {lang.flag}
-                    </Text>
+                    More languages below
+                  </Text>
+                  <ChevronDown size={16} color="rgba(255,255,255,0.4)" strokeWidth={2} />
+                </View>
+              </View>
+            )}
 
-                    {/* Names */}
-                    <View style={{ flex: 1, minWidth: 0 }}>
-                      <Text
-                        style={{
-                          fontFamily: "Inter_700Bold",
-                          fontSize: 14,
-                          color: "#FFFFFF",
-                          letterSpacing: 0.1,
-                        }}
-                      >
-                        {lang.name}
-                      </Text>
-                      {lang.native !== lang.name && (
-                        <Text
-                          style={{
-                            fontFamily: "Inter_400Regular",
-                            fontSize: 12,
-                            color: "rgba(255,255,255,0.6)",
-                            marginTop: 1,
-                          }}
-                        >
-                          {lang.native}
-                        </Text>
-                      )}
-                    </View>
-
-                    {/* Checkmark — always reserve space so layout doesn't shift */}
-                    <View
-                      style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: 11,
-                        marginLeft: 10,
-                        backgroundColor: isSelected
-                          ? accentColor
-                          : "transparent",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {isSelected && (
-                        <Check
-                          size={13}
-                          color={isDark ? "#1A1A2E" : theme.primary}
-                          strokeWidth={3}
-                        />
-                      )}
-                    </View>
-                  </View>
-                </Pressable>
-              );
-            })}
+            {/* Remaining languages (scrollable) */}
+            {remainingLangs.map(renderLanguageRow)}
 
             {filtered.length === 0 && (
               <Text
@@ -276,13 +301,14 @@ export function LanguageSelectionScreen() {
               </Text>
             )}
 
-            {/* Continue button — directly below the language list */}
-            <View style={{ marginTop: 12 }}>
-              <OnboardingCTAButton onPress={handleContinue} label="Continue" />
-            </View>
+            {/* When searching, show Continue at the bottom */}
+            {isSearching && (
+              <View style={{ marginTop: 16 }}>
+                <OnboardingCTAButton onPress={handleContinue} label="Continue" />
+              </View>
+            )}
           </ScrollView>
         </Animated.View>
-
       </LinearGradient>
 
       {/* Progress bar + back button overlay */}
