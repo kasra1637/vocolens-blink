@@ -102,44 +102,41 @@ const useUserStatsStore = create<UserStatsStore>()(
 
       updateStreak: (entryDate) => {
         const { stats } = get();
-        const today = new Date(entryDate).toDateString();
-        const lastEntry = stats.lastEntryDate
-          ? new Date(stats.lastEntryDate).toDateString()
+
+        // Use local date strings (YYYY-MM-DD) consistently to avoid timezone issues.
+        // new Date(isoString).toLocaleDateString('en-CA') → "YYYY-MM-DD" in local time.
+        const toLocalDateStr = (iso: string) =>
+          new Date(iso).toLocaleDateString('en-CA'); // "YYYY-MM-DD"
+
+        const entryLocalDate = toLocalDateStr(entryDate);
+        const lastLocalDate = stats.lastEntryDate
+          ? toLocalDateStr(stats.lastEntryDate)
           : null;
 
         let newStreak = stats.currentStreak;
 
-        console.log('[UserStatsStore] updateStreak called');
-        console.log('[UserStatsStore] Entry date:', entryDate);
-        console.log('[UserStatsStore] Today:', today);
-        console.log('[UserStatsStore] Last entry:', lastEntry);
-        console.log('[UserStatsStore] Current streak:', stats.currentStreak);
-
-        if (!lastEntry) {
+        if (!lastLocalDate) {
+          // First ever entry
           newStreak = 1;
-          console.log('[UserStatsStore] First entry ever, streak = 1');
-        } else if (today === lastEntry) {
+        } else if (entryLocalDate === lastLocalDate) {
+          // Same calendar day — streak unchanged
           newStreak = stats.currentStreak;
-          console.log('[UserStatsStore] Same day entry, streak unchanged:', newStreak);
         } else {
-          const lastDate = new Date(stats.lastEntryDate!);
-          const currentDate = new Date(entryDate);
-          const diffTime = currentDate.getTime() - lastDate.getTime();
-          const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-          console.log('[UserStatsStore] Days difference:', diffDays);
+          // Compare calendar day difference using local date parts only
+          const [ey, em, ed] = entryLocalDate.split('-').map(Number);
+          const [ly, lm, ld] = lastLocalDate.split('-').map(Number);
+          const entryMs = new Date(ey, em - 1, ed).getTime();
+          const lastMs = new Date(ly, lm - 1, ld).getTime();
+          const diffDays = Math.round((entryMs - lastMs) / (1000 * 60 * 60 * 24));
 
           if (diffDays === 1) {
             newStreak = stats.currentStreak + 1;
-            console.log('[UserStatsStore] Consecutive day! New streak:', newStreak);
           } else if (diffDays > 1) {
+            // Missed at least one day — reset streak
             newStreak = 1;
-            console.log('[UserStatsStore] Streak broken, resetting to 1');
           }
+          // diffDays < 0 shouldn't happen in normal flow, leave streak as-is
         }
-
-        console.log('[UserStatsStore] Final new streak:', newStreak);
-        console.log('[UserStatsStore] Longest streak:', Math.max(newStreak, stats.longestStreak));
 
         set((state) => ({
           stats: {

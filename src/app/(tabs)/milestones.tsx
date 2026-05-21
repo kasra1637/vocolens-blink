@@ -45,6 +45,11 @@ import {
   CalendarCheck,
   Clock,
   Settings,
+  Mic,
+  Activity,
+  Compass,
+  Scale,
+  Library,
 } from "lucide-react-native";
 import Animated, {
   FadeOut,
@@ -93,10 +98,15 @@ const BADGE_ICONS: Record<string, typeof Flame> = {
   "book-open": BookOpen,
   "pen-tool": PenTool,
   book: Book,
+  library: Library,
   sunrise: Sunrise,
   "moon-star": MoonStar,
   "calendar-check": CalendarCheck,
   clock: Clock,
+  scale: Scale,
+  mic: Mic,
+  activity: Activity,
+  compass: Compass,
 };
 
 // Rarity colors and effects

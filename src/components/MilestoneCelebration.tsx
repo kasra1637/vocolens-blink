@@ -34,11 +34,14 @@ import {
   Clock,
   Scale,
   Library,
+  Mic,
+  Activity,
+  Compass,
 } from "lucide-react-native";
 import useBadgesStore from "@/lib/state/badges-store";
 import { shareMilestone } from "@/lib/share-utils";
 import { useMilestoneSound } from "@/lib/hooks/useMilestoneSound";
-import { Badge, BadgeRarity } from "@/lib/types";
+import { Badge } from "@/lib/types";
 import useOnboardingStore from "@/lib/state/onboarding-store";
 import { THEME_COLORS } from "@/lib/state/onboarding-store";
 
@@ -72,20 +75,9 @@ const BADGE_ICONS: Record<
   "calendar-check": CalendarCheck,
   clock: Clock,
   scale: Scale,
-};
-
-const RARITY_CONFIG: Record<
-  BadgeRarity,
-  { label: string; color: string; glow: string }
-> = {
-  common: { label: "Common", color: "#8BA888", glow: "rgba(139,168,136,0.35)" },
-  rare: { label: "Rare", color: "#7BA7D4", glow: "rgba(123,167,212,0.40)" },
-  epic: { label: "Epic", color: "#A47FC4", glow: "rgba(164,127,196,0.45)" },
-  legendary: {
-    label: "Legendary",
-    color: "#F4C542",
-    glow: "rgba(244,197,66,0.50)",
-  },
+  mic: Mic,
+  activity: Activity,
+  compass: Compass,
 };
 
 const CONFETTI_COLORS = [
@@ -288,7 +280,6 @@ export function MilestoneCelebration() {
 
   if (!badge) return null;
 
-  const rarity = RARITY_CONFIG[badge.rarity];
   const BadgeIcon = BADGE_ICONS[badge.icon] ?? Award;
 
   return (
@@ -350,12 +341,11 @@ export function MilestoneCelebration() {
               borderRadius: 28,
               backgroundColor: "rgba(18,10,36,0.96)",
               borderWidth: 1.5,
-              borderColor: rarity.color + "60",
+              borderColor: themeColor + "60",
               overflow: "hidden",
-              // Rarity glow
-              shadowColor: rarity.color,
+              shadowColor: themeColor,
               shadowOffset: { width: 0, height: 0 },
-              shadowOpacity: 0.6,
+              shadowOpacity: 0.55,
               shadowRadius: 32,
               elevation: 20,
             },
@@ -365,7 +355,7 @@ export function MilestoneCelebration() {
           <View
             style={{
               height: 3,
-              backgroundColor: rarity.color,
+              backgroundColor: themeColor,
               opacity: 0.9,
             }}
           />
@@ -377,9 +367,9 @@ export function MilestoneCelebration() {
                 paddingHorizontal: 12,
                 paddingVertical: 4,
                 borderRadius: 20,
-                backgroundColor: rarity.color + "22",
+                backgroundColor: themeColor + "22",
                 borderWidth: 1,
-                borderColor: rarity.color + "55",
+                borderColor: themeColor + "55",
                 marginBottom: 20,
               }}
             >
@@ -387,16 +377,16 @@ export function MilestoneCelebration() {
                 style={{
                   fontFamily: "Inter_700Bold",
                   fontSize: 10,
-                  color: rarity.color,
+                  color: themeColor,
                   textTransform: "uppercase",
                   letterSpacing: 1.2,
                 }}
               >
-                {rarity.label} Milestone
+                {badge.rarity.charAt(0).toUpperCase() + badge.rarity.slice(1)} Milestone
               </Text>
             </View>
 
-            {/* Emoji / icon */}
+            {/* Icon */}
             <Animated.View
               style={[
                 emojiStyle,
@@ -404,12 +394,12 @@ export function MilestoneCelebration() {
                   width: 88,
                   height: 88,
                   borderRadius: 44,
-                  backgroundColor: rarity.glow,
+                  backgroundColor: themeColor + "28",
                   alignItems: "center",
                   justifyContent: "center",
                   marginBottom: 18,
                   borderWidth: 1.5,
-                  borderColor: rarity.color + "40",
+                  borderColor: themeColor + "50",
                 },
               ]}
             >
@@ -445,7 +435,7 @@ export function MilestoneCelebration() {
                 style={{
                   fontFamily: "Inter_600SemiBold",
                   fontSize: 13,
-                  color: rarity.color,
+                  color: themeColor,
                   textAlign: "center",
                   marginBottom: 26,
                 }}

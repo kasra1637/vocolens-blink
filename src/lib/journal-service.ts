@@ -15,10 +15,14 @@ import useUserStatsStore from "./state/user-stats-store";
 import useBadgesStore from "./state/badges-store";
 import {
   countEntriesByTimeOfDay,
-  countPositiveEntries,
-  countNeutralEntries,
+  countPositiveEntriesByValence,
+  countNeutralEntriesByValence,
   getUniqueEmotions,
   getLongestSessionDuration,
+  getTotalDurationSeconds,
+  getUniqueTopicCount,
+  getMaxEmotionIntensity,
+  countWeeksWithMinEntries,
 } from "./analytics";
 import {
   transcribeAudioWithRetry,
@@ -740,8 +744,8 @@ export async function createJournalEntry(
   const newlyUnlocked = badgesStore.checkAndUpdateBadges({
     streak: stats.currentStreak,
     totalEntries: stats.totalEntries,
-    positiveEntries: countPositiveEntries(allEntries),
-    neutralEntries: countNeutralEntries(allEntries),
+    positiveEntries: countPositiveEntriesByValence(allEntries),
+    neutralEntries: countNeutralEntriesByValence(allEntries),
     morningEntries: timeOfDay.morning,
     eveningEntries: timeOfDay.evening,
     uniqueEmotions: getUniqueEmotions(allEntries),
@@ -749,6 +753,10 @@ export async function createJournalEntry(
       getLongestSessionDuration(allEntries),
       duration,
     ),
+    totalDurationSeconds: getTotalDurationSeconds(allEntries),
+    uniqueTopicCount: getUniqueTopicCount(allEntries),
+    maxEmotionIntensity: getMaxEmotionIntensity(allEntries),
+    weeksWithFullCoverage: countWeeksWithMinEntries(allEntries, 7),
   });
 
   // Queue a celebration for each newly unlocked badge

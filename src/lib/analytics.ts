@@ -260,6 +260,72 @@ export function getLongestSessionDuration(entries: JournalEntry[]): number {
   return Math.max(...entries.map((entry) => entry.duration));
 }
 
+// Get total recording duration in seconds across all entries
+export function getTotalDurationSeconds(entries: JournalEntry[]): number {
+  return entries.reduce((sum, entry) => sum + (entry.duration || 0), 0);
+}
+
+// Get unique topic count across all entries
+export function getUniqueTopicCount(entries: JournalEntry[]): number {
+  const topics = new Set<string>();
+  entries.forEach((entry) => {
+    entry.topics?.forEach((topic) => {
+      if (topic && topic.trim().length > 0) topics.add(topic.trim().toLowerCase());
+    });
+  });
+  return topics.size;
+}
+
+// Get max emotion intensity across all entries
+export function getMaxEmotionIntensity(entries: JournalEntry[]): number {
+  if (entries.length === 0) return 0;
+  return Math.max(...entries.map((e) => e.emotionIntensity || 0));
+}
+
+// Count positive entries using valence (positive valence > 20)
+export function countPositiveEntriesByValence(entries: JournalEntry[]): number {
+  return entries.filter((entry) => {
+    if (entry.valence !== undefined) return entry.valence > 20;
+    // Fallback: primary emotion is a positive emotion
+    const positiveEmotions: EmotionType[] = ['happiness', 'trust', 'anticipation', 'surprise'];
+    return entry.primaryEmotion !== undefined && positiveEmotions.includes(entry.primaryEmotion as EmotionType);
+  }).length;
+}
+
+// Count neutral entries using valence (-20 to +20) or mid-range intensity fallback
+export function countNeutralEntriesByValence(entries: JournalEntry[]): number {
+  return entries.filter((entry) => {
+    if (entry.valence !== undefined) return entry.valence >= -20 && entry.valence <= 20;
+    // Fallback: emotionIntensity between 35-65
+    return entry.emotionIntensity >= 35 && entry.emotionIntensity <= 65;
+  }).length;
+}
+
+// Count how many complete calendar weeks have at least N entries each
+// A "week" is Mon–Sun local time
+export function countWeeksWithMinEntries(entries: JournalEntry[], minPerWeek: number = 7): number {
+  if (entries.length === 0) return 0;
+
+  // Group entries by ISO week key (YYYY-Www)
+  const weekCounts: Record<string, Set<string>> = {};
+  entries.forEach((entry) => {
+    const d = new Date(entry.createdAt);
+    // Get Monday of the entry's week
+    const day = d.getDay(); // 0=Sun
+    const diff = (day === 0 ? -6 : 1 - day);
+    const monday = new Date(d);
+    monday.setDate(d.getDate() + diff);
+    monday.setHours(0, 0, 0, 0);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (!weekCounts[weekKey]) weekCounts[weekKey] = new Set();
+    // Use date string as key to count distinct days
+    weekCounts[weekKey].add(d.toLocaleDateString('en-CA')); // YYYY-MM-DD
+  });
+
+  return Object.values(weekCounts).filter((days) => days.size >= minPerWeek).length;
+}
+
 // Format mood data for charts
 export function formatMoodDataForChart(
   summaries: DailyMoodSummary[],
