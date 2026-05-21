@@ -1377,9 +1377,9 @@ export default function EntryDetailScreen() {
               }}
               className="flex-row items-center justify-center rounded-3xl py-4 px-5"
               style={{
-                backgroundColor: hexToRgba(Colors.primary, 0.15),
-                borderWidth: 1.5,
-                borderColor: hexToRgba(Colors.primary, 0.35),
+                backgroundColor: "rgba(255, 255, 255, 0.12)",
+                borderWidth: 2,
+                borderColor: "rgba(255, 255, 255, 0.20)",
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.08,

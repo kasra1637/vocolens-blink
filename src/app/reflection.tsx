@@ -323,8 +323,8 @@ export default function ReflectionScreen() {
                   s.defCard,
                   {
                     overflow: "hidden",
-                    backgroundColor: hexToRgba(Colors.primary, 0.1),
-                    borderColor: hexToRgba(Colors.primary, 0.15),
+                    backgroundColor: "rgba(255, 255, 255, 0.12)",
+                    borderColor: "rgba(255, 255, 255, 0.20)",
                   },
                 ]}
               >
@@ -356,8 +356,8 @@ export default function ReflectionScreen() {
                 s.nextBtn,
                 {
                   overflow: "hidden",
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderColor: hexToRgba(Colors.primary, 0.15),
+                  backgroundColor: "rgba(255, 255, 255, 0.12)",
+                  borderColor: "rgba(255, 255, 255, 0.20)",
                 },
               ]}
             >
@@ -381,8 +381,8 @@ export default function ReflectionScreen() {
                 s.sliderCard,
                 {
                   overflow: "hidden",
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderColor: hexToRgba(Colors.primary, 0.15),
+                  backgroundColor: "rgba(255, 255, 255, 0.12)",
+                  borderColor: "rgba(255, 255, 255, 0.20)",
                 },
               ]}
             >
@@ -413,8 +413,8 @@ export default function ReflectionScreen() {
                 {
                   marginTop: 16,
                   overflow: "hidden",
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderColor: hexToRgba(Colors.primary, 0.15),
+                  backgroundColor: "rgba(255, 255, 255, 0.12)",
+                  borderColor: "rgba(255, 255, 255, 0.20)",
                 },
               ]}
             >
@@ -445,8 +445,8 @@ export default function ReflectionScreen() {
                   s.distressBanner,
                   {
                     overflow: "hidden",
-                    backgroundColor: hexToRgba(Colors.primary, 0.1),
-                    borderColor: hexToRgba(Colors.primary, 0.15),
+                    backgroundColor: "rgba(255, 255, 255, 0.12)",
+                    borderColor: "rgba(255, 255, 255, 0.20)",
                   },
                 ]}
               >
@@ -465,8 +465,8 @@ export default function ReflectionScreen() {
                 s.nextBtn,
                 {
                   overflow: "hidden",
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderColor: hexToRgba(Colors.primary, 0.15),
+                  backgroundColor: "rgba(255, 255, 255, 0.12)",
+                  borderColor: "rgba(255, 255, 255, 0.20)",
                 },
               ]}
             >
@@ -496,8 +496,8 @@ export default function ReflectionScreen() {
                 s.nextBtn,
                 {
                   marginTop: 28,
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderColor: hexToRgba(Colors.primary, 0.2),
+                  backgroundColor: "rgba(255, 255, 255, 0.12)",
+                  borderColor: "rgba(255, 255, 255, 0.20)",
                 },
               ]}
             >
@@ -528,8 +528,8 @@ export default function ReflectionScreen() {
                   s.groundingBtn,
                   {
                     overflow: "hidden",
-                    backgroundColor: hexToRgba(Colors.primary, 0.1),
-                    borderColor: hexToRgba(Colors.primary, 0.15),
+                    backgroundColor: "rgba(255, 255, 255, 0.12)",
+                    borderColor: "rgba(255, 255, 255, 0.20)",
                   },
                 ]}
               >
@@ -547,8 +547,8 @@ export default function ReflectionScreen() {
                   s.groundingBtn,
                   {
                     overflow: "hidden",
-                    backgroundColor: hexToRgba(Colors.primary, 0.1),
-                    borderColor: hexToRgba(Colors.primary, 0.15),
+                    backgroundColor: "rgba(255, 255, 255, 0.12)",
+                    borderColor: "rgba(255, 255, 255, 0.20)",
                   },
                 ]}
               >
