@@ -32,8 +32,6 @@ import {
   X,
   Shield,
   ChevronRight,
-  Moon,
-  Waves,
   Brain,
   BarChart3,
   AlertTriangle,
@@ -375,7 +373,7 @@ export default function SettingsScreen() {
             <View>
               <Text
                 className="text-white font-bold mb-2 text-center"
-                style={{ fontFamily: "Fraunces_700Bold", fontSize: 22 }}
+                style={{ fontFamily: "Fraunces_700Bold", fontSize: 30 }}
               >
                 Settings
               </Text>
@@ -540,137 +538,121 @@ export default function SettingsScreen() {
                   shadowRadius: 8,
                 }}
               >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    flexWrap: "wrap",
-                    gap: 16,
-                    justifyContent: "flex-start",
-                  }}
-                >
-                  {(
-                    [
-                      "hotPink",
-                      "softPink",
-                      "lavenderBliss",
-                      "violetWhisper",
-                      "oceanCalm",
-                      "darkMode",
-                    ] as ThemeColorType[]
-                  ).map((theme) => {
-                    const themeData = THEME_COLORS[theme];
-                    const isSelected = selectedTheme === theme;
+                {[
+                  ["hotPink", "softPink", "lavenderBliss"],
+                  ["violetWhisper", "oceanCalm", "darkMode"],
+                ].map((row, rowIndex) => (
+                  <View
+                    key={rowIndex}
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-around",
+                      marginBottom: rowIndex === 0 ? 20 : 0,
+                    }}
+                  >
+                    {(row as ThemeColorType[]).map((theme) => {
+                      const themeData = THEME_COLORS[theme];
+                      const isSelected = selectedTheme === theme;
 
-                    return (
-                      <Pressable
-                        key={theme}
-                        onPress={() => handleThemeSelect(theme)}
-                        style={{ alignItems: "center", width: 52 }}
-                      >
-                        {/* Outer glow ring */}
-                        {isSelected && (
-                          <View
-                            style={{
-                              position: "absolute",
-                              width: 64,
-                              height: 64,
-                              borderRadius: 32,
-                              borderWidth: 2.5,
-                              borderColor: "rgba(255,255,255,0.95)",
-                              top: -6,
-                              left: -6,
-                              shadowColor: "#FFFFFF",
-                              shadowOffset: { width: 0, height: 0 },
-                              shadowOpacity: 0.55,
-                              shadowRadius: 10,
-                            }}
-                          />
-                        )}
-
-                        {/* Gradient orb */}
-                        <LinearGradient
-                          colors={[
-                            themeData.gradientStart,
-                            themeData.gradientEnd,
-                          ]}
-                          start={{ x: 0.15, y: 0 }}
-                          end={{ x: 0.85, y: 1 }}
-                          style={{
-                            width: 52,
-                            height: 52,
-                            borderRadius: 26,
-                            alignItems: "center",
-                            justifyContent: "center",
-                            overflow: "hidden",
-                          }}
+                      return (
+                        <Pressable
+                          key={theme}
+                          onPress={() => handleThemeSelect(theme)}
+                          style={{ alignItems: "center", width: 52 }}
                         >
-                          {/* Inner highlight shimmer */}
-                          <View
-                            style={{
-                              position: "absolute",
-                              top: 7,
-                              left: 7,
-                              width: 16,
-                              height: 16,
-                              borderRadius: 8,
-                              backgroundColor: "rgba(255,255,255,0.38)",
-                            }}
-                          />
-                          {/* Bottom shadow layer */}
-                          <View
-                            style={{
-                              position: "absolute",
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              height: 20,
-                              borderBottomLeftRadius: 26,
-                              borderBottomRightRadius: 26,
-                              backgroundColor: "rgba(0,0,0,0.10)",
-                            }}
-                          />
-                          {isSelected ? (
-                            <Check
-                              size={18}
-                              color="#FFFFFF"
-                              strokeWidth={2.8}
+                          {/* Outer glow ring */}
+                          {isSelected && (
+                            <View
+                              style={{
+                                position: "absolute",
+                                width: 64,
+                                height: 64,
+                                borderRadius: 32,
+                                borderWidth: 2.5,
+                                borderColor: "rgba(255,255,255,0.95)",
+                                top: -6,
+                                left: -6,
+                                shadowColor: "#FFFFFF",
+                                shadowOffset: { width: 0, height: 0 },
+                                shadowOpacity: 0.55,
+                                shadowRadius: 10,
+                              }}
                             />
-                          ) : theme === "darkMode" ? (
-                            <Moon
-                              size={16}
-                              color="rgba(255,255,255,0.7)"
-                              strokeWidth={2}
-                            />
-                          ) : theme === "oceanCalm" ? (
-                            <Waves
-                              size={16}
-                              color="rgba(255,255,255,0.7)"
-                              strokeWidth={2}
-                            />
-                          ) : null}
-                        </LinearGradient>
+                          )}
 
-                        {/* Label */}
-                        <Text
-                          numberOfLines={2}
-                          style={{
-                            color: isSelected
-                              ? "#FFFFFF"
-                              : "rgba(255,255,255,0.65)",
-                            fontSize: 10,
-                            fontFamily: "Inter_600SemiBold",
-                            textAlign: "center",
-                            marginTop: 8,
-                            lineHeight: 14,
-                            maxWidth: 52,
-                          }}
-                        >
-                          {themeData.name}
-                        </Text>
-                      </Pressable>
-                    );
-                  })}
-                </View>
+                          {/* Gradient orb */}
+                          <LinearGradient
+                            colors={[
+                              themeData.gradientStart,
+                              themeData.gradientEnd,
+                            ]}
+                            start={{ x: 0.15, y: 0 }}
+                            end={{ x: 0.85, y: 1 }}
+                            style={{
+                              width: 52,
+                              height: 52,
+                              borderRadius: 26,
+                              alignItems: "center",
+                              justifyContent: "center",
+                              overflow: "hidden",
+                            }}
+                          >
+                            {/* Inner highlight shimmer */}
+                            <View
+                              style={{
+                                position: "absolute",
+                                top: 7,
+                                left: 7,
+                                width: 16,
+                                height: 16,
+                                borderRadius: 8,
+                                backgroundColor: "rgba(255,255,255,0.38)",
+                              }}
+                            />
+                            {/* Bottom shadow layer */}
+                            <View
+                              style={{
+                                position: "absolute",
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                height: 20,
+                                borderBottomLeftRadius: 26,
+                                borderBottomRightRadius: 26,
+                                backgroundColor: "rgba(0,0,0,0.10)",
+                              }}
+                            />
+                            {isSelected && (
+                              <Check
+                                size={18}
+                                color="#FFFFFF"
+                                strokeWidth={2.8}
+                              />
+                            )}
+                          </LinearGradient>
+
+                          {/* Label */}
+                          <Text
+                            numberOfLines={2}
+                            style={{
+                              color: isSelected
+                                ? "#FFFFFF"
+                                : "rgba(255,255,255,0.65)",
+                              fontSize: 10,
+                              fontFamily: "Inter_600SemiBold",
+                              textAlign: "center",
+                              marginTop: 8,
+                              lineHeight: 14,
+                              maxWidth: 52,
+                            }}
+                          >
+                            {themeData.name}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                ))}
               </View>
             </View>
 
