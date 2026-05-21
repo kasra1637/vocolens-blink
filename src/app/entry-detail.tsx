@@ -6,7 +6,6 @@ import {
   Pressable,
   TextInput,
   Modal,
-  Alert,
   LayoutChangeEvent,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -23,7 +22,6 @@ import {
   ArrowLeft,
   Calendar,
   Clock,
-  Share2,
   Edit3,
   Save,
   X,
@@ -62,6 +60,7 @@ import useOnboardingStore from "@/lib/state/onboarding-store";
 import useSettingsStore from "@/lib/state/settings-store";
 import { useDeleteEntry } from "@/lib/hooks";
 import { hexToRgba, GlassLayers } from "@/lib/glass";
+
 import {
   formatShortDuration,
   EMOTION_COLORS,
@@ -88,6 +87,13 @@ const ALL_EMOTIONS: EmotionType[] = [
   "anger",
 ];
 
+// ─── Glassmorphic card tokens matching the filter/search container ────────────
+const GLASS_BG       = "rgba(255, 255, 255, 0.12)";
+const GLASS_BORDER   = "rgba(255, 255, 255, 0.20)";
+const GLASS_INNER_BG = "rgba(255, 255, 255, 0.08)";
+const GLASS_INNER_BORDER = "rgba(255, 255, 255, 0.13)";
+
+
 export default function EntryDetailScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -104,12 +110,12 @@ export default function EntryDetailScreen() {
   const [barContainerWidth, setBarContainerWidth] = useState(0);
   const [showRefineModal, setShowRefineModal] = useState(false);
   const queryClient = useQueryClient();
+
   const onBarContainerLayout = useCallback((e: LayoutChangeEvent) => {
     setBarContainerWidth(e.nativeEvent.layout.width);
   }, []);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
-  // Get selected theme and dark mode
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
   const isDarkMode = useSettingsStore((s) => s.isDarkMode);
   const timeFormat = useSettingsStore((s) => s.timeFormat);
@@ -129,6 +135,7 @@ export default function EntryDetailScreen() {
   });
 
   const entry = id ? getEntry(id) : null;
+
 
   const handleBack = () => {
     tapHaptic();
@@ -208,26 +215,19 @@ export default function EntryDetailScreen() {
     }
   };
 
-  if (!fontsLoaded) {
-    return null;
-  }
+  if (!fontsLoaded) return null;
+
 
   if (!entry) {
     return (
-      <View
-        className="flex-1 items-center justify-center"
-        style={{ backgroundColor: Colors.background }}
-      >
+      <View className="flex-1 items-center justify-center" style={{ backgroundColor: Colors.background }}>
         <LinearGradient
           colors={Gradients.background}
           style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
         />
-        <Text
-          style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
-          className="text-lg"
-        >
+        <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }} className="text-lg">
           Entry not found
         </Text>
       </View>
@@ -237,28 +237,18 @@ export default function EntryDetailScreen() {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
+      weekday: "long", month: "long", day: "numeric", year: "numeric",
     });
   };
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     if (timeFormat === "24h") {
-      return date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
+      return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
     }
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+    return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
   };
+
 
   return (
     <View className="flex-1" style={{ backgroundColor: Colors.background }}>
@@ -269,7 +259,7 @@ export default function EntryDetailScreen() {
         end={{ x: 0, y: 1 }}
       />
 
-      {/* Header */}
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
       <View
         className="flex-row items-center justify-between px-5"
         style={{ paddingTop: insets.top + 12, paddingBottom: 16 }}
@@ -277,25 +267,25 @@ export default function EntryDetailScreen() {
         <Pressable
           onPress={handleBack}
           className="w-10 h-10 rounded-full items-center justify-center"
-          style={{ backgroundColor: hexToRgba(Colors.primary, 0.15) }}
+          style={{ backgroundColor: GLASS_BG, borderWidth: 1.5, borderColor: GLASS_BORDER }}
         >
           <ArrowLeft size={20} color="#FFFFFF" strokeWidth={2.5} />
         </Pressable>
 
-        <View className="flex-row items-center" style={{ gap: 12 }}>
+        <View className="flex-row items-center" style={{ gap: 10 }}>
           {!isEditing && (
             <>
               <Pressable
                 onPress={handleEdit}
                 className="w-10 h-10 rounded-full items-center justify-center"
-                style={{ backgroundColor: hexToRgba(Colors.primary, 0.15) }}
+                style={{ backgroundColor: GLASS_BG, borderWidth: 1.5, borderColor: GLASS_BORDER }}
               >
                 <Edit3 size={18} color="#FFFFFF" strokeWidth={2.5} />
               </Pressable>
               <Pressable
                 onPress={handleDeletePress}
                 className="w-10 h-10 rounded-full items-center justify-center"
-                style={{ backgroundColor: "transparent" }}
+                style={{ backgroundColor: "rgba(239,68,68,0.15)", borderWidth: 1.5, borderColor: "rgba(239,68,68,0.30)" }}
               >
                 <Trash2 size={18} color="#FFFFFF" strokeWidth={2.5} />
               </Pressable>
@@ -306,14 +296,14 @@ export default function EntryDetailScreen() {
               <Pressable
                 onPress={handleCancelEdit}
                 className="w-10 h-10 rounded-full items-center justify-center"
-                style={{ backgroundColor: hexToRgba(Colors.primary, 0.15) }}
+                style={{ backgroundColor: GLASS_BG, borderWidth: 1.5, borderColor: GLASS_BORDER }}
               >
                 <X size={18} color="#FFFFFF" strokeWidth={2.5} />
               </Pressable>
               <Pressable
                 onPress={handleSave}
                 className="w-10 h-10 rounded-full items-center justify-center"
-                style={{ backgroundColor: hexToRgba(Colors.primary, 0.15) }}
+                style={{ backgroundColor: GLASS_BG, borderWidth: 1.5, borderColor: GLASS_BORDER }}
               >
                 <Save size={18} color="#FFFFFF" strokeWidth={2.5} />
               </Pressable>
@@ -321,6 +311,7 @@ export default function EntryDetailScreen() {
           )}
         </View>
       </View>
+
 
       <ScrollView
         className="flex-1"
@@ -330,8 +321,8 @@ export default function EntryDetailScreen() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Entry Header */}
-        <Animated.View entering={FadeInDown.delay(100).duration(600)}>
+        {/* ── Entry title + meta ──────────────────────────────────────────── */}
+        <Animated.View entering={FadeInDown.delay(100).duration(600)} style={{ marginBottom: 24 }}>
           {isEditing ? (
             <TextInput
               value={editedTitle}
@@ -340,184 +331,123 @@ export default function EntryDetailScreen() {
                 fontFamily: "Fraunces_700Bold",
                 color: "#FFFFFF",
                 fontSize: 24,
-                backgroundColor: hexToRgba(Colors.primary, 0.1),
-                borderRadius: 12,
+                backgroundColor: GLASS_INNER_BG,
+                borderRadius: 14,
                 padding: 12,
                 marginBottom: 8,
                 borderWidth: 1,
-                borderColor: hexToRgba(Colors.primary, 0.2),
+                borderColor: GLASS_BORDER,
               }}
-              placeholderTextColor="rgba(255, 255, 255, 0.5)"
-              placeholder="Entry title..."
+              placeholderTextColor="rgba(255,255,255,0.5)"
+              placeholder="Entry title…"
             />
           ) : (
             <Text
-              style={{ fontFamily: "Fraunces_700Bold", color: "#FFFFFF" }}
-              className="text-2xl mb-2"
+              style={{ fontFamily: "Fraunces_700Bold", color: "#FFFFFF", fontSize: 26, marginBottom: 6 }}
             >
               {entry.title}
             </Text>
           )}
-          <Text
-            style={{
-              fontFamily: "Inter_400Regular",
-              color: "rgba(255, 255, 255, 0.8)",
-            }}
-            className="text-sm mb-4"
-          >
+          <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.7)", fontSize: 13, marginBottom: 14 }}>
             {formatDate(entry.createdAt)}
           </Text>
 
-          {/* Meta Info */}
-          <View className="flex-row items-center mb-2" style={{ gap: 16 }}>
-            <View className="flex-row items-center">
-              <Calendar
-                size={16}
-                color="rgba(255, 255, 255, 0.8)"
-                strokeWidth={2}
-              />
-              <Text
-                style={{
-                  fontFamily: "Inter_400Regular",
-                  color: "rgba(255, 255, 255, 0.8)",
-                }}
-                className="text-sm ml-2"
-              >
-                {formatTime(entry.createdAt)}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Clock
-                size={16}
-                color="rgba(255, 255, 255, 0.8)"
-                strokeWidth={2}
-              />
-              <Text
-                style={{
-                  fontFamily: "Inter_400Regular",
-                  color: "rgba(255, 255, 255, 0.8)",
-                }}
-                className="text-sm ml-2"
-              >
-                {formatShortDuration(entry.duration)}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Activity
-                size={16}
-                color="rgba(255, 255, 255, 0.8)"
-                strokeWidth={2}
-              />
-              <Text
-                style={{
-                  fontFamily: "Inter_400Regular",
-                  color: "rgba(255, 255, 255, 0.8)",
-                }}
-                className="text-sm ml-2"
-              >
-                {entry.emotionIntensity}%
-              </Text>
+          {/* Meta chips row */}
+          <View
+            className="rounded-2xl overflow-hidden"
+            style={{
+              backgroundColor: GLASS_BG,
+              borderWidth: 2,
+              borderColor: GLASS_BORDER,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.08,
+              shadowRadius: 8,
+            }}
+          >
+            <GlassLayers primaryColor={Colors.primary} borderRadius={16} />
+            <View className="flex-row items-center justify-around py-4 px-5">
+              <View className="items-center">
+                <Calendar size={16} color="rgba(255,255,255,0.9)" strokeWidth={2} />
+                <Text style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF", fontSize: 12, marginTop: 4 }}>
+                  {formatTime(entry.createdAt)}
+                </Text>
+                <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.5)", fontSize: 10 }}>Time</Text>
+              </View>
+              <View style={{ width: 1, height: 36, backgroundColor: "rgba(255,255,255,0.15)" }} />
+              <View className="items-center">
+                <Clock size={16} color="rgba(255,255,255,0.9)" strokeWidth={2} />
+                <Text style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF", fontSize: 12, marginTop: 4 }}>
+                  {formatShortDuration(entry.duration)}
+                </Text>
+                <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.5)", fontSize: 10 }}>Duration</Text>
+              </View>
+              <View style={{ width: 1, height: 36, backgroundColor: "rgba(255,255,255,0.15)" }} />
+              <View className="items-center">
+                <Activity size={16} color="rgba(255,255,255,0.9)" strokeWidth={2} />
+                <Text style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF", fontSize: 12, marginTop: 4 }}>
+                  {entry.emotionIntensity}%
+                </Text>
+                <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.5)", fontSize: 10 }}>Intensity</Text>
+              </View>
             </View>
           </View>
         </Animated.View>
 
-        {/* AI Reflection (TTS) - shown when available from OpenRouter */}
+
+        {/* ── AI Reflection (TTS) ─────────────────────────────────────────── */}
         {entry.aiReflection && entry.aiReflection.trim().length > 0 && (
-          <Animated.View
-            entering={FadeInDown.delay(150).duration(600)}
-            className="mb-6"
-          >
+          <Animated.View entering={FadeInDown.delay(150).duration(600)} style={{ marginBottom: 16 }}>
             <Pressable
               onPress={() => toggleSection("reflection")}
               className="rounded-3xl overflow-hidden"
               style={{
-                backgroundColor: hexToRgba(Colors.primary, 0.1),
-                borderWidth: 1.5,
-                borderColor: hexToRgba(Colors.primary, 0.2),
-                overflow: "hidden",
+                backgroundColor: GLASS_BG,
+                borderWidth: 2,
+                borderColor: GLASS_BORDER,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
               }}
             >
-              <View className="p-5">
-                <View className="flex-row items-center justify-between mb-3">
-                  <View className="flex-row items-center">
-                    <Volume2 size={18} color="#FFFFFF" strokeWidth={2} />
-                    <Text
-                      style={{
-                        fontFamily: "Inter_600SemiBold",
-                        color: "#FFFFFF",
-                      }}
-                      className="text-base ml-2"
-                    >
-                      AI Reflection
+              <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+              <View style={{ padding: 20 }}>
+                <View className="flex-row items-center justify-between" style={{ marginBottom: expandedSection === "reflection" ? 14 : 0 }}>
+                  <View className="flex-row items-center" style={{ gap: 8 }}>
+                    <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 8, padding: 6, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                      <Volume2 size={16} color="#FFFFFF" strokeWidth={2} />
+                    </View>
+                    <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15 }}>
+                      Your Reflection
                     </Text>
-                    <View
-                      className="ml-2 px-2 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: hexToRgba(Colors.primary, 0.2),
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontFamily: "Inter_600SemiBold",
-                          color: "#FFFFFF",
-                          fontSize: 9,
-                        }}
-                      >
-                        OPENROUTER
-                      </Text>
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20, backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                      <Text style={{ fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.7)", fontSize: 9 }}>AI</Text>
                     </View>
                   </View>
-                  {expandedSection === "reflection" ? (
-                    <ChevronUp size={20} color="#FFFFFF" strokeWidth={2} />
-                  ) : (
-                    <ChevronDown size={20} color="#FFFFFF" strokeWidth={2} />
-                  )}
+                  {expandedSection === "reflection"
+                    ? <ChevronUp size={18} color="rgba(255,255,255,0.7)" strokeWidth={2} />
+                    : <ChevronDown size={18} color="rgba(255,255,255,0.7)" strokeWidth={2} />}
                 </View>
 
                 {expandedSection === "reflection" && (
-                  <Animated.View
-                    entering={FadeIn.duration(300)}
-                    exiting={FadeOut.duration(200)}
-                  >
-                    <Text
-                      style={{
-                        fontFamily: "Inter_400Regular",
-                        lineHeight: 24,
-                        color: "rgba(255, 255, 255, 0.95)",
-                        marginBottom: 16,
-                      }}
-                      className="text-sm"
-                    >
+                  <Animated.View entering={FadeIn.duration(300)} exiting={FadeOut.duration(200)}>
+                    <Text style={{ fontFamily: "Inter_400Regular", lineHeight: 24, color: "rgba(255,255,255,0.92)", fontSize: 14, marginBottom: 16 }}>
                       {entry.aiReflection}
                     </Text>
-
-                    {/* TTS Play/Stop Button */}
                     <Pressable
                       onPress={handleToggleSpeech}
                       className="flex-row items-center justify-center rounded-2xl py-3 px-5"
                       style={{
-                        backgroundColor: isSpeaking
-                          ? "rgba(239, 68, 68, 0.25)"
-                          : hexToRgba(Colors.primary, 0.2),
-                        borderWidth: 1,
-                        borderColor: isSpeaking
-                          ? "rgba(239, 68, 68, 0.5)"
-                          : hexToRgba(Colors.primary, 0.25),
+                        backgroundColor: isSpeaking ? "rgba(239,68,68,0.2)" : GLASS_INNER_BG,
+                        borderWidth: 1.5,
+                        borderColor: isSpeaking ? "rgba(239,68,68,0.45)" : GLASS_BORDER,
                       }}
                     >
-                      {isSpeaking ? (
-                        <Square size={16} color="#FFFFFF" strokeWidth={2} />
-                      ) : (
-                        <Play size={16} color="#FFFFFF" strokeWidth={2} />
-                      )}
-                      <Text
-                        style={{
-                          fontFamily: "Inter_600SemiBold",
-                          color: "#FFFFFF",
-                          fontSize: 13,
-                          marginLeft: 8,
-                        }}
-                      >
+                      {isSpeaking
+                        ? <Square size={15} color="#FFFFFF" strokeWidth={2} />
+                        : <Play size={15} color="#FFFFFF" strokeWidth={2} />}
+                      <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 13, marginLeft: 8 }}>
                         {isSpeaking ? "Stop Reading" : "Listen to Reflection"}
                       </Text>
                     </Pressable>
@@ -528,70 +458,67 @@ export default function EntryDetailScreen() {
           </Animated.View>
         )}
 
-        {/* Conversation Prompt */}
+
+        {/* ── Conversation Prompt ─────────────────────────────────────────── */}
         {entry.conversationPrompt && (
-          <Animated.View
-            entering={FadeInDown.delay(200).duration(600)}
-            className="mb-6"
-          >
+          <Animated.View entering={FadeInDown.delay(200).duration(600)} style={{ marginBottom: 16 }}>
             <View
-              className="rounded-2xl p-4"
+              className="rounded-2xl overflow-hidden"
               style={{
-                backgroundColor: hexToRgba(Colors.primary, 0.1),
-                borderWidth: 1.5,
-                borderColor: hexToRgba(Colors.primary, 0.2),
-                overflow: "hidden",
+                backgroundColor: GLASS_BG,
+                borderWidth: 2,
+                borderColor: GLASS_BORDER,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
               }}
             >
-              
-              <View className="flex-row items-center mb-2">
-                <MessageSquare
-                  size={16}
-                  color="rgba(255, 255, 255, 0.8)"
-                  strokeWidth={2}
-                />
-                <Text
-                  style={{
-                    fontFamily: "Inter_600SemiBold",
-                    color: "rgba(255, 255, 255, 0.8)",
-                  }}
-                  className="text-xs uppercase ml-2"
-                >
-                  Conversation Starter
+              <GlassLayers primaryColor={Colors.primary} borderRadius={16} />
+              <View style={{ padding: 18 }}>
+                <View className="flex-row items-center" style={{ marginBottom: 10, gap: 8 }}>
+                  <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 8, padding: 6, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                    <MessageSquare size={14} color="rgba(255,255,255,0.85)" strokeWidth={2} />
+                  </View>
+                  <Text style={{ fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.75)", fontSize: 11, textTransform: "uppercase", letterSpacing: 0.8 }}>
+                    Conversation Starter
+                  </Text>
+                </View>
+                <Text style={{ fontFamily: "Inter_400Regular", color: "#FFFFFF", lineHeight: 22, fontSize: 14, fontStyle: "italic" }}>
+                  "{entry.conversationPrompt}"
                 </Text>
               </View>
-              <Text
-                style={{
-                  fontFamily: "Inter_400Regular",
-                  color: "#FFFFFF",
-                  lineHeight: 22,
-                }}
-                className="text-sm italic"
-              >
-                "{entry.conversationPrompt}"
-              </Text>
             </View>
           </Animated.View>
         )}
 
-        {/* Transcript */}
-        <Animated.View entering={FadeInDown.delay(300).duration(600)}>
+
+        {/* ── Full Transcript ─────────────────────────────────────────────── */}
+        <Animated.View entering={FadeInDown.delay(300).duration(600)} style={{ marginBottom: 16 }}>
           <View
-            className="rounded-3xl overflow-hidden mb-6"
+            className="rounded-3xl overflow-hidden"
             style={{
-              backgroundColor: hexToRgba(Colors.primary, 0.1),
-              borderWidth: 1.5,
-              borderColor: hexToRgba(Colors.primary, 0.2),
-              overflow: "hidden",
+              backgroundColor: GLASS_BG,
+              borderWidth: 2,
+              borderColor: GLASS_BORDER,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.08,
+              shadowRadius: 8,
             }}
           >
-            <View className="p-5">
-              <Text
-                style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
-                className="text-base mb-3"
-              >
-                Full Transcript
-              </Text>
+            <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+            <View style={{ padding: 20 }}>
+              {/* Section header */}
+              <View className="flex-row items-center" style={{ marginBottom: 14, gap: 8 }}>
+                <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 8, padding: 6, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                  <MessageSquare size={16} color="#FFFFFF" strokeWidth={2} />
+                </View>
+                <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15 }}>
+                  Full Transcript
+                </Text>
+              </View>
+
               {isEditing ? (
                 <TextInput
                   value={editedTranscript}
@@ -604,55 +531,41 @@ export default function EntryDetailScreen() {
                     fontSize: 14,
                     lineHeight: 24,
                     color: "#FFFFFF",
-                    backgroundColor: hexToRgba(Colors.primary, 0.1),
+                    backgroundColor: GLASS_INNER_BG,
                     borderRadius: 12,
-                    padding: 12,
+                    padding: 14,
                     minHeight: 200,
+                    borderWidth: 1,
+                    borderColor: GLASS_BORDER,
                   }}
-                  placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                  placeholderTextColor="rgba(255,255,255,0.4)"
                 />
               ) : (
-                <View>
+                <View
+                  style={{
+                    backgroundColor: GLASS_INNER_BG,
+                    borderRadius: 14,
+                    borderWidth: 1,
+                    borderColor: GLASS_INNER_BORDER,
+                    padding: 14,
+                  }}
+                >
                   <Text
-                    style={{
-                      fontFamily: "Inter_400Regular",
-                      lineHeight: 24,
-                      color: "rgba(255, 255, 255, 0.95)",
-                    }}
-                    className="text-sm"
-                    numberOfLines={transcriptExpanded ? undefined : 2}
+                    style={{ fontFamily: "Inter_400Regular", lineHeight: 24, color: "rgba(255,255,255,0.92)", fontSize: 14 }}
+                    numberOfLines={transcriptExpanded ? undefined : 4}
                   >
                     {entry.transcript}
                   </Text>
-                  {entry.transcript && entry.transcript.length > 120 && (
+                  {entry.transcript && entry.transcript.length > 180 && (
                     <Pressable
-                      onPress={() => {
-                        tapHaptic();
-                        setTranscriptExpanded(!transcriptExpanded);
-                      }}
-                      className="flex-row items-center mt-2"
+                      onPress={() => { tapHaptic(); setTranscriptExpanded(!transcriptExpanded); }}
+                      className="flex-row items-center mt-3"
+                      style={{ gap: 4 }}
                     >
-                      {transcriptExpanded ? (
-                        <ChevronUp
-                          size={14}
-                          color="#FFFFFF"
-                          strokeWidth={2}
-                        />
-                      ) : (
-                        <ChevronDown
-                          size={14}
-                          color="#FFFFFF"
-                          strokeWidth={2}
-                        />
-                      )}
-                      <Text
-                        style={{
-                          fontFamily: "Inter_500Medium",
-                          color: "#FFFFFF",
-                          fontSize: 13,
-                          marginLeft: 4,
-                        }}
-                      >
+                      {transcriptExpanded
+                        ? <ChevronUp size={14} color="rgba(255,255,255,0.7)" strokeWidth={2} />
+                        : <ChevronDown size={14} color="rgba(255,255,255,0.7)" strokeWidth={2} />}
+                      <Text style={{ fontFamily: "Inter_500Medium", color: "rgba(255,255,255,0.75)", fontSize: 13 }}>
                         {transcriptExpanded ? "Show less" : "Read more"}
                       </Text>
                     </Pressable>
@@ -663,25 +576,25 @@ export default function EntryDetailScreen() {
           </View>
         </Animated.View>
 
-        {/* Audio Playback */}
-        {entry.audioUri && (          <Animated.View
-            entering={FadeInDown.delay(350).duration(600)}
-            className="mb-6"
-          >
+
+        {/* ── Audio Playback ──────────────────────────────────────────────── */}
+        {entry.audioUri && (
+          <Animated.View entering={FadeInDown.delay(350).duration(600)} style={{ marginBottom: 16 }}>
             <View
               className="rounded-3xl overflow-hidden"
               style={{
-                backgroundColor: hexToRgba(Colors.primary, 0.1),
-                borderWidth: 1.5,
-                borderColor: hexToRgba(Colors.primary, 0.2),
-                overflow: "hidden",
+                backgroundColor: GLASS_BG,
+                borderWidth: 2,
+                borderColor: GLASS_BORDER,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
               }}
             >
-              <View className="p-5">
-                <Text
-                  style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
-                  className="text-base mb-4"
-                >
+              <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+              <View style={{ padding: 20 }}>
+                <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15, marginBottom: 14 }}>
                   Recording
                 </Text>
                 <AudioPlayer
@@ -695,9 +608,10 @@ export default function EntryDetailScreen() {
           </Animated.View>
         )}
 
-        {/* EmotionBreakdownCard — Claude 3.5 Sonnet Plutchik deep analysis */}
+
+        {/* ── EmotionBreakdownCard (Claude 3.5 Sonnet deep analysis) ─────── */}
         {(entry.aiTopThreeEmotions?.length || entry.aiBlendedEmotions?.length || entry.aiAmbivalenceFlags?.length) ? (
-          <View style={{ paddingHorizontal: 0, marginBottom: 4 }}>
+          <View style={{ marginBottom: 4 }}>
             <EmotionBreakdownCard
               aiTopThreeEmotions={entry.aiTopThreeEmotions}
               aiBlendedEmotions={entry.aiBlendedEmotions}
@@ -707,75 +621,49 @@ export default function EntryDetailScreen() {
           </View>
         ) : null}
 
-        {/* Emotion Breakdown - Collapsible */}
-        <Animated.View entering={FadeInDown.delay(400).duration(600)}>
+        {/* ── Emotion Breakdown — collapsible ─────────────────────────────── */}
+        <Animated.View entering={FadeInDown.delay(400).duration(600)} style={{ marginBottom: 16 }}>
           <Pressable
             onPress={() => toggleSection("emotions")}
-            className="rounded-3xl overflow-hidden mb-6"
+            className="rounded-3xl overflow-hidden"
             style={{
-              backgroundColor: hexToRgba(Colors.primary, 0.1),
-              borderWidth: 1.5,
-              borderColor: hexToRgba(Colors.primary, 0.2),
-              overflow: "hidden",
+              backgroundColor: GLASS_BG,
+              borderWidth: 2,
+              borderColor: GLASS_BORDER,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.08,
+              shadowRadius: 8,
             }}
           >
-            <View className="p-5">
-              <View className="flex-row items-center justify-between mb-3">
-                <View className="flex-row items-center">
-                  <BarChart2 size={18} color="#FFFFFF" strokeWidth={2} />
-                  <Text
-                    style={{
-                      fontFamily: "Inter_600SemiBold",
-                      color: "#FFFFFF",
-                    }}
-                    className="text-base ml-2"
-                  >
+            <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+            <View style={{ padding: 20 }}>
+              {/* Header row */}
+              <View className="flex-row items-center justify-between" style={{ marginBottom: expandedSection === "emotions" ? 16 : 0 }}>
+                <View className="flex-row items-center" style={{ gap: 8 }}>
+                  <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 8, padding: 6, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                    <BarChart2 size={16} color="#FFFFFF" strokeWidth={2} />
+                  </View>
+                  <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15 }}>
                     Emotion Breakdown
                   </Text>
                   {entry.emotionScores && (
-                    <View
-                      className="ml-2 px-2 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: hexToRgba(Colors.primary, 0.2),
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontFamily: "Inter_600SemiBold",
-                          color: "#FFFFFF",
-                          fontSize: 9,
-                        }}
-                      >
-                        TOP 4
-                      </Text>
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20, backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                      <Text style={{ fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.7)", fontSize: 9 }}>TOP 4</Text>
                     </View>
                   )}
                 </View>
-                {expandedSection === "emotions" ? (
-                  <ChevronUp size={20} color="#FFFFFF" strokeWidth={2} />
-                ) : (
-                  <ChevronDown size={20} color="#FFFFFF" strokeWidth={2} />
-                )}
+                {expandedSection === "emotions"
+                  ? <ChevronUp size={18} color="rgba(255,255,255,0.7)" strokeWidth={2} />
+                  : <ChevronDown size={18} color="rgba(255,255,255,0.7)" strokeWidth={2} />}
               </View>
 
+
               {expandedSection === "emotions" && (
-                <Animated.View
-                  entering={FadeIn.duration(300)}
-                  exiting={FadeOut.duration(200)}
-                >
+                <Animated.View entering={FadeIn.duration(300)} exiting={FadeOut.duration(200)}>
                   {entry.emotionScores ? (
-                    /* Top 4 emotions by score — Plutchik intensity labels */
                     <View style={{ gap: 10 }} onLayout={onBarContainerLayout}>
-                      <Text
-                        style={{
-                          fontFamily: "Inter_600SemiBold",
-                          color: "rgba(255, 255, 255, 0.6)",
-                          fontSize: 10,
-                          textTransform: "uppercase",
-                          letterSpacing: 0.8,
-                          marginBottom: 4,
-                        }}
-                      >
+                      <Text style={{ fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.5)", fontSize: 10, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 4 }}>
                         Top Emotions — Plutchik Intensity
                       </Text>
                       {ALL_EMOTIONS.map((emotion) => ({
@@ -786,211 +674,81 @@ export default function EntryDetailScreen() {
                         .slice(0, 4)
                         .map(({ emotion, score }, rank) => {
                           const isPrimary = emotion === entry.primaryEmotion;
-                          const barWidth =
-                            barContainerWidth > 0
-                              ? (score / 100) * barContainerWidth
-                              : 0;
-                          // Prefer user override, then saved AI label, then compute from score
+                          const barWidth = barContainerWidth > 0 ? (score / 100) * barContainerWidth : 0;
                           const intensityLabel =
                             entry.userOverrideLabels?.[emotion] ??
                             entry.emotionIntensityLabels?.[emotion] ??
                             getEmotionSubLabel(emotion, score);
-                          const subLabelMatchesBase =
-                            intensityLabel.toLowerCase() ===
-                            emotion.toLowerCase();
-                          // Opacity steps: 1 → 0.75 → 0.55 → 0.4 for visual hierarchy
+                          const subLabelMatchesBase = intensityLabel.toLowerCase() === emotion.toLowerCase();
                           const barOpacity = [1, 0.75, 0.55, 0.4][rank];
                           return (
                             <View key={emotion}>
-                              <View className="flex-row items-center justify-between mb-1">
+                              <View className="flex-row items-center justify-between" style={{ marginBottom: 6 }}>
                                 <View className="flex-row items-center flex-1 mr-2">
                                   <View>
-                                    <Text
-                                      style={{
-                                        fontFamily: isPrimary
-                                          ? "Inter_600SemiBold"
-                                          : "Inter_400Regular",
-                                        color: "#FFFFFF",
-                                        fontSize: 13,
-                                      }}
-                                    >
+                                    <Text style={{ fontFamily: isPrimary ? "Inter_600SemiBold" : "Inter_400Regular", color: "#FFFFFF", fontSize: 13 }}>
                                       {intensityLabel}
                                     </Text>
                                     {!subLabelMatchesBase && (
-                                      <Text
-                                        style={{
-                                          fontFamily: "Inter_400Regular",
-                                          color: "rgba(255,255,255,0.4)",
-                                          fontSize: 9,
-                                          textTransform: "uppercase",
-                                          letterSpacing: 0.5,
-                                        }}
-                                      >
+                                      <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.4)", fontSize: 9, textTransform: "uppercase", letterSpacing: 0.5 }}>
                                         {emotion}
                                       </Text>
                                     )}
                                   </View>
                                   {isPrimary && (
-                                    <View
-                                      className="ml-2 px-2 py-0.5 rounded-full"
-                                      style={{
-                                        backgroundColor: `${Colors.primary}40`,
-                                      }}
-                                    >
-                                      <Text
-                                        style={{
-                                          fontFamily: "Inter_600SemiBold",
-                                          color: "#FFFFFF",
-                                          fontSize: 9,
-                                        }}
-                                      >
-                                        PRIMARY
-                                      </Text>
+                                    <View style={{ marginLeft: 8, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20, backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                                      <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 9 }}>PRIMARY</Text>
                                     </View>
                                   )}
                                 </View>
-                                <Text
-                                  style={{
-                                    fontFamily: "Inter_700Bold",
-                                    color: "rgba(255,255,255,0.8)",
-                                    fontSize: 13,
-                                  }}
-                                >
-                                  {score}
-                                </Text>
+                                <Text style={{ fontFamily: "Inter_700Bold", color: "rgba(255,255,255,0.8)", fontSize: 13 }}>{score}</Text>
                               </View>
-                              <View
-                                className="h-2 rounded-full"
-                                style={{
-                                  backgroundColor: hexToRgba(
-                                    Colors.primary,
-                                    0.1,
-                                  ),
-                                }}
-                              >
-                                <View
-                                  className="h-full rounded-full"
-                                  style={{
-                                    width: barWidth,
-                                    backgroundColor: "#FFFFFF",
-                                    opacity: barOpacity,
-                                  }}
-                                />
+                              <View style={{ height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
+                                <View style={{ height: "100%", borderRadius: 3, width: barWidth, backgroundColor: "#FFFFFF", opacity: barOpacity }} />
                               </View>
                             </View>
                           );
                         })}
                     </View>
                   ) : (
-                    /* Fallback: detected emotions only */
                     <View onLayout={onBarContainerLayout}>
-                      <Text
-                        style={{
-                          fontFamily: "Inter_600SemiBold",
-                          color: "rgba(255, 255, 255, 0.8)",
-                        }}
-                        className="text-xs uppercase mb-3"
-                      >
+                      <Text style={{ fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.7)", fontSize: 11, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 12 }}>
                         Detected Emotions
                       </Text>
                       <View style={{ gap: 10 }}>
                         {entry.emotions.map((emotion, index) => {
                           const isPrimary = emotion === entry.primaryEmotion;
-                          const intensity = isPrimary
-                            ? entry.emotionIntensity
-                            : Math.round(
-                                entry.emotionIntensity * (0.7 - index * 0.1),
-                              );
-                          const barWidth =
-                            barContainerWidth > 0
-                              ? (intensity / 100) * barContainerWidth
-                              : 0;
-                          // Prefer user override, then saved AI label, then compute
+                          const intensity = isPrimary ? entry.emotionIntensity : Math.round(entry.emotionIntensity * (0.7 - index * 0.1));
+                          const barWidth = barContainerWidth > 0 ? (intensity / 100) * barContainerWidth : 0;
                           const subLabel =
                             entry.userOverrideLabels?.[emotion] ??
                             entry.emotionIntensityLabels?.[emotion] ??
                             getEmotionSubLabel(emotion, intensity);
-                          const subLabelMatchesBase =
-                            subLabel.toLowerCase() === emotion.toLowerCase();
-
+                          const subLabelMatchesBase = subLabel.toLowerCase() === emotion.toLowerCase();
                           return (
                             <View key={emotion}>
-                              <View className="flex-row items-center justify-between mb-2">
+                              <View className="flex-row items-center justify-between" style={{ marginBottom: 6 }}>
                                 <View className="flex-row items-center flex-1 mr-2">
                                   <View>
-                                    <Text
-                                      style={{
-                                        fontFamily: isPrimary
-                                          ? "Inter_600SemiBold"
-                                          : "Inter_400Regular",
-                                        color: "#FFFFFF",
-                                        fontSize: 13,
-                                      }}
-                                    >
+                                    <Text style={{ fontFamily: isPrimary ? "Inter_600SemiBold" : "Inter_400Regular", color: "#FFFFFF", fontSize: 13 }}>
                                       {subLabel}
                                     </Text>
                                     {!subLabelMatchesBase && (
-                                      <Text
-                                        style={{
-                                          fontFamily: "Inter_400Regular",
-                                          color: "rgba(255,255,255,0.4)",
-                                          fontSize: 9,
-                                          textTransform: "uppercase",
-                                          letterSpacing: 0.5,
-                                        }}
-                                      >
+                                      <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.4)", fontSize: 9, textTransform: "uppercase", letterSpacing: 0.5 }}>
                                         {emotion}
                                       </Text>
                                     )}
                                   </View>
                                   {isPrimary && (
-                                    <View
-                                      className="ml-2 px-2 py-0.5 rounded-full"
-                                      style={{
-                                        backgroundColor: hexToRgba(
-                                          Colors.primary,
-                                          0.2,
-                                        ),
-                                      }}
-                                    >
-                                      <Text
-                                        style={{
-                                          fontFamily: "Inter_600SemiBold",
-                                          color: "#FFFFFF",
-                                          fontSize: 9,
-                                        }}
-                                      >
-                                        PRIMARY
-                                      </Text>
+                                    <View style={{ marginLeft: 8, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 20, backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                                      <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 9 }}>PRIMARY</Text>
                                     </View>
                                   )}
                                 </View>
-                                <Text
-                                  style={{
-                                    fontFamily: "Inter_700Bold",
-                                    color: "#FFFFFF",
-                                    fontSize: 13,
-                                  }}
-                                >
-                                  {intensity}%
-                                </Text>
+                                <Text style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF", fontSize: 13 }}>{intensity}%</Text>
                               </View>
-                              <View
-                                className="h-2 rounded-full"
-                                style={{
-                                  backgroundColor: hexToRgba(
-                                    Colors.primary,
-                                    0.1,
-                                  ),
-                                }}
-                              >
-                                <View
-                                  className="h-full rounded-full"
-                                  style={{
-                                    width: barWidth,
-                                    backgroundColor: "#FFFFFF",
-                                  }}
-                                />
+                              <View style={{ height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.08)", overflow: "hidden" }}>
+                                <View style={{ height: "100%", borderRadius: 3, width: barWidth, backgroundColor: "#FFFFFF" }} />
                               </View>
                             </View>
                           );
@@ -1004,356 +762,130 @@ export default function EntryDetailScreen() {
           </Pressable>
         </Animated.View>
 
-        {/* Your Reflection Card — valence/arousal, body sensation, grounding */}
+
+        {/* ── Your Reflection ─────────────────────────────────────────────── */}
         {(entry.valence !== undefined ||
           entry.arousal !== undefined ||
           entry.bodySensation ||
           entry.groundingUsed) && (
-          <Animated.View entering={FadeInDown.delay(450).duration(600)}>
+          <Animated.View entering={FadeInDown.delay(450).duration(600)} style={{ marginBottom: 16 }}>
             <View
-              className="rounded-3xl overflow-hidden mb-6"
+              className="rounded-3xl overflow-hidden"
               style={{
-                backgroundColor: hexToRgba(Colors.primary, 0.1),
-                borderWidth: 1.5,
-                borderColor: hexToRgba(Colors.primary, 0.2),
-                overflow: "hidden",
+                backgroundColor: GLASS_BG,
+                borderWidth: 2,
+                borderColor: GLASS_BORDER,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
               }}
             >
-              <View className="p-5">
-                <View className="flex-row items-center justify-between mb-4">
-                  <View className="flex-row items-center">
-                    <Heart size={18} color="#FFFFFF" strokeWidth={2} />
-                    <Text
-                      style={{
-                        fontFamily: "Inter_600SemiBold",
-                        color: "#FFFFFF",
-                      }}
-                      className="text-base ml-2"
-                    >
-                      Your Reflection
-                    </Text>
+              <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+              <View style={{ padding: 20 }}>
+                {/* Header */}
+                <View className="flex-row items-center justify-between" style={{ marginBottom: 18 }}>
+                  <View className="flex-row items-center" style={{ gap: 8 }}>
+                    <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 8, padding: 6, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                      <Heart size={16} color="#FFFFFF" strokeWidth={2} />
+                    </View>
+                    <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15 }}>Your Reflection</Text>
                   </View>
-                  {/* User validation chip — always glassmorphic with white text */}
                   {entry.userValidated ? (
-                    <View
-                      className="flex-row items-center px-2.5 py-1 rounded-full"
-                      style={{
-                        backgroundColor: "rgba(255, 255, 255, 0.14)",
-                        borderWidth: 1,
-                        borderColor: "rgba(255, 255, 255, 0.25)",
-                      }}
-                    >
+                    <View className="flex-row items-center px-2.5 py-1 rounded-full" style={{ backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_BORDER }}>
                       <CheckCircle2 size={12} color="#FFFFFF" strokeWidth={2} />
-                      <Text
-                        style={{
-                          fontFamily: "Inter_600SemiBold",
-                          color: "#FFFFFF",
-                          fontSize: 10,
-                          marginLeft: 4,
-                        }}
-                      >
-                        Confirmed
-                      </Text>
+                      <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 10, marginLeft: 4 }}>Confirmed</Text>
                     </View>
                   ) : entry.aiCorrected ? (
-                    <View
-                      className="flex-row items-center px-2.5 py-1 rounded-full"
-                      style={{
-                        backgroundColor: "rgba(255, 255, 255, 0.14)",
-                        borderWidth: 1,
-                        borderColor: "rgba(255, 255, 255, 0.25)",
-                      }}
-                    >
+                    <View className="flex-row items-center px-2.5 py-1 rounded-full" style={{ backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_BORDER }}>
                       <RefreshCw size={12} color="#FFFFFF" strokeWidth={2} />
-                      <Text
-                        style={{
-                          fontFamily: "Inter_600SemiBold",
-                          color: "#FFFFFF",
-                          fontSize: 10,
-                          marginLeft: 4,
-                        }}
-                      >
-                        Adjusted
-                      </Text>
+                      <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 10, marginLeft: 4 }}>Adjusted</Text>
                     </View>
                   ) : null}
                 </View>
 
-                {/* Valence & Arousal Bars */}
-                {(entry.valence !== undefined ||
-                  entry.arousal !== undefined) && (
-                  <View style={{ gap: 12, marginBottom: 16 }}>
-                    {/* Valence */}
+                {/* Valence & Arousal */}
+                {(entry.valence !== undefined || entry.arousal !== undefined) && (
+                  <View style={{ gap: 16, marginBottom: 16 }}>
                     {entry.valence !== undefined && (
-                      <View>
-                        <View className="flex-row items-center justify-between mb-1.5">
-                          <Text
-                            style={{
-                              fontFamily: "Inter_500Medium",
-                              color: "rgba(255, 255, 255, 0.8)",
-                              fontSize: 12,
-                            }}
-                          >
-                            Valence
-                          </Text>
-                          <Text
-                            style={{
-                              fontFamily: "Inter_600SemiBold",
-                              color: "#FFFFFF",
-                              fontSize: 12,
-                            }}
-                          >
-                            {entry.valence > 0 ? "+" : ""}
-                            {entry.valence}
+                      <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 12, borderWidth: 1, borderColor: GLASS_INNER_BORDER, padding: 14 }}>
+                        <View className="flex-row items-center justify-between" style={{ marginBottom: 8 }}>
+                          <Text style={{ fontFamily: "Inter_500Medium", color: "rgba(255,255,255,0.8)", fontSize: 12 }}>Valence</Text>
+                          <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 12 }}>
+                            {entry.valence > 0 ? "+" : ""}{entry.valence}
                           </Text>
                         </View>
-                        <View
-                          className="h-2.5 rounded-full overflow-hidden"
-                          style={{
-                            backgroundColor: hexToRgba(Colors.primary, 0.1),
-                          }}
-                        >
-                          <View
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${Math.abs(entry.valence)}%`,
-                              backgroundColor: "#FFFFFF",
-                              marginLeft:
-                                entry.valence < 0
-                                  ? `${100 - Math.abs(entry.valence)}%`
-                                  : 0,
-                            }}
-                          />
+                        <View style={{ height: 8, borderRadius: 4, backgroundColor: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
+                          <View style={{ height: "100%", borderRadius: 4, width: `${Math.abs(entry.valence)}%`, backgroundColor: "#FFFFFF", marginLeft: entry.valence < 0 ? `${100 - Math.abs(entry.valence)}%` : 0 }} />
                         </View>
-                        <View className="flex-row justify-between mt-1">
-                          <Text
-                            style={{
-                              fontFamily: "Inter_400Regular",
-                              color: "rgba(255,255,255,0.4)",
-                              fontSize: 10,
-                            }}
-                          >
-                            Unpleasant
-                          </Text>
-                          <Text
-                            style={{
-                              fontFamily: "Inter_400Regular",
-                              color: "rgba(255,255,255,0.4)",
-                              fontSize: 10,
-                            }}
-                          >
-                            Pleasant
-                          </Text>
+                        <View className="flex-row justify-between" style={{ marginTop: 6 }}>
+                          <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.4)", fontSize: 10 }}>Unpleasant</Text>
+                          <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.4)", fontSize: 10 }}>Pleasant</Text>
                         </View>
                       </View>
                     )}
-                    {/* Arousal */}
                     {entry.arousal !== undefined && (
-                      <View>
-                        <View className="flex-row items-center justify-between mb-1.5">
-                          <Text
-                            style={{
-                              fontFamily: "Inter_500Medium",
-                              color: "rgba(255, 255, 255, 0.8)",
-                              fontSize: 12,
-                            }}
-                          >
-                            Arousal
-                          </Text>
-                          <Text
-                            style={{
-                              fontFamily: "Inter_600SemiBold",
-                              color: "#FFFFFF",
-                              fontSize: 12,
-                            }}
-                          >
-                            {entry.arousal}%
-                          </Text>
+                      <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 12, borderWidth: 1, borderColor: GLASS_INNER_BORDER, padding: 14 }}>
+                        <View className="flex-row items-center justify-between" style={{ marginBottom: 8 }}>
+                          <Text style={{ fontFamily: "Inter_500Medium", color: "rgba(255,255,255,0.8)", fontSize: 12 }}>Arousal</Text>
+                          <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 12 }}>{entry.arousal}%</Text>
                         </View>
-                        <View
-                          className="h-2.5 rounded-full overflow-hidden"
-                          style={{
-                            backgroundColor: hexToRgba(Colors.primary, 0.1),
-                          }}
-                        >
-                          <View
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${entry.arousal}%`,
-                              backgroundColor: "#FFFFFF",
-                            }}
-                          />
+                        <View style={{ height: 8, borderRadius: 4, backgroundColor: "rgba(255,255,255,0.1)", overflow: "hidden" }}>
+                          <View style={{ height: "100%", borderRadius: 4, width: `${entry.arousal}%`, backgroundColor: "#FFFFFF" }} />
                         </View>
-                        <View className="flex-row justify-between mt-1">
-                          <Text
-                            style={{
-                              fontFamily: "Inter_400Regular",
-                              color: "rgba(255,255,255,0.4)",
-                              fontSize: 10,
-                            }}
-                          >
-                            Calm
-                          </Text>
-                          <Text
-                            style={{
-                              fontFamily: "Inter_400Regular",
-                              color: "rgba(255,255,255,0.4)",
-                              fontSize: 10,
-                            }}
-                          >
-                            Activated
-                          </Text>
+                        <View className="flex-row justify-between" style={{ marginTop: 6 }}>
+                          <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.4)", fontSize: 10 }}>Calm</Text>
+                          <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.4)", fontSize: 10 }}>Activated</Text>
                         </View>
                       </View>
                     )}
                   </View>
                 )}
 
-                {/* Body Sensation & Grounding Chips */}
+
+                {/* Body Sensation & Grounding chips */}
                 <View className="flex-row flex-wrap" style={{ gap: 8 }}>
                   {entry.bodySensation && (
-                    <View
-                      className="flex-row items-center px-3 py-2 rounded-full"
-                      style={{
-                        backgroundColor: hexToRgba(Colors.primary, 0.15),
-                        borderWidth: 1,
-                        borderColor: hexToRgba(Colors.primary, 0.2),
-                      }}
-                    >
-                      <AlertTriangle
-                        size={12}
-                        color="#FFFFFF"
-                        strokeWidth={2}
-                      />
-                      <Text
-                        style={{
-                          fontFamily: "Inter_500Medium",
-                          color: "#FFFFFF",
-                          fontSize: 11,
-                          marginLeft: 6,
-                          textTransform: "capitalize",
-                        }}
-                      >
+                    <View className="flex-row items-center px-3 py-2 rounded-full" style={{ backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_BORDER }}>
+                      <AlertTriangle size={12} color="#FFFFFF" strokeWidth={2} />
+                      <Text style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF", fontSize: 11, marginLeft: 6, textTransform: "capitalize" }}>
                         {entry.bodySensation.replace(/_/g, " ")}
                       </Text>
                     </View>
                   )}
                   {entry.groundingUsed && (
-                    <View
-                      className="flex-row items-center px-3 py-2 rounded-full"
-                      style={{
-                        backgroundColor: `${Colors.primary}30`,
-                        borderWidth: 1,
-                        borderColor: `${Colors.primary}50`,
-                      }}
-                    >
-                      <Wind size={12} color={Colors.primary} strokeWidth={2} />
-                      <Text
-                        style={{
-                          fontFamily: "Inter_500Medium",
-                          color: "#FFFFFF",
-                          fontSize: 11,
-                          marginLeft: 6,
-                        }}
-                      >
-                        Grounding used
-                      </Text>
+                    <View className="flex-row items-center px-3 py-2 rounded-full" style={{ backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_BORDER }}>
+                      <Wind size={12} color="#FFFFFF" strokeWidth={2} />
+                      <Text style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF", fontSize: 11, marginLeft: 6 }}>Grounding used</Text>
                     </View>
                   )}
                   {entry.distressLevel && (
-                    <View
-                      className="flex-row items-center px-3 py-2 rounded-full"
-                      style={{
-                        backgroundColor: "rgba(255, 255, 255, 0.12)",
-                        borderWidth: 1,
-                        borderColor: "rgba(255, 255, 255, 0.22)",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontFamily: "Inter_500Medium",
-                          color: "#FFFFFF",
-                          fontSize: 11,
-                          textTransform: "capitalize",
-                        }}
-                      >
+                    <View className="flex-row items-center px-3 py-2 rounded-full" style={{ backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_BORDER }}>
+                      <Text style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF", fontSize: 11, textTransform: "capitalize" }}>
                         {entry.distressLevel} distress
                       </Text>
                     </View>
                   )}
                   {entry.userValidated && (
-                    <View
-                      className="flex-row items-center px-3 py-2 rounded-full"
-                      style={{
-                        backgroundColor: "rgba(255, 255, 255, 0.12)",
-                        borderWidth: 1,
-                        borderColor: "rgba(255, 255, 255, 0.22)",
-                      }}
-                    >
+                    <View className="flex-row items-center px-3 py-2 rounded-full" style={{ backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_BORDER }}>
                       <CheckCircle2 size={12} color="#FFFFFF" strokeWidth={2} />
-                      <Text
-                        style={{
-                          fontFamily: "Inter_500Medium",
-                          color: "#FFFFFF",
-                          fontSize: 11,
-                          marginLeft: 6,
-                        }}
-                      >
-                        Validated
-                      </Text>
+                      <Text style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF", fontSize: 11, marginLeft: 6 }}>Validated</Text>
                     </View>
                   )}
                 </View>
 
-                {/* Body Region Map Results */}
+                {/* Body region map */}
                 {entry.bodyRegions && entry.bodyRegions.length > 0 && (
-                  <View style={{ marginTop: 12 }}>
-                    <Text
-                      style={{
-                        fontFamily: "Inter_500Medium",
-                        color: "rgba(255, 255, 255, 0.6)",
-                        fontSize: 11,
-                        marginBottom: 6,
-                        textTransform: "uppercase",
-                        letterSpacing: 0.5,
-                      }}
-                    >
+                  <View style={{ marginTop: 14 }}>
+                    <Text style={{ fontFamily: "Inter_500Medium", color: "rgba(255,255,255,0.5)", fontSize: 11, marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
                       Body regions
                     </Text>
                     <View className="flex-row flex-wrap" style={{ gap: 6 }}>
                       {entry.bodyRegions.map((br) => (
-                        <View
-                          key={br.region}
-                          className="flex-row items-center px-2.5 py-1.5 rounded-full"
-                          style={{
-                            backgroundColor: hexToRgba(Colors.primary, 0.1),
-                            borderWidth: 1,
-                            borderColor: hexToRgba(Colors.primary, 0.15),
-                          }}
-                        >
-                          <Text style={{ fontSize: 10, marginRight: 4 }}>
-                            {BODY_REGION_EMOJIS[br.region]}
-                          </Text>
-                          <Text
-                            style={{
-                              fontFamily: "Inter_500Medium",
-                              color: "#FFFFFF",
-                              fontSize: 10,
-                              textTransform: "capitalize",
-                            }}
-                          >
-                            {br.region}
-                          </Text>
-                          <Text
-                            style={{
-                              fontFamily: "Inter_600SemiBold",
-                              color: "rgba(255, 255, 255, 0.6)",
-                              fontSize: 9,
-                              marginLeft: 4,
-                            }}
-                          >
-                            {"●".repeat(br.intensity)}
-                          </Text>
+                        <View key={br.region} className="flex-row items-center px-2.5 py-1.5 rounded-full" style={{ backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                          <Text style={{ fontSize: 10, marginRight: 4 }}>{BODY_REGION_EMOJIS[br.region]}</Text>
+                          <Text style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF", fontSize: 10, textTransform: "capitalize" }}>{br.region}</Text>
+                          <Text style={{ fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.5)", fontSize: 9, marginLeft: 4 }}>{"●".repeat(br.intensity)}</Text>
                         </View>
                       ))}
                     </View>
@@ -1364,22 +896,17 @@ export default function EntryDetailScreen() {
           </Animated.View>
         )}
 
-        {/* Refine Analysis Button */}
+
+        {/* ── Refine Analysis button ──────────────────────────────────────── */}
         {!entry.userValidated && (
-          <Animated.View
-            entering={FadeInDown.delay(480).duration(600)}
-            className="mb-6"
-          >
+          <Animated.View entering={FadeInDown.delay(480).duration(600)} style={{ marginBottom: 16 }}>
             <Pressable
-              onPress={() => {
-                selectHaptic();
-                setShowRefineModal(true);
-              }}
+              onPress={() => { selectHaptic(); setShowRefineModal(true); }}
               className="flex-row items-center justify-center rounded-3xl py-4 px-5"
               style={{
-                backgroundColor: "rgba(255, 255, 255, 0.12)",
+                backgroundColor: GLASS_BG,
                 borderWidth: 2,
-                borderColor: "rgba(255, 255, 255, 0.20)",
+                borderColor: GLASS_BORDER,
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.08,
@@ -1387,85 +914,55 @@ export default function EntryDetailScreen() {
               }}
             >
               <RefreshCw size={16} color="#FFFFFF" strokeWidth={2} />
-              <Text
-                style={{
-                  fontFamily: "Inter_600SemiBold",
-                  color: "#FFFFFF",
-                  fontSize: 13,
-                  marginLeft: 8,
-                }}
-              >
+              <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 13, marginLeft: 8 }}>
                 Refine Analysis
               </Text>
             </Pressable>
           </Animated.View>
         )}
 
-        {/* AI Analysis - Collapsible */}
+        {/* ── AI Analysis — collapsible ───────────────────────────────────── */}
         {entry.aiAnalysis && entry.aiAnalysis.trim().length > 1 && (
-          <Animated.View entering={FadeInDown.delay(500).duration(600)}>
+          <Animated.View entering={FadeInDown.delay(500).duration(600)} style={{ marginBottom: 16 }}>
             <Pressable
               onPress={() => toggleSection("analysis")}
-              className="rounded-3xl overflow-hidden mb-6"
+              className="rounded-3xl overflow-hidden"
               style={{
-                backgroundColor: hexToRgba(Colors.primary, 0.1),
-                borderWidth: 1.5,
-                borderColor: hexToRgba(Colors.primary, 0.2),
-                overflow: "hidden",
+                backgroundColor: GLASS_BG,
+                borderWidth: 2,
+                borderColor: GLASS_BORDER,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.08,
+                shadowRadius: 8,
               }}
             >
-              <View className="p-5">
-                <View className="flex-row items-center justify-between mb-3">
-                  <View className="flex-row items-center">
-                    <Lightbulb size={18} color="#FFFFFF" strokeWidth={2} />
-                    <Text
-                      style={{
-                        fontFamily: "Inter_600SemiBold",
-                        color: "#FFFFFF",
-                      }}
-                      className="text-base ml-2"
-                    >
-                      AI Analysis
-                    </Text>
+              <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+              <View style={{ padding: 20 }}>
+                <View className="flex-row items-center justify-between" style={{ marginBottom: expandedSection === "analysis" ? 14 : 0 }}>
+                  <View className="flex-row items-center" style={{ gap: 8 }}>
+                    <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 8, padding: 6, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                      <Lightbulb size={16} color="#FFFFFF" strokeWidth={2} />
+                    </View>
+                    <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15 }}>AI Analysis</Text>
                     {entry.aiCorrected && (
-                      <View
-                        className="ml-2 px-2 py-0.5 rounded-full"
-                        style={{ backgroundColor: "rgba(234, 179, 8, 0.25)" }}
-                      >
-                        <Text
-                          style={{
-                            fontFamily: "Inter_600SemiBold",
-                            color: "#EAB308",
-                            fontSize: 9,
-                          }}
-                        >
-                          ADJUSTED
-                        </Text>
+                      <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 20, backgroundColor: "rgba(234,179,8,0.18)", borderWidth: 1, borderColor: "rgba(234,179,8,0.4)" }}>
+                        <Text style={{ fontFamily: "Inter_600SemiBold", color: "#EAB308", fontSize: 9 }}>ADJUSTED</Text>
                       </View>
                     )}
                   </View>
-                  {expandedSection === "analysis" ? (
-                    <ChevronUp size={20} color="#FFFFFF" strokeWidth={2} />
-                  ) : (
-                    <ChevronDown size={20} color="#FFFFFF" strokeWidth={2} />
-                  )}
+                  {expandedSection === "analysis"
+                    ? <ChevronUp size={18} color="rgba(255,255,255,0.7)" strokeWidth={2} />
+                    : <ChevronDown size={18} color="rgba(255,255,255,0.7)" strokeWidth={2} />}
                 </View>
 
                 {expandedSection === "analysis" && (
-                  <Animated.View
-                    entering={FadeIn.duration(300)}
-                    exiting={FadeOut.duration(200)}
-                  >
-                    <Text
-                      style={{
-                        fontFamily: "Inter_400Regular",
-                        lineHeight: 24,
-                        color: "rgba(255, 255, 255, 0.95)",
-                      }}
-                      className="text-sm"
-                    >
-                      {entry.aiAnalysis}
-                    </Text>
+                  <Animated.View entering={FadeIn.duration(300)} exiting={FadeOut.duration(200)}>
+                    <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 14, borderWidth: 1, borderColor: GLASS_INNER_BORDER, padding: 14 }}>
+                      <Text style={{ fontFamily: "Inter_400Regular", lineHeight: 24, color: "rgba(255,255,255,0.92)", fontSize: 14 }}>
+                        {entry.aiAnalysis}
+                      </Text>
+                    </View>
                   </Animated.View>
                 )}
               </View>
@@ -1473,32 +970,31 @@ export default function EntryDetailScreen() {
           </Animated.View>
         )}
 
-        {/* Topics */}
+
+        {/* ── Topics ─────────────────────────────────────────────────────── */}
         {entry.topics &&
           entry.topics.length > 0 &&
           entry.topics.some((t) => t && t.trim().length > 0) && (
-            <Animated.View entering={FadeInDown.delay(600).duration(600)}>
+            <Animated.View entering={FadeInDown.delay(560).duration(600)} style={{ marginBottom: 16 }}>
               <View
-                className="rounded-3xl overflow-hidden mb-6"
+                className="rounded-3xl overflow-hidden"
                 style={{
-                  backgroundColor: hexToRgba(Colors.primary, 0.1),
-                  borderWidth: 1.5,
-                  borderColor: hexToRgba(Colors.primary, 0.2),
-                  overflow: "hidden",
+                  backgroundColor: GLASS_BG,
+                  borderWidth: 2,
+                  borderColor: GLASS_BORDER,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
                 }}
               >
-                <View className="p-5">
-                  <View className="flex-row items-center mb-3">
-                    <Target size={18} color="#FFFFFF" strokeWidth={2} />
-                    <Text
-                      style={{
-                        fontFamily: "Inter_600SemiBold",
-                        color: "#FFFFFF",
-                      }}
-                      className="text-base ml-2"
-                    >
-                      Topics
-                    </Text>
+                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
+                <View style={{ padding: 20 }}>
+                  <View className="flex-row items-center" style={{ marginBottom: 14, gap: 8 }}>
+                    <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 8, padding: 6, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
+                      <Target size={16} color="#FFFFFF" strokeWidth={2} />
+                    </View>
+                    <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15 }}>Topics</Text>
                   </View>
                   <View className="flex-row flex-wrap" style={{ gap: 8 }}>
                     {entry.topics
@@ -1506,20 +1002,16 @@ export default function EntryDetailScreen() {
                       .map((topic, index) => (
                         <View
                           key={index}
-                          className="px-3 py-2 rounded-full"
                           style={{
-                            backgroundColor: hexToRgba(Colors.primary, 0.15),
-                            borderWidth: 1,
-                            borderColor: hexToRgba(Colors.primary, 0.2),
+                            paddingHorizontal: 14,
+                            paddingVertical: 8,
+                            borderRadius: 999,
+                            backgroundColor: GLASS_INNER_BG,
+                            borderWidth: 1.5,
+                            borderColor: GLASS_BORDER,
                           }}
                         >
-                          <Text
-                            style={{
-                              fontFamily: "Inter_500Medium",
-                              color: "#FFFFFF",
-                            }}
-                            className="text-xs capitalize"
-                          >
+                          <Text style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF", fontSize: 13, textTransform: "capitalize" }}>
                             {topic}
                           </Text>
                         </View>
@@ -1531,94 +1023,49 @@ export default function EntryDetailScreen() {
           )}
       </ScrollView>
 
-      {/* Delete Confirmation Modal */}
-      <Modal
-        visible={showDeleteModal}
-        animationType="fade"
-        transparent
-        onRequestClose={handleDeleteCancel}
-      >
+
+      {/* ── Delete Confirmation Modal ─────────────────────────────────────── */}
+      <Modal visible={showDeleteModal} animationType="fade" transparent onRequestClose={handleDeleteCancel}>
         <View className="flex-1 bg-black/60 items-center justify-center px-6">
           <Animated.View
             entering={FadeIn.duration(200)}
             className="rounded-3xl overflow-hidden w-full max-w-sm"
+            style={{
+              backgroundColor: GLASS_BG,
+              borderWidth: 2,
+              borderColor: GLASS_BORDER,
+            }}
           >
             <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
             <LinearGradient
               colors={Gradients.background}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
-              style={{
-                padding: 24,
-                borderRadius: 24,
-                borderWidth: 1,
-                borderColor: hexToRgba(Colors.primary, 0.15),
-              }}
+              style={{ padding: 24, borderRadius: 24 }}
             >
-              <View className="items-center mb-4">
-                <View
-                  className="w-16 h-16 rounded-full items-center justify-center mb-4"
-                  style={{ backgroundColor: "rgba(239, 68, 68, 0.15)" }}
-                >
+              <View className="items-center" style={{ marginBottom: 20 }}>
+                <View className="w-16 h-16 rounded-full items-center justify-center" style={{ backgroundColor: "rgba(239,68,68,0.15)", marginBottom: 16 }}>
                   <Trash2 size={32} color="#EF4444" strokeWidth={2} />
                 </View>
-                <Text
-                  className="text-2xl font-bold mb-2 text-center"
-                  style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF" }}
-                >
+                <Text className="text-2xl font-bold mb-2 text-center" style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF" }}>
                   Delete Entry?
                 </Text>
-                <Text
-                  className="text-center text-base"
-                  style={{
-                    fontFamily: "Inter_400Regular",
-                    color: "rgba(255, 255, 255, 0.8)",
-                    lineHeight: 22,
-                  }}
-                >
-                  This will permanently delete this journal entry. This action
-                  cannot be undone.
+                <Text className="text-center text-base" style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.8)", lineHeight: 22 }}>
+                  This will permanently delete this journal entry. This action cannot be undone.
                 </Text>
               </View>
-
               <View style={{ gap: 12 }}>
-                <Pressable
-                  onPress={handleDeleteConfirm}
-                  className="rounded-2xl overflow-hidden"
-                >
-                  <LinearGradient
-                    colors={["#EF4444", "#DC2626"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={{ padding: 16, alignItems: "center" }}
-                  >
-                    <Text
-                      className="text-white text-base font-bold"
-                      style={{ fontFamily: "Inter_700Bold" }}
-                    >
-                      Delete Entry
-                    </Text>
+                <Pressable onPress={handleDeleteConfirm} className="rounded-2xl overflow-hidden">
+                  <LinearGradient colors={["#EF4444", "#DC2626"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ padding: 16, alignItems: "center" }}>
+                    <Text className="text-white text-base font-bold" style={{ fontFamily: "Inter_700Bold" }}>Delete Entry</Text>
                   </LinearGradient>
                 </Pressable>
-
                 <Pressable
                   onPress={handleDeleteCancel}
                   className="rounded-2xl py-4 items-center"
-                  style={{
-                    borderWidth: 2,
-                    borderColor: Colors.primary,
-                    backgroundColor: "transparent",
-                  }}
+                  style={{ borderWidth: 2, borderColor: GLASS_BORDER, backgroundColor: GLASS_INNER_BG }}
                 >
-                  <Text
-                    className="text-base font-bold"
-                    style={{
-                      fontFamily: "Inter_700Bold",
-                      color: Colors.primary,
-                    }}
-                  >
-                    Cancel
-                  </Text>
+                  <Text className="text-base font-bold" style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF" }}>Cancel</Text>
                 </Pressable>
               </View>
             </LinearGradient>
@@ -1626,7 +1073,7 @@ export default function EntryDetailScreen() {
         </View>
       </Modal>
 
-      {/* Refine Analysis Modal */}
+      {/* ── Refine Analysis Modal ─────────────────────────────────────────── */}
       {entry && (
         <EmotionCorrectionModal
           visible={showRefineModal}
@@ -1635,10 +1082,7 @@ export default function EntryDetailScreen() {
           aiValence={entry.valence}
           aiArousal={entry.arousal}
           aiDistress={entry.distressLevel}
-          onDismiss={() => {
-            tapHaptic();
-            setShowRefineModal(false);
-          }}
+          onDismiss={() => { tapHaptic(); setShowRefineModal(false); }}
           onSubmit={(correction) => {
             if (correction.userConfirmedAI) {
               updateEntry(entry.id, { userValidated: true });
@@ -1650,18 +1094,10 @@ export default function EntryDetailScreen() {
                 arousal: number;
                 aiCorrected: boolean;
                 userOverrideLabels: Partial<Record<EmotionType, string>>;
-              }> = {
-                aiCorrected: true,
-              };
-              if (correction.userEditedEmotion) {
-                updates.primaryEmotion = correction.userEditedEmotion;
-              }
-              if (correction.userEditedValence !== undefined) {
-                updates.valence = correction.userEditedValence;
-              }
-              if (correction.userEditedArousal !== undefined) {
-                updates.arousal = correction.userEditedArousal;
-              }
+              }> = { aiCorrected: true };
+              if (correction.userEditedEmotion) updates.primaryEmotion = correction.userEditedEmotion;
+              if (correction.userEditedValence !== undefined) updates.valence = correction.userEditedValence;
+              if (correction.userEditedArousal !== undefined) updates.arousal = correction.userEditedArousal;
               updateEntry(entry.id, updates as any);
               successHaptic();
             }
