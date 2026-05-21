@@ -450,8 +450,7 @@ export function FreeTrialPreviewScreen() {
             style={{
               flex: 1,
               paddingHorizontal: 24,
-              justifyContent: "space-between",
-              paddingBottom: 28,
+              paddingVertical: 12,
             }}
           >
             {/* Title */}
@@ -477,7 +476,7 @@ export function FreeTrialPreviewScreen() {
             {/* ── Animated App Demo ── */}
             <Animated.View
               entering={FadeIn.delay(200).duration(700).easing(SOFT)}
-              style={[cardFloatStyle, { flex: 1, marginVertical: 16 }]}
+              style={[cardFloatStyle, { maxHeight: 340, marginTop: 12, marginBottom: 16 }]}
             >
               <View
                 style={{
@@ -1060,7 +1059,7 @@ export function FreeTrialPreviewScreen() {
             {/* ── No payment text + CTA ── */}
             <Animated.View
               entering={FadeIn.delay(500).duration(600).easing(SOFT)}
-              style={{ alignItems: "center" }}
+              style={{ alignItems: "center", paddingBottom: 24 }}
             >
               <View
                 style={{
@@ -1129,6 +1128,9 @@ export function FreeTrialPreviewScreen() {
                 </LinearGradient>
               </Pressable>
             </Animated.View>
+
+            {/* Spacer — pushes content up, aligns button with other screens */}
+            <View style={{ flex: 1 }} />
           </View>
         </SafeAreaView>
       </LinearGradient>
