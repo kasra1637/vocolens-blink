@@ -270,7 +270,7 @@ export function SetPinScreen() {
                   <Text
                     style={{
                       fontFamily: "Fraunces_700Bold",
-                      fontSize: 22,
+                      fontSize: 26,
                       color: "#FFFFFF",
                       textAlign: "center",
                       opacity: 0.92,

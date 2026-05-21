@@ -104,7 +104,7 @@ export function NameCollectionScreen() {
                   style={{
                     fontFamily: "Fraunces_700Bold",
                     color: "#FFFFFF",
-                    fontSize: 26,
+                    fontSize: 28,
                     textAlign: "center",
                     opacity: 0.95,
                     letterSpacing: 0.2,

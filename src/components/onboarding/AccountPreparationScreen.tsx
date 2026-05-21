@@ -146,7 +146,7 @@ export function AccountPreparationScreen() {
                 style={{
                   color: "#FFFFFF",
                   fontFamily: "Fraunces_700Bold",
-                  fontSize: 24,
+                  fontSize: 26,
                   textAlign: "center",
                   marginBottom: 10,
                 }}

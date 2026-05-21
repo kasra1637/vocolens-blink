@@ -147,7 +147,7 @@ export function MoodFollowUpScreen() {
                 style={{
                   fontFamily: "Fraunces_700Bold",
                   color: "#FFFFFF",
-                  fontSize: 22,
+                  fontSize: 26,
                   opacity: 0.92,
                   letterSpacing: 0.2,
                 }}

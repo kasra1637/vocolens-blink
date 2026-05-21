@@ -544,7 +544,7 @@ export function PaywallScreen() {
               style={{ paddingHorizontal: 24, paddingTop: 8, paddingBottom: 10, alignItems: "center" }}
             >
               <Text
-                style={{ fontFamily: "Fraunces_700Bold", color: "#FFFFFF", fontSize: 22, textAlign: "center", lineHeight: 30, letterSpacing: 0.2, opacity: 0.92 }}
+                style={{ fontFamily: "Fraunces_700Bold", color: "#FFFFFF", fontSize: 26, textAlign: "center", lineHeight: 30, letterSpacing: 0.2, opacity: 0.92 }}
               >
                 Start your 3-day FREE trial{"\n"}to continue.
               </Text>

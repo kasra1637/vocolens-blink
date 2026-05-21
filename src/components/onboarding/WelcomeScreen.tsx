@@ -96,7 +96,7 @@ export function WelcomeScreen() {
                 style={{
                   fontFamily: "Fraunces_700Bold",
                   color: "#FFFFFF",
-                  fontSize: 22,
+                  fontSize: 32,
                   textAlign: "center",
                   opacity: 0.92,
                   letterSpacing: 0.2,
