@@ -59,7 +59,7 @@ import useJournalStore from "@/lib/state/journal-store";
 import useOnboardingStore from "@/lib/state/onboarding-store";
 import useSettingsStore from "@/lib/state/settings-store";
 import { useDeleteEntry } from "@/lib/hooks";
-import { hexToRgba, GlassLayers } from "@/lib/glass";
+import { hexToRgba } from "@/lib/glass";
 
 import {
   formatShortDuration,
@@ -365,7 +365,6 @@ export default function EntryDetailScreen() {
               shadowRadius: 8,
             }}
           >
-            <GlassLayers primaryColor={Colors.primary} borderRadius={16} />
             <View className="flex-row items-center justify-around py-4 px-5">
               <View className="items-center">
                 <Calendar size={16} color="rgba(255,255,255,0.9)" strokeWidth={2} />
@@ -411,7 +410,6 @@ export default function EntryDetailScreen() {
                 shadowRadius: 8,
               }}
             >
-              <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
               <View style={{ padding: 20 }}>
                 <View className="flex-row items-center justify-between" style={{ marginBottom: expandedSection === "reflection" ? 14 : 0 }}>
                   <View className="flex-row items-center" style={{ gap: 8 }}>
@@ -474,7 +472,6 @@ export default function EntryDetailScreen() {
                 shadowRadius: 8,
               }}
             >
-              <GlassLayers primaryColor={Colors.primary} borderRadius={16} />
               <View style={{ padding: 18 }}>
                 <View className="flex-row items-center" style={{ marginBottom: 10, gap: 8 }}>
                   <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 8, padding: 6, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
@@ -507,7 +504,6 @@ export default function EntryDetailScreen() {
               shadowRadius: 8,
             }}
           >
-            <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
             <View style={{ padding: 20 }}>
               {/* Section header */}
               <View className="flex-row items-center" style={{ marginBottom: 14, gap: 8 }}>
@@ -592,7 +588,6 @@ export default function EntryDetailScreen() {
                 shadowRadius: 8,
               }}
             >
-              <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
               <View style={{ padding: 20 }}>
                 <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15, marginBottom: 14 }}>
                   Recording
@@ -636,7 +631,6 @@ export default function EntryDetailScreen() {
               shadowRadius: 8,
             }}
           >
-            <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
             <View style={{ padding: 20 }}>
               {/* Header row */}
               <View className="flex-row items-center justify-between" style={{ marginBottom: expandedSection === "emotions" ? 16 : 0 }}>
@@ -781,7 +775,6 @@ export default function EntryDetailScreen() {
                 shadowRadius: 8,
               }}
             >
-              <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
               <View style={{ padding: 20 }}>
                 {/* Header */}
                 <View className="flex-row items-center justify-between" style={{ marginBottom: 18 }}>
@@ -937,7 +930,6 @@ export default function EntryDetailScreen() {
                 shadowRadius: 8,
               }}
             >
-              <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
               <View style={{ padding: 20 }}>
                 <View className="flex-row items-center justify-between" style={{ marginBottom: expandedSection === "analysis" ? 14 : 0 }}>
                   <View className="flex-row items-center" style={{ gap: 8 }}>
@@ -988,7 +980,6 @@ export default function EntryDetailScreen() {
                   shadowRadius: 8,
                 }}
               >
-                <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
                 <View style={{ padding: 20 }}>
                   <View className="flex-row items-center" style={{ marginBottom: 14, gap: 8 }}>
                     <View style={{ backgroundColor: GLASS_INNER_BG, borderRadius: 8, padding: 6, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
@@ -1036,7 +1027,6 @@ export default function EntryDetailScreen() {
               borderColor: GLASS_BORDER,
             }}
           >
-            <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
             <LinearGradient
               colors={Gradients.background}
               start={{ x: 0, y: 0 }}
