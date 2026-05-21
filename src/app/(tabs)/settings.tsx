@@ -1185,7 +1185,7 @@ export default function SettingsScreen() {
                   <View
                     style={{
                       height: 1,
-                      backgroundColor: "rgba(239, 68, 68, 0.2)",
+                      backgroundColor: "rgba(255, 255, 255, 0.12)",
                       marginBottom: 16,
                     }}
                   />
@@ -1218,16 +1218,17 @@ export default function SettingsScreen() {
                     onPress={handleResetAllData}
                     className="rounded-3xl overflow-hidden active:opacity-80"
                   >
-                    <LinearGradient
-                      colors={["#EF4444", "#DC2626"]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
+                    <View
                       style={{
                         paddingVertical: 14,
                         paddingHorizontal: 24,
                         flexDirection: "row",
                         alignItems: "center",
                         justifyContent: "center",
+                        backgroundColor: "rgba(239, 68, 68, 0.15)",
+                        borderWidth: 2,
+                        borderColor: hexToRgba(Colors.primary, 0.30),
+                        borderRadius: 24,
                       }}
                     >
                       <Trash2
@@ -1244,7 +1245,7 @@ export default function SettingsScreen() {
                       >
                         Reset All Data
                       </Text>
-                    </LinearGradient>
+                    </View>
                   </Pressable>
                 </View>
               </View>
@@ -1627,36 +1628,40 @@ export default function SettingsScreen() {
       >
         <View className="flex-1 bg-black/50 items-center justify-center px-6">
           <View
-            className="rounded-3xl p-6 w-full max-w-md"
             style={{
-              backgroundColor: Colors.surfaceHighlight,
-              ...Shadows.large,
+              backgroundColor: "rgba(255, 255, 255, 0.12)",
+              borderRadius: 24,
+              padding: 24,
+              width: "100%",
+              maxWidth: 400,
+              borderWidth: 2,
+              borderColor: "rgba(255, 255, 255, 0.20)",
+              overflow: "hidden",
             }}
           >
-            <GlassLayers primaryColor={Colors.primary} borderRadius={24} />
             <View className="items-center mb-4">
               <View
                 className="w-16 h-16 rounded-full items-center justify-center mb-4"
                 style={{
-                  backgroundColor: isDarkMode
-                    ? "rgba(239, 68, 68, 0.15)"
-                    : "#FEE2E2",
+                  backgroundColor: hexToRgba(Colors.primary, 0.20),
+                  borderWidth: 1,
+                  borderColor: hexToRgba(Colors.primary, 0.30),
                 }}
               >
-                <AlertTriangle size={32} color="#DC2626" strokeWidth={2} />
+                <AlertTriangle size={32} color="#FFFFFF" strokeWidth={2} />
               </View>
               <Text
                 className="text-2xl font-bold mb-2"
                 style={{
                   fontFamily: "Inter_700Bold",
-                  color: Colors.textPrimary,
+                  color: "#FFFFFF",
                 }}
               >
                 {resetStep === 1 ? "Reset All Data?" : "Are you sure?"}
               </Text>
               <Text
                 className="text-center text-base"
-                style={{ color: Colors.textSecondary, lineHeight: 22 }}
+                style={{ color: "rgba(255, 255, 255, 0.75)", lineHeight: 22 }}
               >
                 {resetStep === 1
                   ? "This will permanently erase all your journal entries, stats, badges, PIN, and settings."
@@ -1668,13 +1673,13 @@ export default function SettingsScreen() {
             <View className="flex-row justify-center items-center gap-2 mb-4">
               <View
                 className="w-8 h-1.5 rounded-full"
-                style={{ backgroundColor: "#EF4444" }}
+                style={{ backgroundColor: Colors.primary }}
               />
               <View
                 className="w-8 h-1.5 rounded-full"
                 style={{
                   backgroundColor:
-                    resetStep === 2 ? "#EF4444" : "rgba(255,255,255,0.2)",
+                    resetStep === 2 ? Colors.primary : "rgba(255,255,255,0.2)",
                 }}
               />
             </View>
@@ -1691,13 +1696,17 @@ export default function SettingsScreen() {
                     ? handleResetStep1Confirm
                     : confirmResetAllData
                 }
-                className="rounded-3xl overflow-hidden mb-3"
+                className="rounded-3xl overflow-hidden mb-3 active:opacity-80"
               >
-                <LinearGradient
-                  colors={["#EF4444", "#DC2626"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={{ padding: 16, alignItems: "center" }}
+                <View
+                  style={{
+                    padding: 16,
+                    alignItems: "center",
+                    backgroundColor: "rgba(239, 68, 68, 0.20)",
+                    borderWidth: 2,
+                    borderColor: hexToRgba(Colors.primary, 0.40),
+                    borderRadius: 24,
+                  }}
                 >
                   <Text
                     className="text-white text-lg font-bold"
@@ -1707,7 +1716,7 @@ export default function SettingsScreen() {
                       ? "Yes, Reset Everything"
                       : "Delete All Data Now"}
                   </Text>
-                </LinearGradient>
+                </View>
               </Pressable>
 
               <Pressable
