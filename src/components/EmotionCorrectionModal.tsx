@@ -26,13 +26,16 @@ import {
   Check,
   X,
   Brain,
+  Tag,
+  Sliders,
+  MessageSquare,
 } from "lucide-react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EmotionType, DistressLevel } from "@/lib/types";
 import { EMOTION_EMOJIS } from "@/lib/types";
 import { getEmotionDefinition } from "@/lib/emotion-definitions";
-import { useEmotionCorrectionStore } from "@/lib/state/emotion-correction-store";
+import { useEmotionCorrectionStore, CorrectionType } from "@/lib/state/emotion-correction-store";
 import { tapHaptic, successHaptic } from "@/lib/haptics";
 import useOnboardingStore from "@/lib/state/onboarding-store";
 import useSettingsStore from "@/lib/state/settings-store";
@@ -90,6 +93,7 @@ export default function EmotionCorrectionModal({
   const [arousal, setArousal] = useState(aiArousal);
   const [correctionMode, setCorrectionMode] = useState<CorrectionMode>("slider");
   const [reason, setReason] = useState("");
+  const [correctionType, setCorrectionType] = useState<CorrectionType>("intensity");
 
   const { recordCorrection, recordConfirmation } = useEmotionCorrectionStore();
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
@@ -105,6 +109,7 @@ export default function EmotionCorrectionModal({
 
   const handleReject = useCallback(() => {
     tapHaptic();
+    setCorrectionType("label");
     setStep("replace");
   }, []);
 
@@ -128,6 +133,7 @@ export default function EmotionCorrectionModal({
       userArousal: arousal,
       reason: undefined,
       correctionMode: "slider",
+      correctionType: "intensity",
     });
     onSubmit({
       userConfirmedAI: false,
@@ -153,6 +159,7 @@ export default function EmotionCorrectionModal({
       userArousal: arousal,
       reason: reason.trim() || undefined,
       correctionMode,
+      correctionType,
     });
     onSubmit({
       userConfirmedAI: false,
@@ -163,7 +170,7 @@ export default function EmotionCorrectionModal({
       userCorrectionReason: reason.trim() || undefined,
       correctionTimestamp: new Date().toISOString(),
     });
-  }, [entryId, aiEmotion, selectedEmotion, aiValence, valence, aiArousal, arousal, reason, correctionMode, recordCorrection, onSubmit]);
+  }, [entryId, aiEmotion, selectedEmotion, aiValence, valence, aiArousal, arousal, reason, correctionMode, correctionType, recordCorrection, onSubmit]);
 
   const aiDef = getEmotionDefinition(aiEmotion);
 
@@ -494,6 +501,43 @@ export default function EmotionCorrectionModal({
                 Is there anything that might help us understand this better next time? (Optional)
               </Text>
 
+              {/* Correction type chips */}
+              <Text
+                style={{
+                  fontFamily: "Inter_500Medium",
+                  fontSize: 12,
+                  color: "rgba(255,255,255,0.6)",
+                  marginBottom: 8,
+                  textTransform: "uppercase",
+                  letterSpacing: 0.5,
+                }}
+              >
+                What kind of change?
+              </Text>
+              <View style={{ flexDirection: "row", gap: 8, marginBottom: 16 }}>
+                <ReasonChip
+                  label="Wrong label"
+                  icon={<Tag size={13} color="#FFFFFF" strokeWidth={2} />}
+                  active={correctionType === "label"}
+                  onPress={() => { tapHaptic(); setCorrectionType("label"); }}
+                  primaryColor={Colors.primary}
+                />
+                <ReasonChip
+                  label="Wrong intensity"
+                  icon={<Sliders size={13} color="#FFFFFF" strokeWidth={2} />}
+                  active={correctionType === "intensity"}
+                  onPress={() => { tapHaptic(); setCorrectionType("intensity"); }}
+                  primaryColor={Colors.primary}
+                />
+                <ReasonChip
+                  label="Context"
+                  icon={<MessageSquare size={13} color="#FFFFFF" strokeWidth={2} />}
+                  active={correctionType === "context"}
+                  onPress={() => { tapHaptic(); setCorrectionType("context"); }}
+                  primaryColor={Colors.primary}
+                />
+              </View>
+
               {/* Mode chips */}
               <View style={{ flexDirection: "row", gap: 10, marginBottom: 16 }}>
                 <ReasonChip
@@ -649,6 +693,7 @@ export default function EmotionCorrectionModal({
                     userArousal: arousal,
                     reason: undefined,
                     correctionMode,
+                    correctionType,
                   });
                   onSubmit({
                     userConfirmedAI: false,

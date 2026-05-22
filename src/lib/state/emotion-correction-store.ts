@@ -1,9 +1,21 @@
 /**
- * Emotion Correction Store — Personalization Layer
+ * Emotion Correction Store — Personalization Layer (v2)
  *
  * Stores user corrections and aggregates patterns to build a personalized
- * emotional model. This lets the app learn each user's unique emotion vocabulary
- * and interpretation patterns over time.
+ * emotional model. Uses weighted feedback mechanics:
+ *
+ * 1. RECENCY DECAY — corrections from last 14 days weight 3×, decays with 45-day half-life
+ * 2. CONSISTENCY — same correction across different moods/contexts matters more than
+ *    repeated corrections in a single bad week
+ * 3. MAGNITUDE THRESHOLD — valence/arousal shifts ≤5 are noise, ignored for learning
+ * 4. CORRECTION TYPE — label corrections, intensity corrections, and context corrections
+ *    are tracked separately. Context corrections (sarcasm, quoting) are excluded from learning.
+ *
+ * Philosophy:
+ * - AI output = expressed emotion (what the text conveys)
+ * - User correction = experienced emotion (what the person actually felt)
+ * - The system learns from stable divergence patterns, not one-off disagreements
+ * - Personalization caps at ~80% agreement to preserve external perspective value
  *
  * Safety: Corrections inform personalization — they are not diagnostic.
  */
@@ -12,6 +24,11 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { EmotionType } from '../types';
+
+// ── Correction Types ──────────────────────────────────────────────────────────
+
+/** What kind of correction the user made */
+export type CorrectionType = 'label' | 'intensity' | 'context';
 
 export interface CorrectionRecord {
   id: string;
@@ -25,6 +42,8 @@ export interface CorrectionRecord {
   userArousal: number;
   reason?: string;
   correctionMode: 'voice' | 'text' | 'slider';
+  /** v2: type of correction — determines how it feeds into learning */
+  correctionType?: CorrectionType;
 }
 
 export interface CorrectionPattern {
@@ -32,26 +51,30 @@ export interface CorrectionPattern {
   aiLabel: EmotionType;
   /** What the user consistently corrects it to */
   actualLabel: EmotionType;
-  /** How often this correction has happened */
+  /** Weighted occurrence count (recency-adjusted) */
   occurrences: number;
+  /** Raw (unweighted) occurrence count */
+  rawOccurrences: number;
   /** Confidence 0–1 that this is a real pattern */
   confidence: number;
   /** Most recent correction timestamp */
   lastSeen: string;
   /** Text excerpts from user corrections (for phrase patterns) */
   userPhrases: string[];
+  /** Number of distinct weeks this pattern appeared in */
+  distinctWeeks: number;
 }
 
 export interface UserEmotionBias {
   /** User-specific interpretations of emotions */
   emotionMappings: Partial<Record<EmotionType, {
-    valenceBias: number;    // shift to apply to AI valence
-    arousalBias: number;     // shift to apply to AI arousal
-    labelBias: number;      // confidence shift for this label
+    valenceBias: number;    // weighted shift to apply to AI valence
+    arousalBias: number;    // weighted shift to apply to AI arousal
+    labelBias: number;      // confidence shift for this label (0–1)
   }>>;
   /** Patterns detected from corrections */
   patterns: CorrectionPattern[];
-  /** Total corrections given */
+  /** Total corrections given (all types) */
   totalCorrections: number;
   /** Total confirmations (AI was right) */
   totalConfirmations: number;
@@ -76,18 +99,96 @@ interface EmotionCorrectionState {
   clearCorrections: () => void;
 }
 
+// ── Configuration Constants ───────────────────────────────────────────────────
+
 const MAX_STORED_CORRECTIONS = 200;
-const PATTERN_MIN_OCCURRENCES = 3;
-const HIGH_CONFIRMATION_THRESHOLD = 0.7; // 70%+ confirms a label as accurate
+
+/** Minimum weighted occurrences to register as a pattern */
+const PATTERN_MIN_WEIGHTED = 2.5;
+
+/** Minimum raw occurrences before considering as pattern */
+const PATTERN_MIN_RAW = 3;
+
+/** Half-life for recency decay in days */
+const RECENCY_HALF_LIFE_DAYS = 45;
+
+/** Recent corrections (within this many days) get a boost multiplier */
+const RECENCY_BOOST_WINDOW_DAYS = 14;
+const RECENCY_BOOST_MULTIPLIER = 3;
+
+/** Valence/arousal shifts below this threshold are treated as noise */
+const MAGNITUDE_NOISE_THRESHOLD = 5;
+
+/** Minimum distinct weeks to consider a pattern stable (vs. a bad-week cluster) */
+const MIN_DISTINCT_WEEKS = 2;
+
+/** Personalization ceiling — prevents AI from fully converging to user */
+const PERSONALIZATION_CEILING = 0.80;
+
+// ── Helper Functions ──────────────────────────────────────────────────────────
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
-function computePatterns(corrections: CorrectionRecord[]): CorrectionPattern[] {
+/**
+ * Calculate recency weight for a correction.
+ * Recent corrections (≤14 days) get 3× weight.
+ * Older corrections decay with a 45-day half-life.
+ */
+function getRecencyWeight(timestamp: string): number {
+  const now = Date.now();
+  const correctionTime = new Date(timestamp).getTime();
+  const daysSince = (now - correctionTime) / (1000 * 60 * 60 * 24);
+
+  if (daysSince <= RECENCY_BOOST_WINDOW_DAYS) {
+    return RECENCY_BOOST_MULTIPLIER;
+  }
+
+  // Exponential decay: weight = 2^(-daysSince / halfLife)
+  return Math.pow(2, -daysSince / RECENCY_HALF_LIFE_DAYS);
+}
+
+/**
+ * Get the ISO week string for grouping (YYYY-Www)
+ */
+function getWeekKey(timestamp: string): string {
+  const d = new Date(timestamp);
+  const yearStart = new Date(d.getFullYear(), 0, 1);
+  const weekNum = Math.ceil(
+    ((d.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24) + yearStart.getDay() + 1) / 7
+  );
+  return `${d.getFullYear()}-W${weekNum.toString().padStart(2, '0')}`;
+}
+
+/**
+ * Determine if a correction represents a meaningful difference (not noise).
+ * Returns false for context corrections (excluded from learning).
+ */
+function isMeaningfulForLearning(c: CorrectionRecord): boolean {
+  // Context corrections (sarcasm, quoting someone) never feed learning
+  if (c.correctionType === 'context') return false;
+
+  // Label corrections are always meaningful
+  if (c.aiEmotion !== c.userEmotion) return true;
+
+  // Intensity corrections: only meaningful if shift exceeds noise threshold
+  const valenceShift = Math.abs(c.userValence - c.aiValence);
+  const arousalShift = Math.abs(c.userArousal - c.aiArousal);
+  return valenceShift > MAGNITUDE_NOISE_THRESHOLD || arousalShift > MAGNITUDE_NOISE_THRESHOLD;
+}
+
+/**
+ * Compute patterns with weighted feedback mechanics.
+ * Only considers corrections that are meaningful for learning.
+ */
+function computeWeightedPatterns(corrections: CorrectionRecord[]): CorrectionPattern[] {
+  // Filter to only learnable corrections
+  const learnable = corrections.filter(isMeaningfulForLearning);
+
   const map = new Map<string, CorrectionRecord[]>();
 
-  corrections.forEach((c) => {
+  learnable.forEach((c) => {
     const key = `${c.aiEmotion}→${c.userEmotion}`;
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(c);
@@ -96,11 +197,31 @@ function computePatterns(corrections: CorrectionRecord[]): CorrectionPattern[] {
   const patterns: CorrectionPattern[] = [];
 
   map.forEach((records, key) => {
-    if (records.length < PATTERN_MIN_OCCURRENCES) return;
+    // Raw occurrence check
+    if (records.length < PATTERN_MIN_RAW) return;
+
     const [aiLabel, actualLabel] = key.split('→') as [EmotionType, EmotionType];
 
-    const avgValenceShift = records.reduce((s, r) => s + (r.userValence - r.aiValence), 0) / records.length;
-    const avgArousalShift = records.reduce((s, r) => s + (r.userArousal - r.aiArousal), 0) / records.length;
+    // Calculate weighted occurrences (recency-adjusted)
+    const weightedOccurrences = records.reduce(
+      (sum, r) => sum + getRecencyWeight(r.timestamp),
+      0
+    );
+
+    // Must exceed weighted minimum
+    if (weightedOccurrences < PATTERN_MIN_WEIGHTED) return;
+
+    // Consistency check: count distinct weeks
+    const weekSet = new Set(records.map((r) => getWeekKey(r.timestamp)));
+    const distinctWeeks = weekSet.size;
+
+    // A pattern appearing only in 1 week could be a temporary mood — flag as lower confidence
+    const consistencyMultiplier = distinctWeeks >= MIN_DISTINCT_WEEKS ? 1.0 : 0.5;
+
+    // Confidence: combination of weighted volume and consistency
+    // Caps at PERSONALIZATION_CEILING to preserve external perspective
+    const rawConfidence = Math.min(1, weightedOccurrences / 8) * consistencyMultiplier;
+    const confidence = Math.min(PERSONALIZATION_CEILING, rawConfidence);
 
     const phrases = records
       .filter((r) => r.reason && r.reason.trim().length > 0)
@@ -110,26 +231,53 @@ function computePatterns(corrections: CorrectionRecord[]): CorrectionPattern[] {
     patterns.push({
       aiLabel,
       actualLabel,
-      occurrences: records.length,
-      confidence: Math.min(1, records.length / 10),
-      lastSeen: records[records.length - 1].timestamp,
+      occurrences: Math.round(weightedOccurrences * 10) / 10,
+      rawOccurrences: records.length,
+      confidence,
+      lastSeen: records[0].timestamp, // corrections are newest-first
       userPhrases: phrases,
+      distinctWeeks,
     });
-
-    // Apply shift bias
-    if (patterns.length > 0) {
-      const p = patterns[patterns.length - 1];
-      const bias = {
-        valenceBias: avgValenceShift,
-        arousalBias: avgArousalShift,
-        labelBias: p.confidence,
-      };
-      // (stored in userBias.emotionMappings[aiLabel] by caller)
-    }
   });
 
   return patterns.sort((a, b) => b.occurrences - a.occurrences);
 }
+
+/**
+ * Compute weighted valence/arousal bias for a set of corrections.
+ * Applies recency weighting and magnitude threshold.
+ */
+function computeWeightedBias(corrections: CorrectionRecord[]): {
+  valenceBias: number;
+  arousalBias: number;
+} {
+  const meaningful = corrections.filter((c) => {
+    if (c.correctionType === 'context') return false;
+    const valShift = Math.abs(c.userValence - c.aiValence);
+    const aroShift = Math.abs(c.userArousal - c.aiArousal);
+    return valShift > MAGNITUDE_NOISE_THRESHOLD || aroShift > MAGNITUDE_NOISE_THRESHOLD;
+  });
+
+  if (meaningful.length === 0) return { valenceBias: 0, arousalBias: 0 };
+
+  let totalWeight = 0;
+  let weightedValenceSum = 0;
+  let weightedArousalSum = 0;
+
+  meaningful.forEach((c) => {
+    const w = getRecencyWeight(c.timestamp);
+    totalWeight += w;
+    weightedValenceSum += (c.userValence - c.aiValence) * w;
+    weightedArousalSum += (c.userArousal - c.aiArousal) * w;
+  });
+
+  return {
+    valenceBias: Math.round((weightedValenceSum / totalWeight) * 10) / 10,
+    arousalBias: Math.round((weightedArousalSum / totalWeight) * 10) / 10,
+  };
+}
+
+// ── Store ─────────────────────────────────────────────────────────────────────
 
 export const useEmotionCorrectionStore = create<EmotionCorrectionState>()(
   persist(
@@ -150,34 +298,27 @@ export const useEmotionCorrectionStore = create<EmotionCorrectionState>()(
         set((state) => {
           const corrections = [correction, ...state.corrections].slice(0, MAX_STORED_CORRECTIONS);
 
-          // Rebuild patterns
-          const patterns = computePatterns(corrections);
-          const aiLabel = record.aiEmotion;
-          const actualLabel = record.userEmotion;
-          const pattern = patterns.find((p) => p.aiLabel === aiLabel && p.actualLabel === actualLabel);
+          // Rebuild patterns with weighted mechanics
+          const patterns = computeWeightedPatterns(corrections);
 
-          const avgValenceShift = pattern
-            ? corrections
-                .filter((c) => c.aiEmotion === aiLabel && c.userEmotion === actualLabel)
-                .reduce((s, r) => s + (r.userValence - r.aiValence), 0) /
-              corrections.filter((c) => c.aiEmotion === aiLabel && c.userEmotion === actualLabel).length
-            : 0;
+          // Rebuild emotion mappings from patterns
+          const newMappings: UserEmotionBias['emotionMappings'] = {};
+          patterns.forEach((p) => {
+            // Get all corrections for this pattern to compute weighted bias
+            const patternCorrections = corrections.filter(
+              (c) => c.aiEmotion === p.aiLabel && c.userEmotion === p.actualLabel
+            );
+            const bias = computeWeightedBias(patternCorrections);
 
-          const avgArousalShift = pattern
-            ? corrections
-                .filter((c) => c.aiEmotion === aiLabel && c.userEmotion === actualLabel)
-                .reduce((s, r) => s + (r.userArousal - r.aiArousal), 0) /
-              corrections.filter((c) => c.aiEmotion === aiLabel && c.userEmotion === actualLabel).length
-            : 0;
-
-          const newMappings = { ...state.userBias.emotionMappings };
-          if (pattern) {
-            newMappings[aiLabel] = {
-              valenceBias: avgValenceShift,
-              arousalBias: avgArousalShift,
-              labelBias: pattern.confidence,
-            };
-          }
+            // Only apply mapping if pattern meets stability criteria
+            if (p.distinctWeeks >= MIN_DISTINCT_WEEKS && p.confidence >= 0.3) {
+              newMappings[p.aiLabel] = {
+                valenceBias: bias.valenceBias,
+                arousalBias: bias.arousalBias,
+                labelBias: p.confidence,
+              };
+            }
+          });
 
           return {
             corrections,
@@ -205,6 +346,7 @@ export const useEmotionCorrectionStore = create<EmotionCorrectionState>()(
           aiArousal,
           userArousal: aiArousal,
           correctionMode: 'slider',
+          correctionType: 'intensity', // confirmations are treated as "no intensity change"
         };
 
         set((state) => {
@@ -233,9 +375,21 @@ export const useEmotionCorrectionStore = create<EmotionCorrectionState>()(
       },
 
       getPersonalizationStrength: () => {
-        const { totalCorrections } = get().userBias;
-        // Sigmoid-ish curve: 1 correction = weak signal, 20+ = strong signal
-        return Math.min(1, totalCorrections / 20);
+        const { patterns, totalCorrections } = get().userBias;
+        if (totalCorrections === 0) return 0;
+
+        // Personalization strength considers:
+        // 1. Volume of corrections (more data = stronger signal)
+        // 2. Pattern stability (patterns across multiple weeks = stronger)
+        // 3. Capped at PERSONALIZATION_CEILING
+        const volumeSignal = Math.min(1, totalCorrections / 20);
+        const stablePatterns = patterns.filter((p) => p.distinctWeeks >= MIN_DISTINCT_WEEKS);
+        const stabilitySignal = stablePatterns.length > 0
+          ? Math.min(1, stablePatterns.reduce((sum, p) => sum + p.confidence, 0) / stablePatterns.length)
+          : 0;
+
+        const raw = (volumeSignal * 0.4) + (stabilitySignal * 0.6);
+        return Math.min(PERSONALIZATION_CEILING, raw);
       },
 
       clearCorrections: () => {
