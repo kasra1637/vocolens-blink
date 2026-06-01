@@ -26,19 +26,19 @@ const HOW_IT_WORKS = [
   {
     icon: Mic,
     step: "01",
-    headline: "Speak without filter.",
+    headline: "Speak without filter",
     body: "No blank page, no executive-function hurdle.",
   },
   {
     icon: Smile,
     step: "02",
-    headline: "Emotions get named.",
+    headline: "Emotions get named",
     body: "When emotions are hard to name, the AI names them for you.",
   },
   {
     icon: TrendingUp,
     step: "03",
-    headline: "Watch patterns unfold.",
+    headline: "Watch patterns unfold",
     body: "See the patterns behind the overwhelm — privately, at your pace.",
   },
 ];
