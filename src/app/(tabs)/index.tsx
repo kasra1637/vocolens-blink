@@ -812,13 +812,10 @@ export default function SpeakScreen() {
             <View
               className="rounded-3xl overflow-hidden"
               style={{
-                backgroundColor: hexToRgba(Colors.primary, 0.1),
-                borderWidth: 1.5,
-                borderColor: hexToRgba(Colors.primary, 0.2),
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.08,
-                shadowRadius: 8,
+                backgroundColor: "rgba(255, 255, 255, 0.12)",
+                borderWidth: 2,
+                borderColor: "rgba(255, 255, 255, 0.20)",
+                borderRadius: 24,
               }}
             >
               <View className="p-4">
@@ -866,9 +863,9 @@ export default function SpeakScreen() {
                   <View
                     className="mb-3 rounded-2xl overflow-hidden"
                     style={{
-                      backgroundColor: hexToRgba(Colors.primary, 0.1),
-                      borderWidth: 1.5,
-                      borderColor: hexToRgba(Colors.primary, 0.2),
+                      backgroundColor: "rgba(255, 255, 255, 0.08)",
+                      borderWidth: 2,
+                      borderColor: "rgba(255, 255, 255, 0.20)",
                     }}
                   >
                     {(Object.keys(TOPIC_LABELS) as TopicCategory[]).map(
@@ -880,10 +877,10 @@ export default function SpeakScreen() {
                           style={{
                             backgroundColor:
                               selectedTopic === topic
-                                ? hexToRgba(Colors.primary, 0.15)
+                                ? "rgba(255, 255, 255, 0.12)"
                                 : "transparent",
                             borderBottomWidth: 1,
-                            borderBottomColor: hexToRgba(Colors.primary, 0.1),
+                            borderBottomColor: "rgba(255, 255, 255, 0.10)",
                           }}
                         >
                           <Text

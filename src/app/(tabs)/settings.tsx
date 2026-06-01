@@ -425,14 +425,14 @@ export default function SettingsScreen() {
                     style={{
                       width: 40,
                       height: 40,
-                      borderRadius: 20,
-                      backgroundColor: hexToRgba(Colors.primary, 0.2),
+                      borderRadius: 12,
+                      backgroundColor: "rgba(255, 255, 255, 0.15)",
                       alignItems: "center",
                       justifyContent: "center",
                       marginRight: 12,
                     }}
                   >
-                    <Crown size={20} color="#FFFFFF" strokeWidth={2} />
+                    <Crown size={22} color="#FFFFFF" strokeWidth={2} />
                   </View>
                   <Text
                     style={{
@@ -590,11 +590,14 @@ export default function SettingsScreen() {
                   <View className="flex-row items-center justify-between mb-4">
                     <View className="flex-row items-center">
                       <View
-                        className="w-9 h-9 rounded-full items-center justify-center mr-3"
+                        className="items-center justify-center mr-3"
                         style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 12,
                           backgroundColor: isAtLimit
                             ? "rgba(255, 100, 100, 0.3)"
-                            : hexToRgba(Colors.primary, 0.2),
+                            : "rgba(255, 255, 255, 0.15)",
                         }}
                       >
                         <Text style={{ fontSize: 17 }}>
@@ -701,10 +704,15 @@ export default function SettingsScreen() {
                   }}
                 >
                   <View
-                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                    style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
+                    className="items-center justify-center mr-3"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      backgroundColor: "rgba(255, 255, 255, 0.15)",
+                    }}
                   >
-                    <Palette size={20} color="#FFFFFF" />
+                    <Palette size={22} color="#FFFFFF" />
                   </View>
                   <Text
                     className="text-xl font-bold"
@@ -858,10 +866,15 @@ export default function SettingsScreen() {
                   }}
                 >
                   <View
-                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                    style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
+                    className="items-center justify-center mr-3"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      backgroundColor: "rgba(255, 255, 255, 0.15)",
+                    }}
                   >
-                    <Bell size={20} color="#FFFFFF" />
+                    <Bell size={22} color="#FFFFFF" />
                   </View>
                   <Text
                     className="text-xl font-bold"
@@ -918,10 +931,15 @@ export default function SettingsScreen() {
                   }}
                 >
                   <View
-                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                    style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
+                    className="items-center justify-center mr-3"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      backgroundColor: "rgba(255, 255, 255, 0.15)",
+                    }}
                   >
-                    <Brain size={20} color="#FFFFFF" />
+                    <Brain size={22} color="#FFFFFF" />
                   </View>
                   <Text
                     className="text-xl font-bold"
@@ -1044,12 +1062,16 @@ export default function SettingsScreen() {
                       </Text>
                     </View>
                     <View
-                      className="w-8 h-8 rounded-full items-center justify-center"
                       style={{
-                        backgroundColor: hexToRgba(Colors.primary, 0.2),
+                        width: 40,
+                        height: 40,
+                        borderRadius: 12,
+                        backgroundColor: "rgba(255, 255, 255, 0.15)",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      <BarChart3 size={16} color="#FFFFFF" />
+                      <BarChart3 size={22} color="#FFFFFF" />
                     </View>
                   </View>
                 </Pressable>
@@ -1086,8 +1108,13 @@ export default function SettingsScreen() {
                   }}
                 >
                   <View
-                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                    style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
+                    className="items-center justify-center mr-3"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      backgroundColor: "rgba(255, 255, 255, 0.15)",
+                    }}
                   >
                     <Text style={{ fontSize: 18 }}>{currentLang.flag}</Text>
                   </View>
@@ -1141,10 +1168,15 @@ export default function SettingsScreen() {
                   }}
                 >
                   <View
-                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                    style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
+                    className="items-center justify-center mr-3"
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 12,
+                      backgroundColor: "rgba(255, 255, 255, 0.15)",
+                    }}
                   >
-                    <Shield size={20} color="#FFFFFF" />
+                    <Shield size={22} color="#FFFFFF" />
                   </View>
                   <Text
                     className="text-xl font-bold"

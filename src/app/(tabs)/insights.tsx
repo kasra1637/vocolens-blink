@@ -932,16 +932,16 @@ function WelcomeSection({ user, totalEntries }: WelcomeSectionProps) {
           <View className="flex-row items-center">
             <View
               style={{
-                width: 48,
-                height: 48,
-                borderRadius: BorderRadius.large,
-                backgroundColor: hexToRgba(Colors.primary, 0.15),
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                backgroundColor: "rgba(255, 255, 255, 0.15)",
                 alignItems: "center",
                 justifyContent: "center",
                 marginRight: 12,
               }}
             >
-              <Award size={26} color="#FFFFFF" strokeWidth={2} />
+              <Award size={22} color="#FFFFFF" strokeWidth={2} />
             </View>
             <View className="flex-1">
               <Text
@@ -984,20 +984,20 @@ function WelcomeSection({ user, totalEntries }: WelcomeSectionProps) {
           <View className="flex-row items-center">
             <View
               style={{
-                width: 48,
-                height: 48,
-                borderRadius: BorderRadius.large,
+                width: 40,
+                height: 40,
+                borderRadius: 12,
                 backgroundColor: isAtLimit
                   ? "rgba(255, 80, 80, 0.25)"
                   : isNearLimit
                     ? "rgba(255, 185, 50, 0.25)"
-                    : hexToRgba(Colors.primary, 0.15),
+                    : "rgba(255, 255, 255, 0.15)",
                 alignItems: "center",
                 justifyContent: "center",
                 marginRight: 12,
               }}
             >
-              <Clock size={24} color="#FFFFFF" strokeWidth={2} />
+              <Clock size={22} color="#FFFFFF" strokeWidth={2} />
             </View>
             <View className="flex-1">
               <View className="flex-row items-center justify-between mb-1.5">
@@ -1211,10 +1211,22 @@ function SentimentTimeline({
         {/* Header */}
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-row items-center">
-            <TrendingUp size={20} color="#FFFFFF" strokeWidth={2} />
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                backgroundColor: "rgba(255, 255, 255, 0.15)",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 10,
+              }}
+            >
+              <TrendingUp size={22} color="#FFFFFF" strokeWidth={2} />
+            </View>
             <Text
               style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
-              className="text-lg ml-2"
+              className="text-lg"
             >
               {viewMode === "overall"
                 ? "Sentiment Timeline"

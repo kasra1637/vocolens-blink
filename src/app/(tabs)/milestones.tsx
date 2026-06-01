@@ -432,16 +432,16 @@ function StatItem({
     <View className="items-center flex-1">
       <View
         style={{
-          width: 48,
-          height: 48,
-          borderRadius: BorderRadius.large,
-          backgroundColor: hexToRgba(Colors.primary, 0.15),
+          width: 40,
+          height: 40,
+          borderRadius: 12,
+          backgroundColor: "rgba(255, 255, 255, 0.15)",
           alignItems: "center",
           justifyContent: "center",
           marginBottom: 8,
         }}
       >
-        <Icon size={24} color="#FFFFFF" strokeWidth={2} />
+        <Icon size={22} color="#FFFFFF" strokeWidth={2} />
       </View>
       <Text
         style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}

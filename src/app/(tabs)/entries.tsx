@@ -306,7 +306,19 @@ export default function EntriesScreen() {
             <View className="p-4">
               {/* Section Header */}
               <View className="flex-row items-center mb-3">
-                <Filter size={16} color="#FFFFFF" strokeWidth={2} />
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 12,
+                    backgroundColor: "rgba(255, 255, 255, 0.15)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 10,
+                  }}
+                >
+                  <Filter size={22} color="#FFFFFF" strokeWidth={2} />
+                </View>
                 <Text
                   style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
                   className="text-sm ml-2"
