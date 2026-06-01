@@ -36,7 +36,7 @@ const DEFAULT_SETTINGS = {
   notificationsEnabled: true,
   dailyReminderTime: '20:00',
   isDarkMode: false,
-  emotionReflectionMode: 'quick' as EmotionReflectionMode,
+  emotionReflectionMode: 'full' as EmotionReflectionMode,
 };
 
 const useSettingsStore = create<SettingsState>()(

@@ -16,6 +16,7 @@ import {
   Alert,
   Platform,
   Modal,
+  Linking,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -650,6 +651,21 @@ export function StandalonePaywall() {
                 {isRestoring ? "Restoring…" : "Restore purchases"}
               </Text>
             </Pressable>
+
+            {/* Legal links */}
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 10 }}>
+              <Pressable onPress={() => Linking.openURL("https://vocolens.com/terms")} hitSlop={8}>
+                <Text style={{ color: "rgba(255,255,255,0.35)", fontFamily: "Inter_400Regular", fontSize: 11 }}>
+                  Terms of Service
+                </Text>
+              </Pressable>
+              <Text style={{ color: "rgba(255,255,255,0.25)", fontSize: 11 }}>·</Text>
+              <Pressable onPress={() => Linking.openURL("https://vocolens.com/privacy")} hitSlop={8}>
+                <Text style={{ color: "rgba(255,255,255,0.35)", fontFamily: "Inter_400Regular", fontSize: 11 }}>
+                  Privacy Policy
+                </Text>
+              </Pressable>
+            </View>
           </LinearGradient>
         </SafeAreaView>
       </LinearGradient>
