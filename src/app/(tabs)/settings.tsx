@@ -439,26 +439,8 @@ export default function SettingsScreen() {
 
             {/* Theme Customization */}
             <Animated.View entering={ENTER_3} className="mb-6">
-              <View className="flex-row items-center mb-3">
-                <View
-                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                  style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
-                >
-                  <Palette size={20} color="#FFFFFF" />
-                </View>
-                <Text
-                  className="text-xl font-bold"
-                  style={{
-                    fontFamily: "Inter_600SemiBold",
-                    color: "#FFFFFF",
-                  }}
-                >
-                  Theme Colors
-                </Text>
-              </View>
-
               <View
-                className="rounded-3xl p-5"
+                className="rounded-3xl"
                 style={{
                   backgroundColor: surfaceBg,
                   borderWidth: 2,
@@ -467,8 +449,32 @@ export default function SettingsScreen() {
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.08,
                   shadowRadius: 8,
+                  overflow: "hidden",
                 }}
               >
+                {/* Section header */}
+                <View
+                  className="flex-row items-center px-5 pt-5 pb-4"
+                  style={{
+                    borderBottomWidth: 1,
+                    borderBottomColor: hexToRgba(Colors.primary, 0.12),
+                  }}
+                >
+                  <View
+                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                    style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
+                  >
+                    <Palette size={20} color="#FFFFFF" />
+                  </View>
+                  <Text
+                    className="text-xl font-bold"
+                    style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
+                  >
+                    Theme Colors
+                  </Text>
+                </View>
+
+                <View className="p-5">
                 {[
                   ["hotPink", "softPink", "lavenderBliss"],
                   ["violetWhisper", "oceanCalm", "darkMode"],
@@ -584,31 +590,14 @@ export default function SettingsScreen() {
                     })}
                   </View>
                 ))}
+                </View>
               </View>
             </Animated.View>
 
             {/* Notifications */}
             <Animated.View entering={ENTER_4} className="mb-6">
-              <View className="flex-row items-center mb-3">
-                <View
-                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                  style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
-                >
-                  <Bell size={20} color="#FFFFFF" />
-                </View>
-                <Text
-                  className="text-xl font-bold"
-                  style={{
-                    fontFamily: "Inter_600SemiBold",
-                    color: "#FFFFFF",
-                  }}
-                >
-                  Notifications
-                </Text>
-              </View>
-
               <View
-                className="rounded-3xl p-5"
+                className="rounded-3xl"
                 style={{
                   backgroundColor: surfaceBg,
                   borderWidth: 2,
@@ -617,55 +606,57 @@ export default function SettingsScreen() {
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.08,
                   shadowRadius: 8,
+                  overflow: "hidden",
                 }}
               >
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-1 mr-4">
-                    <Text
-                      className="text-base font-semibold mb-1"
-                      style={{
-                        fontFamily: "Inter_600SemiBold",
-                        color: "#FFFFFF",
-                      }}
-                    >
-                      Daily Reminders
-                    </Text>
-                    <Text
-                      style={{
-                        color: "rgba(255, 255, 255, 0.8)",
-                        fontSize: 15,
-                      }}
-                    >
-                      Get reminded to journal every day
-                    </Text>
+                {/* Section header */}
+                <View
+                  className="flex-row items-center px-5 pt-5 pb-4"
+                  style={{
+                    borderBottomWidth: 1,
+                    borderBottomColor: hexToRgba(Colors.primary, 0.12),
+                  }}
+                >
+                  <View
+                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                    style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
+                  >
+                    <Bell size={20} color="#FFFFFF" />
                   </View>
-                  <ThemedSwitch
-                    value={notificationsEnabled}
-                    onValueChange={handleNotificationToggle}
-                    trackColor={Colors.primary}
-                    thumbColor="#FFFFFF"
-                  />
+                  <Text
+                    className="text-xl font-bold"
+                    style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
+                  >
+                    Notifications
+                  </Text>
+                </View>
+
+                <View className="p-5">
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-1 mr-4">
+                      <Text
+                        className="text-base font-semibold mb-1"
+                        style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
+                      >
+                        Daily Reminders
+                      </Text>
+                      <Text style={{ color: "rgba(255, 255, 255, 0.8)", fontSize: 15 }}>
+                        Get reminded to journal every day
+                      </Text>
+                    </View>
+                    <ThemedSwitch
+                      value={notificationsEnabled}
+                      onValueChange={handleNotificationToggle}
+                      trackColor={Colors.primary}
+                      thumbColor="#FFFFFF"
+                    />
+                  </View>
                 </View>
               </View>
             </Animated.View>
 
             {/* Emotion Reflection */}
             <Animated.View entering={ENTER_5} className="mb-6">
-              <View className="flex-row items-center mb-3">
-                <View
-                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                  style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
-                >
-                  <Brain size={20} color="#FFFFFF" />
-                </View>
-                <Text
-                  className="text-xl font-bold"
-                  style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
-                >
-                  Emotion Reflection
-                </Text>
-              </View>
-
               <View
                 className="rounded-3xl overflow-hidden"
                 style={{
@@ -678,6 +669,27 @@ export default function SettingsScreen() {
                   shadowRadius: 8,
                 }}
               >
+                {/* Section header */}
+                <View
+                  className="flex-row items-center px-5 pt-5 pb-4"
+                  style={{
+                    borderBottomWidth: 1,
+                    borderBottomColor: hexToRgba(Colors.primary, 0.12),
+                  }}
+                >
+                  <View
+                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                    style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
+                  >
+                    <Brain size={20} color="#FFFFFF" />
+                  </View>
+                  <Text
+                    className="text-xl font-bold"
+                    style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
+                  >
+                    Emotion Reflection
+                  </Text>
+                </View>
                 <View
                   className="p-5"
                   style={{
@@ -805,98 +817,69 @@ export default function SettingsScreen() {
             </Animated.View>
 
             {/* Transcription Language */}
+            {/* Transcription Language */}
             <Animated.View entering={ENTER_5} className="mb-6">
-              <View className="flex-row items-center mb-3">
-                <View
-                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                  style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
-                >
-                  <Text style={{ fontSize: 18 }}>{currentLang.flag}</Text>
-                </View>
-                <Text
-                  className="text-xl font-bold"
-                  style={{
-                    fontFamily: "Inter_600SemiBold",
-                    color: "#FFFFFF",
-                  }}
-                >
-                  Transcription Language
-                </Text>
-              </View>
-
               <Pressable
                 onPress={() => {
                   tapHaptic();
                   router.push("/language-picker");
                 }}
-                className="rounded-3xl overflow-hidden active:opacity-70"
+                className="active:opacity-70"
                 style={{
                   backgroundColor: surfaceBg,
                   borderWidth: 2,
                   borderColor: borderColor,
+                  borderRadius: 24,
                   shadowColor: "#000",
                   shadowOffset: { width: 0, height: 4 },
                   shadowOpacity: 0.08,
                   shadowRadius: 8,
+                  overflow: "hidden",
                 }}
               >
+                {/* Section header */}
+                <View
+                  className="flex-row items-center px-5 pt-5 pb-4"
+                  style={{
+                    borderBottomWidth: 1,
+                    borderBottomColor: hexToRgba(Colors.primary, 0.12),
+                  }}
+                >
+                  <View
+                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                    style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
+                  >
+                    <Text style={{ fontSize: 18 }}>{currentLang.flag}</Text>
+                  </View>
+                  <Text
+                    className="text-xl font-bold"
+                    style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
+                  >
+                    Transcription Language
+                  </Text>
+                </View>
+
                 <View
                   className="p-5"
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
+                  style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
                 >
                   <View className="flex-1">
                     <Text
-                      style={{
-                        fontFamily: "Inter_600SemiBold",
-                        color: "#FFFFFF",
-                        fontSize: 15,
-                        marginBottom: 2,
-                      }}
+                      style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15, marginBottom: 2 }}
                     >
                       {currentLang.flag} {currentLang.name}
                     </Text>
-                    <Text
-                      style={{
-                        color: "rgba(255, 255, 255, 0.7)",
-                        fontSize: 13,
-                      }}
-                    >
+                    <Text style={{ color: "rgba(255, 255, 255, 0.7)", fontSize: 13 }}>
                       Used for all voice transcriptions
                     </Text>
                   </View>
-                  <ChevronRight
-                    size={20}
-                    color="rgba(255, 255, 255, 0.6)"
-                    strokeWidth={2}
-                  />
+                  <ChevronRight size={20} color="rgba(255, 255, 255, 0.6)" strokeWidth={2} />
                 </View>
               </Pressable>
             </Animated.View>
 
             {/* Privacy & Security */}
             <Animated.View entering={ENTER_6} className="mb-6">
-              <View className="flex-row items-center mb-3">
-                <View
-                  className="w-10 h-10 rounded-full items-center justify-center mr-3"
-                  style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
-                >
-                  <Shield size={20} color="#FFFFFF" />
-                </View>
-                <Text
-                  className="text-xl font-bold"
-                  style={{
-                    fontFamily: "Inter_600SemiBold",
-                    color: "#FFFFFF",
-                  }}
-                >
-                  Privacy & Security
-                </Text>
-              </View>
-
               <View
                 className="rounded-3xl overflow-hidden"
                 style={{
@@ -909,6 +892,28 @@ export default function SettingsScreen() {
                   shadowRadius: 8,
                 }}
               >
+                {/* Section header */}
+                <View
+                  className="flex-row items-center px-5 pt-5 pb-4"
+                  style={{
+                    borderBottomWidth: 1,
+                    borderBottomColor: hexToRgba(Colors.primary, 0.12),
+                  }}
+                >
+                  <View
+                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                    style={{ backgroundColor: hexToRgba(Colors.primary, 0.2) }}
+                  >
+                    <Shield size={20} color="#FFFFFF" />
+                  </View>
+                  <Text
+                    className="text-xl font-bold"
+                    style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
+                  >
+                    Privacy & Security
+                  </Text>
+                </View>
+
                 {/* Export & Reset Data */}
                 <View className="p-5">
                   {/* Export Data */}
