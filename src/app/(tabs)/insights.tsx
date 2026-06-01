@@ -1736,12 +1736,27 @@ function EmotionalThemes({ themes }: EmotionalThemesProps) {
       }}
     >
       <View className="p-5">
-        <Text
-          style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
-          className="text-lg mb-4"
-        >
-          Emotional Themes
-        </Text>
+        <View className="flex-row items-center mb-4">
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 12,
+            }}
+          >
+            <Sparkles size={22} color="#FFFFFF" strokeWidth={2} />
+          </View>
+          <Text
+            style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
+            className="text-lg"
+          >
+            Emotional Themes
+          </Text>
+        </View>
 
         <View className="flex-row flex-wrap" style={{ gap: 10 }}>
           {themes.map((theme, index) => (
@@ -1863,12 +1878,27 @@ function TimeOfDayPatterns({ patterns }: TimeOfDayPatternsProps) {
       }}
     >
       <View className="p-5">
-        <Text
-          style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
-          className="text-lg mb-4"
-        >
-          Time of Day Patterns
-        </Text>
+        <View className="flex-row items-center mb-4">
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 12,
+            }}
+          >
+            <Clock size={22} color="#FFFFFF" strokeWidth={2} />
+          </View>
+          <Text
+            style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
+            className="text-lg"
+          >
+            Time of Day Patterns
+          </Text>
+        </View>
 
         <View className="flex-row flex-wrap" style={{ gap: 12 }}>
           {patterns.map((pattern, index) => (
@@ -1929,8 +1959,8 @@ function TimeOfDayCard({ pattern }: TimeOfDayCardProps) {
           style={{
             width: 40,
             height: 40,
-            borderRadius: BorderRadius.medium,
-            backgroundColor: hexToRgba(Colors.primary, 0.15),
+            borderRadius: 12,
+            backgroundColor: "rgba(255, 255, 255, 0.15)",
             alignItems: "center",
             justifyContent: "center",
             marginBottom: 12,

@@ -186,8 +186,12 @@ export default function MilestonesScreen() {
   const allBadges = useMemo(() => getAllBadges(), [getAllBadges]);
 
   const filteredBadges = useMemo(() => {
-    if (selectedCategory === "all") return allBadges;
-    return getBadgesByCategory(selectedCategory);
+    const PINNED_LAST = ["streak-14", "entries-250", "emotional-explorer"];
+    const base =
+      selectedCategory === "all" ? allBadges : getBadgesByCategory(selectedCategory);
+    const normal = base.filter((b) => !PINNED_LAST.includes(b.id));
+    const pinned = PINNED_LAST.map((id) => base.find((b) => b.id === id)).filter(Boolean) as typeof base;
+    return [...normal, ...pinned];
   }, [selectedCategory, allBadges, getBadgesByCategory]);
 
   const userStats = useMemo(
