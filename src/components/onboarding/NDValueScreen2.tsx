@@ -130,7 +130,7 @@ export function NDValueScreen2() {
                   lineHeight: 23,
                 }}
               >
-                Share what's on your mind, and your AI turns it into real emotional clarity.
+                No writing. No pressure. No judgment. Vocolens turns a 60-second voice note into emotional clarity.
               </Text>
             </Animated.View>
 
