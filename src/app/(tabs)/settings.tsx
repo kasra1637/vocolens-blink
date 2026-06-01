@@ -418,7 +418,7 @@ export default function SettingsScreen() {
                     paddingTop: 20,
                     paddingBottom: 16,
                     borderBottomWidth: 1,
-                    borderBottomColor: hexToRgba(Colors.primary, 0.12),
+                    borderBottomColor: "rgba(255, 255, 255, 0.12)",
                   }}
                 >
                   <View
@@ -692,7 +692,7 @@ export default function SettingsScreen() {
                   className="flex-row items-center px-5 pt-5 pb-4"
                   style={{
                     borderBottomWidth: 1,
-                    borderBottomColor: hexToRgba(Colors.primary, 0.12),
+                    borderBottomColor: "rgba(255, 255, 255, 0.12)",
                   }}
                 >
                   <View
@@ -850,7 +850,7 @@ export default function SettingsScreen() {
                   className="flex-row items-center px-5 pt-5 pb-4"
                   style={{
                     borderBottomWidth: 1,
-                    borderBottomColor: hexToRgba(Colors.primary, 0.12),
+                    borderBottomColor: "rgba(255, 255, 255, 0.12)",
                   }}
                 >
                   <View
@@ -911,7 +911,7 @@ export default function SettingsScreen() {
                   className="flex-row items-center px-5 pt-5 pb-4"
                   style={{
                     borderBottomWidth: 1,
-                    borderBottomColor: hexToRgba(Colors.primary, 0.12),
+                    borderBottomColor: "rgba(255, 255, 255, 0.12)",
                   }}
                 >
                   <View
@@ -936,7 +936,7 @@ export default function SettingsScreen() {
                   className="p-5"
                   style={{
                     borderBottomWidth: 1,
-                    borderBottomColor: hexToRgba(Colors.primary, 0.1),
+                    borderBottomColor: "rgba(255, 255, 255, 0.12)",
                   }}
                 >
                   <Text
@@ -1084,7 +1084,7 @@ export default function SettingsScreen() {
                   className="flex-row items-center px-5 pt-5 pb-4"
                   style={{
                     borderBottomWidth: 1,
-                    borderBottomColor: hexToRgba(Colors.primary, 0.12),
+                    borderBottomColor: "rgba(255, 255, 255, 0.12)",
                   }}
                 >
                   <View
@@ -1140,7 +1140,7 @@ export default function SettingsScreen() {
                   className="flex-row items-center px-5 pt-5 pb-4"
                   style={{
                     borderBottomWidth: 1,
-                    borderBottomColor: hexToRgba(Colors.primary, 0.12),
+                    borderBottomColor: "rgba(255, 255, 255, 0.12)",
                   }}
                 >
                   <View
