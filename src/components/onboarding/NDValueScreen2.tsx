@@ -11,7 +11,7 @@ import { View, Text, ScrollView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn, Easing } from "react-native-reanimated";
-import { Mic, Sparkles, TrendingUp, ShieldCheck } from "lucide-react-native";
+import { Mic, Sparkles, TrendingUp } from "lucide-react-native";
 import { tapHaptic } from "@/lib/haptics";
 import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import { OnboardingCTAButton } from "@/components/onboarding/OnboardingCTAButton";
@@ -27,25 +27,19 @@ const HOW_IT_WORKS = [
     icon: Mic,
     step: "01",
     headline: "Just speak",
-    body: "No typing. No journaling prompts to overthink. Hit record and say whatever's in your head — messy, incomplete, or unclear.",
+    body: "No typing, no prompts. Hit record and say whatever's on your mind.",
   },
   {
     icon: Sparkles,
     step: "02",
-    headline: "AI understands your emotions",
-    body: "Vocolens uses the scientifically-validated Plutchik model to detect 8 core emotions with 24 intensity levels from your words.",
+    headline: "AI reads your emotions",
+    body: "The science-backed Plutchik model maps 8 core emotions from your words.",
   },
   {
     icon: TrendingUp,
     step: "03",
-    headline: "Patterns surface over time",
-    body: "See which topics lift your mood and which drain it. Your emotional triggers become visible — and finally manageable.",
-  },
-  {
-    icon: ShieldCheck,
-    step: "04",
-    headline: "Private, safe, always yours",
-    body: "Your entries are stored only on your device. No cloud, no sharing, no ads. Just honest reflection with no audience.",
+    headline: "Patterns become clear",
+    body: "Spot your triggers over time — all stored privately on your device.",
   },
 ];
 
@@ -96,7 +90,7 @@ export function NDValueScreen2() {
               style={{ alignItems: "center", marginBottom: 4 }}
             >
               <EmotionalCompanion
-                state="listening"
+                state="processing"
                 size={100}
                 themeColor={themeColors.primary}
               />

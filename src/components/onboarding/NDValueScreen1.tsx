@@ -25,22 +25,22 @@ const PAIN_POINTS = [
   {
     icon: Brain,
     headline: "Emotions feel like static",
-    body: "You know something's wrong, but naming the feeling is exhausting. Your mind races — or goes blank.",
+    body: "You know something's off — but naming it is exhausting.",
   },
   {
     icon: Layers,
-    headline: "Overwhelm builds silently",
-    body: "Small things pile up before you notice. By the time it's visible, it's already too much.",
+    headline: "Overwhelm sneaks up",
+    body: "Small things pile up unnoticed. Then suddenly, it's too much.",
   },
   {
     icon: MessageCircleQuestion,
-    headline: "Hard to explain to others",
-    body: "\"I'm fine\" is easier than unpacking what's really happening inside. So most of it stays unsaid.",
+    headline: "Words don't come easy",
+    body: "\"I'm fine\" is simpler than explaining. So it stays unsaid.",
   },
   {
     icon: Zap,
-    headline: "Triggers catch you off guard",
-    body: "The same situations keep flipping your mood. You react, then wonder why it keeps happening.",
+    headline: "Triggers blindside you",
+    body: "The same situations flip your mood — again and again.",
   },
 ];
 
@@ -122,7 +122,7 @@ export function NDValueScreen1() {
                   lineHeight: 23,
                 }}
               >
-                For neurodivergent minds, emotional awareness isn't laziness or weakness — it's a skill the world never taught you.
+                Emotional awareness isn't a flaw — it's a skill the world never taught you.
               </Text>
             </Animated.View>
 
