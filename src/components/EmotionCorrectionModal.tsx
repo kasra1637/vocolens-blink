@@ -386,23 +386,13 @@ export default function EmotionCorrectionModal({
             <Animated.View entering={FadeIn.delay(160)} style={{ marginTop: 4 }}>
               <Text
                 style={{
-                  fontFamily: "Inter_600SemiBold",
-                  fontSize: 15,
-                  color: "#FFFFFF",
-                  marginBottom: 4,
-                }}
-              >
-                Or adjust how you felt
-              </Text>
-              <Text
-                style={{
                   fontFamily: "Inter_400Regular",
                   fontSize: 13,
                   color: "rgba(255,255,255,0.65)",
                   marginBottom: 14,
                 }}
               >
-                Drag the sliders to refine your emotional state
+                Not quite right? Drag the slider to better reflect how you felt.
               </Text>
               <View style={{ ...glassCard, marginBottom: 20 }}>
                 <View style={{ padding: 18 }}>
