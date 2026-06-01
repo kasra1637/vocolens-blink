@@ -342,6 +342,7 @@ export default function EmotionCorrectionModal({
 
           {/* ─── PAGE 0: Does this feel right? ─── */}
           {step === "initial" && (
+            <>
               <View style={{ ...glassCard, marginBottom: 20 }}>
                 <View style={{ padding: 18 }}>
                   <View style={{ flexDirection: "row", alignItems: "flex-start", marginBottom: 16 }}>
@@ -389,10 +390,12 @@ export default function EmotionCorrectionModal({
                   </View>
                 </View>
               </View>
+            </>
           )}
 
           {/* ─── PAGE 1: What fits better? ─── */}
           {step === "replace" && (
+            <>
               <View style={{ flexDirection: "row", alignItems: "center",
                   backgroundColor: "rgba(255, 255, 255, 0.08)",
                   borderWidth: 1, borderColor: "rgba(255, 255, 255, 0.15)",
@@ -425,10 +428,12 @@ export default function EmotionCorrectionModal({
                   );
                 })}
               </View>
+            </>
           )}
 
           {/* ─── PAGE 2: Anything to add? ─── */}
           {step === "explain" && (
+            <>
               {selectedEmotion && (
                 <View style={{ ...glassCard, marginBottom: 20 }}>
                   <View style={{ padding: 16, flexDirection: "row", alignItems: "center" }}>
@@ -489,6 +494,7 @@ export default function EmotionCorrectionModal({
                   minHeight: 90, textAlignVertical: "top",
                   borderWidth: 2, borderColor: "rgba(255, 255, 255, 0.20)" }}
               />
+            </>
           )}
 
           </ScrollView>
