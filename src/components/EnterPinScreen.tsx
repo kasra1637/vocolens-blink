@@ -107,21 +107,21 @@ function Numpad({ onKey }: { onKey: (k: string) => void }) {
       </View>
       {/* Row 4: [empty] 0 [backspace] */}
       <View style={styles.numpadRow}>
-        {/* Spacer */}
-        <View style={styles.numpadKey} pointerEvents="none">
-          <Text />
-        </View>
+        {/* Invisible spacer keeps 0 centered */}
+        <View style={[styles.numpadKey, styles.numpadKeySpacer]} pointerEvents="none" />
         <NumKey label="0" onPress={() => onKey("0")} />
         {/* Backspace key */}
         <Pressable
           onPress={() => onKey("del")}
           android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: true }}
+          hitSlop={8}
           style={({ pressed }) => [
             styles.numpadKey,
+            styles.numpadKeyGhost,
             pressed && styles.numpadKeyPressed,
           ]}
         >
-          <Delete size={26} color="rgba(255,255,255,0.85)" strokeWidth={1.8} />
+          <Delete size={28} color="rgba(255,255,255,0.85)" strokeWidth={1.8} />
         </Pressable>
       </View>
     </View>
@@ -308,30 +308,41 @@ const styles = StyleSheet.create({
   },
   numpadContainer: {
     width: "100%",
-    paddingHorizontal: 16,
-    gap: 12,
+    maxWidth: 320,
+    alignSelf: "center",
+    rowGap: 22,
   },
   numpadRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
+    justifyContent: "space-evenly",
+    alignItems: "center",
   },
   numpadKey: {
-    flex: 1,
-    height: 68,
-    borderRadius: 20,
+    width: 74,
+    height: 74,
+    borderRadius: 37,
     backgroundColor: "rgba(255,255,255,0.10)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.15)",
     alignItems: "center",
     justifyContent: "center",
   },
+  // Transparent placeholder so the "0" key stays in the center column
+  numpadKeySpacer: {
+    backgroundColor: "transparent",
+    borderWidth: 0,
+  },
+  // Backspace sits in the grid but without the filled circle chrome
+  numpadKeyGhost: {
+    backgroundColor: "transparent",
+    borderWidth: 0,
+  },
   numpadKeyPressed: {
     backgroundColor: "rgba(255,255,255,0.25)",
   },
   numpadKeyText: {
     color: "#FFFFFF",
-    fontSize: 28,
+    fontSize: 30,
     fontFamily: "Inter_400Regular",
     letterSpacing: 0.5,
   },
