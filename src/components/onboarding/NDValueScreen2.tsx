@@ -211,7 +211,7 @@ export function NDValueScreen2() {
               entering={FadeIn.duration(800).delay(680).easing(SOFT)}
             >
               <OnboardingCTAButton
-                label="This is what I need"
+                label="Show me how"
                 onPress={handleContinue}
                 paddingVertical={17}
                 fontSize={17}
