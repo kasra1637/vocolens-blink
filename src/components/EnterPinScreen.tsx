@@ -62,7 +62,7 @@ function PinDots({
 }
 
 // ── Numpad ────────────────────────────────────────────────────────────────────
-// Standard phone layout: [1 2 3] / [4 5 6] / [7 8 9] / [empty 0 ⌫]
+// Layout: [1 2 3] / [4 5 6] / [7 8 9] / [⌫ 0 OK]
 function NumKey({
   label,
   onPress,
@@ -84,7 +84,16 @@ function NumKey({
   );
 }
 
-function Numpad({ onKey }: { onKey: (k: string) => void }) {
+function Numpad({
+  onKey,
+  onOk,
+  pinLength,
+}: {
+  onKey: (k: string) => void;
+  onOk: () => void;
+  pinLength: number;
+}) {
+  const okReady = pinLength === 4;
   return (
     <View style={styles.numpadContainer}>
       {/* Row 1: 1 2 3 */}
@@ -105,12 +114,9 @@ function Numpad({ onKey }: { onKey: (k: string) => void }) {
           <NumKey key={k} label={k} onPress={() => onKey(k)} />
         ))}
       </View>
-      {/* Row 4: [empty] 0 [backspace] */}
+      {/* Row 4: [⌫] [0] [OK] */}
       <View style={styles.numpadRow}>
-        {/* Invisible spacer keeps 0 centered */}
-        <View style={[styles.numpadKey, styles.numpadKeySpacer]} pointerEvents="none" />
-        <NumKey label="0" onPress={() => onKey("0")} />
-        {/* Backspace key */}
+        {/* Backspace — left */}
         <Pressable
           onPress={() => onKey("del")}
           android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: true }}
@@ -122,6 +128,24 @@ function Numpad({ onKey }: { onKey: (k: string) => void }) {
           ]}
         >
           <Delete size={28} color="rgba(255,255,255,0.85)" strokeWidth={1.8} />
+        </Pressable>
+
+        {/* 0 — center */}
+        <NumKey label="0" onPress={() => onKey("0")} />
+
+        {/* OK — right: dims when PIN not yet complete, fires login on tap */}
+        <Pressable
+          onPress={okReady ? onOk : undefined}
+          android_ripple={{ color: "rgba(255,255,255,0.2)", borderless: true }}
+          hitSlop={8}
+          style={({ pressed }) => [
+            styles.numpadKey,
+            styles.numpadKeyGhost,
+            pressed && okReady && styles.numpadKeyPressed,
+            { opacity: okReady ? 1 : 0.3 },
+          ]}
+        >
+          <Text style={styles.numpadOkText}>OK</Text>
         </Pressable>
       </View>
     </View>
@@ -195,6 +219,13 @@ export function EnterPinScreen() {
     clearPin();
   }, [clearPin]);
 
+  const handleOk = useCallback(() => {
+    if (digits.length === 4) {
+      tapHaptic();
+      handleComplete(digits);
+    }
+  }, [digits, handleComplete]);
+
   const bgColors = themeColors.backgroundGradient;
 
   return (
@@ -249,7 +280,7 @@ export function EnterPinScreen() {
               entering={FadeInDown.delay(180).duration(500)}
               style={{ alignItems: "center", gap: 20 }}
             >
-              <Numpad onKey={handleKey} />
+              <Numpad onKey={handleKey} onOk={handleOk} pinLength={digits.length} />
               {failCount >= 3 && (
                 <Animated.View entering={FadeIn.duration(300)}>
                   <Pressable
@@ -345,5 +376,11 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontFamily: "Inter_400Regular",
     letterSpacing: 0.5,
+  },
+  numpadOkText: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontFamily: "Inter_600SemiBold",
+    letterSpacing: 1,
   },
 });
