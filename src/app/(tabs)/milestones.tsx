@@ -60,12 +60,11 @@ import Animated, {
   withSequence,
   withTiming,
   withRepeat,
-  Easing,
 } from "react-native-reanimated";
-
-const SOFT = Easing.bezier(0.22, 1, 0.36, 1);
-const ENTER_1 = FadeIn.duration(900).delay(100).easing(SOFT);
-const ENTER_2 = FadeIn.duration(900).delay(250).easing(SOFT);
+import {
+  TAB_ENTER_1 as ENTER_1,
+  TAB_ENTER_2 as ENTER_2,
+} from "@/lib/tabAnimations";
 import { tapHaptic, selectHaptic, successHaptic } from "@/lib/haptics";
 import { router, useIsFocused } from "expo-router";
 import {
@@ -242,7 +241,7 @@ export default function MilestonesScreen() {
 
   if (!fontsLoaded) {
     return (
-      <View className="flex-1" style={{ backgroundColor: Colors.background }}>
+      <View className="flex-1" style={{ backgroundColor: "#0F0E1A" }}>
         <LinearGradient
           colors={Gradients.background}
           style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
@@ -258,7 +257,7 @@ export default function MilestonesScreen() {
   );
 
   return (
-    <View className="flex-1" style={{ backgroundColor: Colors.background }}>
+    <View className="flex-1" style={{ backgroundColor: "#0F0E1A" }}>
       <LinearGradient
         colors={Gradients.background}
         style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}

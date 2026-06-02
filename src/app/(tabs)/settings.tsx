@@ -42,16 +42,14 @@ import {
   KeyRound,
 } from "lucide-react-native";
 import Animated from "react-native-reanimated";
-import { FadeIn, Easing } from "react-native-reanimated";
-
-// Welcome-screen entrance animation — gentle fade-in with SOFT easing
-const SOFT = Easing.bezier(0.22, 1, 0.36, 1);
-const ENTER_1 = FadeIn.duration(900).delay(100).easing(SOFT);
-const ENTER_2 = FadeIn.duration(900).delay(250).easing(SOFT);
-const ENTER_3 = FadeIn.duration(900).delay(400).easing(SOFT);
-const ENTER_4 = FadeIn.duration(900).delay(550).easing(SOFT);
-const ENTER_5 = FadeIn.duration(900).delay(700).easing(SOFT);
-const ENTER_6 = FadeIn.duration(800).delay(850).easing(SOFT);
+import {
+  TAB_ENTER_1 as ENTER_1,
+  TAB_ENTER_2 as ENTER_2,
+  TAB_ENTER_3 as ENTER_3,
+  TAB_ENTER_4 as ENTER_4,
+  TAB_ENTER_5 as ENTER_5,
+  TAB_ENTER_6 as ENTER_6,
+} from "@/lib/tabAnimations";
 import {
   selectHaptic,
   tapHaptic,
@@ -394,7 +392,7 @@ export default function SettingsScreen() {
 
   if (!fontsLoaded) {
     return (
-      <View className="flex-1">
+      <View className="flex-1" style={{ backgroundColor: "#0F0E1A" }}>
         <LinearGradient
           colors={THEME_COLORS[selectedTheme].backgroundGradient}
           start={{ x: 0, y: 0 }}
@@ -406,7 +404,7 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View className="flex-1">
+    <View className="flex-1" style={{ backgroundColor: "#0F0E1A" }}>
       <LinearGradient
         colors={THEME_COLORS[selectedTheme].backgroundGradient}
         start={{ x: 0, y: 0 }}

@@ -53,14 +53,13 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
-
-// Welcome-screen entrance animation — gentle fade-in with SOFT easing
-const SOFT = Easing.bezier(0.22, 1, 0.36, 1);
-const ENTER_1 = FadeIn.duration(900).delay(100).easing(SOFT);
-const ENTER_2 = FadeIn.duration(900).delay(250).easing(SOFT);
-const ENTER_3 = FadeIn.duration(900).delay(400).easing(SOFT);
-const ENTER_4 = FadeIn.duration(900).delay(550).easing(SOFT);
-const ENTER_5 = FadeIn.duration(900).delay(700).easing(SOFT);
+import {
+  TAB_ENTER_1 as ENTER_1,
+  TAB_ENTER_2 as ENTER_2,
+  TAB_ENTER_3 as ENTER_3,
+  TAB_ENTER_4 as ENTER_4,
+  TAB_ENTER_5 as ENTER_5,
+} from "@/lib/tabAnimations";
 import { selectHaptic, tapHaptic, selectionHaptic } from "@/lib/haptics";
 import {
   BorderRadius,
@@ -434,7 +433,7 @@ function InsightsContent({
 
   if (!fontsLoaded) {
     return (
-      <View className="flex-1">
+      <View className="flex-1" style={{ backgroundColor: "#0F0E1A" }}>
         <LinearGradient
           colors={Gradients.background}
           style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
@@ -463,7 +462,7 @@ function InsightsContent({
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1" style={{ backgroundColor: "#0F0E1A" }}>
       <LinearGradient
         colors={Gradients.background}
         style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}

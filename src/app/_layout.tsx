@@ -30,7 +30,6 @@ import {
 } from "@expo-google-fonts/fraunces";
 import { useFrameworkReady } from "@/hooks/useFrameworkReady";
 
-// Suppress known harmless warnings that do not affect functionality in Expo Go
 LogBox.ignoreLogs([
   "Expo AV has been deprecated",
   "Disconnected from Metro",
@@ -40,17 +39,20 @@ LogBox.ignoreLogs([
 ]);
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "(tabs)",
   animationEnabled: false,
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync().catch(() => {
-  // no-op: can throw during fast refresh / repeated calls
-});
+SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const queryClient = new QueryClient();
+
+// Always use a dark background so @react-navigation never paints white
+// behind tab screens — the app's LinearGradient covers it but there is
+// one native frame before JS runs where the navigator background shows.
+const DARK_BG = "#0F0E1A";
+const AppDarkTheme  = { ...DarkTheme,    colors: { ...DarkTheme.colors,    background: DARK_BG, card: DARK_BG } };
+const AppLightTheme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: DARK_BG, card: DARK_BG } };
 
 function RootLayoutNav({
   colorScheme,
@@ -58,9 +60,12 @@ function RootLayoutNav({
   colorScheme: "light" | "dark" | null | undefined;
 }) {
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? AppDarkTheme : AppLightTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false, contentStyle: { backgroundColor: "transparent" } }} />
+        <Stack.Screen
+          name="(tabs)"
+          options={{ headerShown: false, contentStyle: { backgroundColor: DARK_BG } }}
+        />
         <Stack.Screen name="modal" options={{ presentation: "modal" }} />
         <Stack.Screen
           name="entry-detail"
@@ -68,11 +73,7 @@ function RootLayoutNav({
         />
         <Stack.Screen
           name="reflection"
-          options={{
-            headerShown: false,
-            presentation: "fullScreenModal",
-            gestureEnabled: false,
-          }}
+          options={{ headerShown: false, presentation: "fullScreenModal", gestureEnabled: false }}
         />
         <Stack.Screen
           name="privacy-settings"
@@ -80,11 +81,7 @@ function RootLayoutNav({
         />
         <Stack.Screen
           name="language-picker"
-          options={{
-            headerShown: false,
-            presentation: "fullScreenModal",
-            gestureEnabled: true,
-          }}
+          options={{ headerShown: false, presentation: "fullScreenModal", gestureEnabled: true }}
         />
         <Stack.Screen
           name="legal"
@@ -113,9 +110,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontsLoaded || fontError) {
-      SplashScreen.hideAsync().catch(() => {
-        // no-op
-      });
+      SplashScreen.hideAsync().catch(() => {});
     }
   }, [fontsLoaded, fontError]);
 
@@ -125,8 +120,9 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+      {/* backgroundColor on root so there is never a white layer at any level */}
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: DARK_BG }}>
+        <StatusBar style="light" />
         <AuthGate>
           <RootLayoutNav colorScheme={colorScheme} />
           <MilestoneCelebration />
