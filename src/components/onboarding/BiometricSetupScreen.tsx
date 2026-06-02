@@ -41,7 +41,6 @@ import {
   authenticateWithBiometrics,
   getBiometricTypeName,
 } from '@/lib/auth-service';
-import { EmotionalCompanion } from '@/components/EmotionalCompanion';
 import { ProgressBar } from '@/components/onboarding/ProgressBar';
 import { useClickSound } from '@/lib/hooks/useClickSound';
 import { OnboardingCTAButton } from '@/components/onboarding/OnboardingCTAButton';
@@ -201,16 +200,30 @@ export function BiometricSetupScreen() {
               paddingBottom: 40,
             }}
           >
-            {/* Top: character + text */}
+            {/* Top: key icon + title + subtitle */}
             <Animated.View
               entering={FadeIn.duration(500).easing(SOFT)}
               style={{ alignItems: 'center', gap: 16 }}
             >
-              <EmotionalCompanion
-                state="processing"
-                size={80}
-                themeColor={selectedTheme === 'darkMode' ? '#9370DB' : themeColors.primary}
-              />
+              {/* Key icon above the title */}
+              <View
+                style={{
+                  width: 88,
+                  height: 88,
+                  borderRadius: 44,
+                  backgroundColor: 'rgba(255,255,255,0.10)',
+                  borderWidth: 1.5,
+                  borderColor: 'rgba(255,255,255,0.25)',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {biometricAvailable
+                  ? <Fingerprint size={48} color="#FFFFFF" strokeWidth={1.6} />
+                  : <KeyRound    size={44} color="#FFFFFF" strokeWidth={1.6} />
+                }
+              </View>
+
               <View style={{ alignItems: 'center', gap: 8 }}>
                 <Text
                   style={{
@@ -240,30 +253,11 @@ export function BiometricSetupScreen() {
               </View>
             </Animated.View>
 
-            {/* Middle: icon badge + privacy reassurance points */}
+            {/* Middle: privacy reassurance points */}
             <Animated.View
               entering={FadeIn.delay(100).duration(500).easing(SOFT)}
               style={{ alignItems: 'center', gap: 24, width: '100%' }}
             >
-              {/* Icon — fingerprint when available, key when PIN-only */}
-              <View
-                style={{
-                  width: 110,
-                  height: 110,
-                  borderRadius: 55,
-                  backgroundColor: 'rgba(255,255,255,0.10)',
-                  borderWidth: 1.5,
-                  borderColor: 'rgba(255,255,255,0.25)',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {biometricAvailable
-                  ? <Fingerprint size={56} color="#FFFFFF" strokeWidth={1.6} />
-                  : <KeyRound    size={52} color="#FFFFFF" strokeWidth={1.6} />
-                }
-              </View>
-
               {/* Privacy reassurance points */}
               <View style={{ gap: 12, width: '100%', maxWidth: 340 }}>
                 {privacyPoints.map((p, i) => {

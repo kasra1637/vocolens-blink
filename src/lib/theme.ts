@@ -7,10 +7,10 @@ import { hexToRgba } from "./glass";
 
 // Dynamic theme function that returns colors based on selected theme and dark mode
 export const getThemeColors = (
-  selectedTheme: ThemeColorType = "lavenderBliss",
+  selectedTheme: ThemeColorType = "darkMode",
   isDarkMode: boolean = false,
 ) => {
-  const theme = THEME_COLORS[selectedTheme] || THEME_COLORS.lavenderBliss;
+  const theme = THEME_COLORS[selectedTheme] || THEME_COLORS.darkMode;
 
   if (isDarkMode) {
     return {
@@ -106,14 +106,14 @@ export const getThemeColors = (
   };
 };
 
-// Default colors (lavenderBliss theme)
-export const Colors = getThemeColors("lavenderBliss");
+// Default colors (darkMode theme — app default for new users)
+export const Colors = getThemeColors("darkMode");
 
 export const getThemeGradients = (
-  selectedTheme: ThemeColorType = "lavenderBliss",
+  selectedTheme: ThemeColorType = "darkMode",
   isDarkMode: boolean = false,
 ) => {
-  const theme = THEME_COLORS[selectedTheme] || THEME_COLORS.lavenderBliss;
+  const theme = THEME_COLORS[selectedTheme] || THEME_COLORS.darkMode;
 
   if (isDarkMode) {
     return {
@@ -144,12 +144,12 @@ export const getThemeGradients = (
   };
 };
 
-export const Gradients = getThemeGradients("lavenderBliss");
+export const Gradients = getThemeGradients("darkMode");
 
 export const getThemeShadows = (
-  selectedTheme: ThemeColorType = "lavenderBliss",
+  selectedTheme: ThemeColorType = "darkMode",
 ) => {
-  const theme = THEME_COLORS[selectedTheme] || THEME_COLORS.lavenderBliss;
+  const theme = THEME_COLORS[selectedTheme] || THEME_COLORS.darkMode;
 
   return {
     small: {
@@ -167,7 +167,7 @@ export const getThemeShadows = (
   };
 };
 
-export const Shadows = getThemeShadows("lavenderBliss");
+export const Shadows = getThemeShadows("darkMode");
 
 export const BorderRadius = {
   small: 12,
