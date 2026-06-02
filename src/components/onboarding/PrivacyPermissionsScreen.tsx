@@ -18,7 +18,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { Easing } from "react-native-reanimated";
 const SOFT = Easing.bezier(0.22, 1, 0.36, 1);
 import { tapHaptic, successHaptic } from "@/lib/haptics";
-import { Smartphone, Lock, ShieldCheck } from "lucide-react-native";
+import { Smartphone, Mic, Lock, ShieldCheck } from "lucide-react-native";
 import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import { EmotionalCompanion } from "@/components/EmotionalCompanion";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
@@ -66,6 +66,12 @@ export function PrivacyPermissionsScreen() {
       title: "Your entries live on your phone",
       description:
         "Every voice note, mood, and insight stays on your device. Nothing is stored on our servers — ever.",
+    },
+    {
+      icon: <Mic size={22} color="#FFFFFF" />,
+      title: "AI listens, then forgets",
+      description:
+        "When you record, your words are used to generate your insight, then discarded. We never store, read, or sell your transcripts.",
     },
     {
       icon: <Lock size={22} color="#FFFFFF" />,
@@ -146,7 +152,7 @@ export function PrivacyPermissionsScreen() {
                   fontFamily: "Inter_400Regular",
                 }}
               >
-                What you share stays yours — here's exactly how
+                Your journal, your rules — nothing leaves without you knowing
               </Text>
             </Animated.View>
 
