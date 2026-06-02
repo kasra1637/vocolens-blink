@@ -29,6 +29,7 @@ import {
   Fraunces_700Bold,
 } from "@expo-google-fonts/fraunces";
 import { useFrameworkReady } from "@/hooks/useFrameworkReady";
+import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 
 LogBox.ignoreLogs([
   "Expo AV has been deprecated",
@@ -47,24 +48,25 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const queryClient = new QueryClient();
 
-// Always use a dark background so @react-navigation never paints white
-// behind tab screens — the app's LinearGradient covers it but there is
-// one native frame before JS runs where the navigator background shows.
-const DARK_BG = "#0F0E1A";
-const AppDarkTheme  = { ...DarkTheme,    colors: { ...DarkTheme.colors,    background: DARK_BG, card: DARK_BG } };
-const AppLightTheme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: DARK_BG, card: DARK_BG } };
-
 function RootLayoutNav({
   colorScheme,
+  themeBg,
 }: {
   colorScheme: "light" | "dark" | null | undefined;
+  themeBg: string;
 }) {
+  // Build navigation themes using the user's selected theme darkest stop.
+  // This ensures @react-navigation never paints a conflicting background
+  // colour behind tab screens on any theme — not just Midnight Glow.
+  const AppDarkTheme  = { ...DarkTheme,    colors: { ...DarkTheme.colors,    background: themeBg, card: themeBg } };
+  const AppLightTheme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: themeBg, card: themeBg } };
+
   return (
     <ThemeProvider value={colorScheme === "dark" ? AppDarkTheme : AppLightTheme}>
       <Stack>
         <Stack.Screen
           name="(tabs)"
-          options={{ headerShown: false, contentStyle: { backgroundColor: DARK_BG } }}
+          options={{ headerShown: false, contentStyle: { backgroundColor: themeBg } }}
         />
         <Stack.Screen name="modal" options={{ presentation: "modal" }} />
         <Stack.Screen
@@ -99,6 +101,12 @@ function RootLayoutNav({
 export default function RootLayout() {
   useFrameworkReady();
   const colorScheme = useColorScheme();
+
+  // Read the user's chosen theme so every background colour adapts —
+  // never hardcoded to Midnight Glow's darkest stop.
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+  const themeBg = THEME_COLORS[selectedTheme].backgroundGradient[2];
+
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -120,11 +128,10 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* backgroundColor on root so there is never a white layer at any level */}
-      <GestureHandlerRootView style={{ flex: 1, backgroundColor: DARK_BG }}>
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: themeBg }}>
         <StatusBar style="light" />
         <AuthGate>
-          <RootLayoutNav colorScheme={colorScheme} />
+          <RootLayoutNav colorScheme={colorScheme} themeBg={themeBg} />
           <MilestoneCelebration />
         </AuthGate>
       </GestureHandlerRootView>

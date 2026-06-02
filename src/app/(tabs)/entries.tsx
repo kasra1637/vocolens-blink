@@ -223,7 +223,7 @@ export default function EntriesScreen() {
 
   if (!fontsLoaded) {
     return (
-      <View className="flex-1" style={{ backgroundColor: "#0F0E1A" }}>
+      <View className="flex-1" style={{ backgroundColor: Gradients.background[2] }}>
         <LinearGradient
           colors={Gradients.background}
           style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}
@@ -235,7 +235,7 @@ export default function EntriesScreen() {
   }
 
   return (
-    <View className="flex-1" style={{ backgroundColor: "#0F0E1A" }}>
+    <View className="flex-1" style={{ backgroundColor: Gradients.background[2] }}>
       <LinearGradient
         colors={Gradients.background}
         style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }}

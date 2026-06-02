@@ -210,7 +210,7 @@ export function BiometricLockScreen() {
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
-    <View style={{ flex: 1, backgroundColor: '#0F0E1A' }}>
+    <View style={{ flex: 1, backgroundColor: themeColors.backgroundGradient[2] }}>
       <LinearGradient
         colors={themeColors.backgroundGradient}
         start={{ x: 0, y: 0 }}
