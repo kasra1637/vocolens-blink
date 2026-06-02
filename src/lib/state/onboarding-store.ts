@@ -61,6 +61,24 @@ export type JournalingTopicType =
   | "dreams-aspirations"
   | "daily-moments";
 
+export type SelfAwarenessType =
+  | "deep-focus"
+  | "no-demands"
+  | "talking-aloud"
+  | "after-movement";
+
+export type ProcessingStyleType =
+  | "talking-out"
+  | "seeing-written"
+  | "noticing-patterns"
+  | "right-question";
+
+export type AppFeelingType =
+  | "quiet-room"
+  | "understanding-tool"
+  | "listening-friend"
+  | "private-notebook";
+
 export type DayOfWeek =
   | "monday"
   | "tuesday"
@@ -195,6 +213,9 @@ interface OnboardingState {
   selectedReflectionFeeling: ReflectionFeelingType | null;
   selectedJournalingFrequency: JournalingFrequencyType | null;
   selectedJournalingTopic: JournalingTopicType | null;
+  selectedSelfAwareness: SelfAwarenessType | null;
+  selectedProcessingStyle: ProcessingStyleType | null;
+  selectedAppFeeling: AppFeelingType | null;
   notificationPreferences: NotificationPreferences | null;
   selectedTranscriptionLanguage: string;
 
@@ -215,6 +236,9 @@ interface OnboardingState {
   setSelectedReflectionFeeling: (feeling: ReflectionFeelingType) => void;
   setJournalingFrequency: (frequency: JournalingFrequencyType) => void;
   setSelectedJournalingTopic: (topic: JournalingTopicType) => void;
+  setSelectedSelfAwareness: (value: SelfAwarenessType) => void;
+  setSelectedProcessingStyle: (value: ProcessingStyleType) => void;
+  setSelectedAppFeeling: (value: AppFeelingType) => void;
   setNotificationPreferences: (preferences: NotificationPreferences) => void;
   setSelectedTranscriptionLanguage: (language: string) => void;
   setCurrentStep: (step: number) => void;
@@ -240,6 +264,9 @@ const useOnboardingStore = create<OnboardingState>()(
       selectedReflectionFeeling: null,
       selectedJournalingFrequency: null,
       selectedJournalingTopic: null,
+      selectedSelfAwareness: null,
+      selectedProcessingStyle: null,
+      selectedAppFeeling: null,
       notificationPreferences: null,
       selectedTranscriptionLanguage: "en",
       currentStep: 0,
@@ -266,13 +293,19 @@ const useOnboardingStore = create<OnboardingState>()(
         set({ selectedJournalingFrequency: frequency }),
       setSelectedJournalingTopic: (topic) =>
         set({ selectedJournalingTopic: topic }),
+      setSelectedSelfAwareness: (value) =>
+        set({ selectedSelfAwareness: value }),
+      setSelectedProcessingStyle: (value) =>
+        set({ selectedProcessingStyle: value }),
+      setSelectedAppFeeling: (value) =>
+        set({ selectedAppFeeling: value }),
       setNotificationPreferences: (preferences) =>
         set({ notificationPreferences: preferences }),
       setSelectedTranscriptionLanguage: (language) =>
         set({ selectedTranscriptionLanguage: language }),
       setCurrentStep: (step) => set({ currentStep: step }),
       nextStep: () =>
-        set((state) => ({ currentStep: Math.min(state.currentStep + 1, 21) })),
+        set((state) => ({ currentStep: Math.min(state.currentStep + 1, 24) })),
       prevStep: () =>
         set((state) => ({ currentStep: Math.max(state.currentStep - 1, 0) })),
       resetOnboarding: () =>
@@ -317,6 +350,9 @@ const useOnboardingStore = create<OnboardingState>()(
         selectedReflectionFeeling: state.selectedReflectionFeeling,
         selectedJournalingFrequency: state.selectedJournalingFrequency,
         selectedJournalingTopic: state.selectedJournalingTopic,
+        selectedSelfAwareness: state.selectedSelfAwareness,
+        selectedProcessingStyle: state.selectedProcessingStyle,
+        selectedAppFeeling: state.selectedAppFeeling,
         notificationPreferences: state.notificationPreferences,
         selectedTranscriptionLanguage: state.selectedTranscriptionLanguage,
       }),

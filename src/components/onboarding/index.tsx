@@ -1,12 +1,12 @@
 /**
  * Onboarding Flow Component
  *
- * Main container that manages the 22-screen onboarding flow.
+ * Main container that manages the 25-screen onboarding flow.
  *
  * Step map:
  *  0  WelcomeScreen
- *  1  NDValueScreen1  ← "Sound Familiar"
- *  2  NDValueScreen2  ← "Speak, we listen"
+ *  1  NDValueScreen1  — "Sound Familiar"
+ *  2  NDValueScreen2  — "Speak, we listen"
  *  3  ThemeSelectionScreen
  *  4  PersonalizePermissionScreen
  *  5  NameCollectionScreen
@@ -18,14 +18,17 @@
  *  11 GoalInsightScreen
  *  12 ReflectionFeelingsScreen
  *  13 JournalingFrequencyInsightScreen
- *  14 NotificationPreferencesScreen
- *  15 LanguageSelectionScreen
- *  16 PrivacyPermissionsScreen
- *  17 AccountPreparationScreen
- *  18 FreeTrialPreviewScreen
- *  19 ReminderScreen
- *  20 PaywallScreen
- *  21 BiometricSetupScreen
+ *  14 SelfAwarenessScreen        ← NEW
+ *  15 ProcessingStyleScreen      ← NEW
+ *  16 AppFeelingScreen           ← NEW
+ *  17 NotificationPreferencesScreen
+ *  18 LanguageSelectionScreen
+ *  19 PrivacyPermissionsScreen
+ *  20 AccountPreparationScreen
+ *  21 FreeTrialPreviewScreen
+ *  22 ReminderScreen
+ *  23 PaywallScreen
+ *  24 BiometricSetupScreen
  */
 
 import React from 'react';
@@ -45,6 +48,9 @@ import { GoalBlockerScreen } from './GoalBlockerScreen';
 import { GoalInsightScreen } from './GoalInsightScreen';
 import { ReflectionFeelingsScreen } from './ReflectionFeelingsScreen';
 import { JournalingFrequencyInsightScreen } from './JournalingFrequencyInsightScreen';
+import { SelfAwarenessScreen } from './SelfAwarenessScreen';
+import { ProcessingStyleScreen } from './ProcessingStyleScreen';
+import { AppFeelingScreen } from './AppFeelingScreen';
 import { NotificationPreferencesScreen } from './NotificationPreferencesScreen';
 import { LanguageSelectionScreen } from './LanguageSelectionScreen';
 import { PrivacyPermissionsScreen } from './PrivacyPermissionsScreen';
@@ -73,14 +79,17 @@ export function OnboardingFlow() {
       case 11: return <GoalInsightScreen />;
       case 12: return <ReflectionFeelingsScreen />;
       case 13: return <JournalingFrequencyInsightScreen />;
-      case 14: return <NotificationPreferencesScreen />;
-      case 15: return <LanguageSelectionScreen />;
-      case 16: return <PrivacyPermissionsScreen />;
-      case 17: return <AccountPreparationScreen />;
-      case 18: return <FreeTrialPreviewScreen />;
-      case 19: return <ReminderScreen />;
-      case 20: return <PaywallScreen />;
-      case 21: return <BiometricSetupScreen />;
+      case 14: return <SelfAwarenessScreen />;
+      case 15: return <ProcessingStyleScreen />;
+      case 16: return <AppFeelingScreen />;
+      case 17: return <NotificationPreferencesScreen />;
+      case 18: return <LanguageSelectionScreen />;
+      case 19: return <PrivacyPermissionsScreen />;
+      case 20: return <AccountPreparationScreen />;
+      case 21: return <FreeTrialPreviewScreen />;
+      case 22: return <ReminderScreen />;
+      case 23: return <PaywallScreen />;
+      case 24: return <BiometricSetupScreen />;
       default: return <WelcomeScreen />;
     }
   };
@@ -106,6 +115,9 @@ export { GoalBlockerScreen } from './GoalBlockerScreen';
 export { GoalInsightScreen } from './GoalInsightScreen';
 export { ReflectionFeelingsScreen } from './ReflectionFeelingsScreen';
 export { JournalingFrequencyInsightScreen } from './JournalingFrequencyInsightScreen';
+export { SelfAwarenessScreen } from './SelfAwarenessScreen';
+export { ProcessingStyleScreen } from './ProcessingStyleScreen';
+export { AppFeelingScreen } from './AppFeelingScreen';
 export { NotificationPreferencesScreen } from './NotificationPreferencesScreen';
 export { LanguageSelectionScreen } from './LanguageSelectionScreen';
 export { PrivacyPermissionsScreen } from './PrivacyPermissionsScreen';
