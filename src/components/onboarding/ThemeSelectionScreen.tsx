@@ -96,6 +96,8 @@ export function ThemeSelectionScreen() {
     transform: [{ translateX: rightX.value }],
   }));
 
+  // Hide left arrow on the very first theme (Midnight Glow, index 0).
+  // Hide right arrow on the very last theme (Ocean Calm, last index).
   const showLeftArrow  = activeIndex > 0;
   const showRightArrow = activeIndex < THEMES.length - 1;
 
@@ -116,6 +118,19 @@ export function ThemeSelectionScreen() {
         setActiveIndex(clamped);
         setSelectedTheme(THEMES[clamped]);
         selectHaptic();
+      }
+    },
+    [activeIndex],
+  );
+
+  // Update activeIndex continuously while scrolling so arrow visibility
+  // updates in real time — not just after momentum ends.
+  const handleScrollContinuous = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      const raw     = e.nativeEvent.contentOffset.x / SCREEN_WIDTH;
+      const clamped = Math.max(0, Math.min(Math.round(raw), THEMES.length - 1));
+      if (clamped !== activeIndex) {
+        setActiveIndex(clamped);
       }
     },
     [activeIndex],
@@ -239,7 +254,8 @@ export function ThemeSelectionScreen() {
               pagingEnabled
               decelerationRate="fast"
               onMomentumScrollEnd={handleScroll}
-              scrollEventThrottle={16}
+              onScroll={handleScrollContinuous}
+              scrollEventThrottle={SCREEN_WIDTH / 2}
               style={{ flexGrow: 0, width: SCREEN_WIDTH }}
             >
               {THEMES.map((theme, i) => {
@@ -267,7 +283,7 @@ export function ThemeSelectionScreen() {
                         width: CARD_WIDTH,
                         alignItems: "center",
                         justifyContent: "center",
-                        paddingVertical: 36,
+                        paddingVertical: 20,
                         paddingHorizontal: 24,
                         gap: 20,
                       }}
@@ -366,15 +382,15 @@ export function ThemeSelectionScreen() {
             </ScrollView>
           </View>
 
-          {/* Dots + Continue — tightened toward the carousel */}
+          {/* Dots + Continue — pulled up close to the card */}
           <Animated.View
             entering={FadeIn.delay(250).duration(900).easing(SOFT)}
             style={{
               paddingHorizontal: 24,
-              paddingBottom: 20,
+              paddingBottom: 8,
               paddingTop: 0,
               alignItems: "center",
-              gap: 14,
+              gap: 12,
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
