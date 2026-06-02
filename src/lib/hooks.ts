@@ -30,7 +30,6 @@ import {
   InsightData,
 } from './types';
 import { WeeklyReflectionResult } from './api/openai-service';
-import Constants from 'expo-constants';
 
 // Query Keys
 export const queryKeys = {
@@ -455,41 +454,127 @@ export function useWeeklyReflection(weekOffset: number = 0) {
   return useQuery({
     queryKey: [...queryKeys.weeklyReflection(weekStartStr), weekLabel],
     queryFn: async (): Promise<WeeklyReflectionResult & { isDemo?: boolean }> => {
-      const BACKEND_URL =
-        Constants.expoConfig?.extra?.EXPO_PUBLIC_BACKEND_URL ||
-        process.env.EXPO_PUBLIC_BACKEND_URL ||
-        'http://localhost:3000';
+      // Direct OpenRouter (Claude 3.5 Sonnet) call — no backend required.
+      // The backend path was removed so the Insights tab works in production
+      // without a deployed server. If the direct call fails for any reason,
+      // we fall back to DEMO_REFLECTION so the UI never breaks.
+      const apiKey = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY || '';
+      if (!apiKey || !apiKey.startsWith('sk-or-')) {
+        console.log('[WeeklyReflection] OpenRouter key missing, using demo data');
+        return DEMO_REFLECTION;
+      }
+
+      const entryDigest = weekEntries
+        .map((e, i) => {
+          const date = new Date(e.createdAt).toLocaleDateString('en-US', {
+            weekday: 'long',
+            month: 'short',
+            day: 'numeric',
+          });
+          const transcript = e.transcript ?? '';
+          return `Entry ${i + 1} (${date}) — Emotion: ${e.primaryEmotion} (${e.emotionIntensity}% intensity)\nTopics: ${e.topics.join(', ')}\nExcerpt: "${transcript.slice(0, 300)}${transcript.length > 300 ? '...' : ''}"`;
+        })
+        .join('\n\n---\n\n');
+
+      const systemPrompt = `You are a warm, insightful journaling companion creating a weekly reflection digest.
+Your tone is compassionate, personal, and encouraging — like a wise friend who truly listened.
+Write as if speaking directly to the person. Keep narratives warm and intimate, not clinical.
+
+Respond with ONLY a valid JSON object — no markdown fences, no commentary:
+{
+  "narrativeSummary": "2-3 sentence warm narrative overview of their week's emotional journey",
+  "emotionalJourney": "1-2 sentences describing how their emotions evolved through the week",
+  "keyThemes": ["theme1", "theme2", "theme3"],
+  "growthMoment": "1 sentence highlighting a meaningful moment or insight from their entries",
+  "weekAhead": "1 encouraging sentence for the coming week",
+  "dominantEmotion": "the most prevalent emotion (must be one of: happiness, sadness, anger, disgust, fear, surprise, trust, anticipation)",
+  "emotionalRange": "brief phrase describing their emotional range e.g. 'Mostly grounded with moments of joy'"
+}`;
 
       try {
-        const response = await fetch(`${BACKEND_URL}/api/journal/weekly-reflection`, {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': 'https://blink.new',
+            'X-Title': 'Vocolens',
+          },
           body: JSON.stringify({
-            entries: weekEntries.map((e) => ({
-              transcript: e.transcript,
-              primaryEmotion: e.primaryEmotion,
-              emotionIntensity: e.emotionIntensity,
-              topics: e.topics,
-              createdAt: e.createdAt,
-              title: e.title,
-            })),
-            weekLabel,
+            model: 'anthropic/claude-3.5-sonnet-20241022',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              {
+                role: 'user',
+                content: `Here are my journal entries from ${weekLabel}:\n\n${entryDigest}\n\nPlease create my weekly reflection digest.`,
+              },
+            ],
+            temperature: 0.8,
+            max_tokens: 800,
           }),
         });
 
         if (!response.ok) {
-          console.log('[WeeklyReflection] API request failed, using demo data');
+          console.log(
+            '[WeeklyReflection] OpenRouter returned non-OK status, using demo data',
+            response.status,
+          );
           return DEMO_REFLECTION;
         }
 
-        const json = await response.json() as { success: boolean; data: WeeklyReflectionResult; error?: string };
-        if (!json.success || !json.data) {
-          console.log('[WeeklyReflection] Invalid response, using demo data');
+        const data = (await response.json()) as {
+          choices?: Array<{ message?: { content?: string } }>;
+        };
+        const content = data.choices?.[0]?.message?.content;
+        if (!content) {
+          console.log('[WeeklyReflection] OpenRouter returned empty content, using demo data');
           return DEMO_REFLECTION;
         }
-        return { ...json.data, isDemo: false };
+
+        const cleaned = content
+          .replace(/^```json\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/```\s*$/i, '')
+          .trim();
+
+        const parsed = JSON.parse(cleaned) as Partial<WeeklyReflectionResult>;
+
+        const validEmotions: EmotionType[] = [
+          'happiness',
+          'sadness',
+          'anger',
+          'disgust',
+          'fear',
+          'surprise',
+          'trust',
+          'anticipation',
+        ];
+
+        return {
+          narrativeSummary:
+            parsed.narrativeSummary || 'A week of meaningful reflection.',
+          emotionalJourney:
+            parsed.emotionalJourney || 'Your emotions told a story this week.',
+          keyThemes: Array.isArray(parsed.keyThemes)
+            ? parsed.keyThemes.slice(0, 4)
+            : [],
+          growthMoment:
+            parsed.growthMoment || 'You showed up for yourself this week.',
+          weekAhead: parsed.weekAhead || "Carry this week's wisdom forward.",
+          dominantEmotion:
+            parsed.dominantEmotion && validEmotions.includes(parsed.dominantEmotion)
+              ? parsed.dominantEmotion
+              : ('trust' as EmotionType),
+          emotionalRange: parsed.emotionalRange || 'A balanced week',
+          entryCount: weekEntries.length,
+          weekLabel,
+          isDemo: false,
+        };
       } catch (error) {
-        console.log('[WeeklyReflection] Error fetching reflection, using demo data:', error);
+        console.log(
+          '[WeeklyReflection] Error fetching reflection, using demo data:',
+          error,
+        );
         return DEMO_REFLECTION;
       }
     },

@@ -1,6 +1,19 @@
-// AI-Powered Emotional Intelligence Analysis via backend proxy
+// AI-Powered Emotional Intelligence Analysis
+//
+// This module powers the Insights tab's deep pattern analysis (recurring
+// patterns, triggers, mood cycles, emotional shifts, priority insights).
+//
+// Originally this called a backend endpoint (/api/journal/ai-completion).
+// To make Deep AI Insights work without deploying the backend, the call has
+// been switched to a direct OpenRouter (Claude 3.5 Sonnet) request using
+// the same EXPO_PUBLIC_OPENROUTER_API_KEY that powers per-entry analysis.
+//
+// All other behavior (caching, validation, default fallback, prompt) is
+// unchanged. If the direct call fails for any reason (no key, network,
+// invalid JSON, rate limit), the safe local default analysis is returned
+// instead so the Insights tab never breaks.
+
 import { JournalEntry } from './types';
-import { resolveBackendUrl } from './api/openrouter-service';
 import {
   DeepInsight,
   EmotionalPattern,
@@ -17,6 +30,14 @@ export interface AIAnalysisResponse {
   shifts: EmotionalShift[];
   insights: DeepInsight[];
 }
+
+// ============================================================================
+// CONFIG (mirrors openrouter-service.ts)
+// ============================================================================
+
+const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
+const MODEL = 'anthropic/claude-3.5-sonnet-20241022';
+const OPENROUTER_API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY || '';
 
 // ============================================================================
 // CACHE
@@ -36,7 +57,7 @@ export function clearAICache(): void {
 }
 
 // ============================================================================
-// DEFAULT ANALYSIS
+// DEFAULT ANALYSIS (used when AI call fails for any reason)
 // ============================================================================
 
 function getDefaultAnalysis(): AIAnalysisResponse {
@@ -88,10 +109,17 @@ Content: ${entry.transcript.slice(0, 300)}${entry.transcript.length > 300 ? '...
 }
 
 // ============================================================================
-// AI CALL (via backend proxy)
+// DIRECT OPENROUTER CALL (replaces former backend proxy call)
 // ============================================================================
 
-async function callBackendAI(entriesText: string): Promise<AIAnalysisResponse> {
+async function callOpenRouterDirect(entriesText: string): Promise<AIAnalysisResponse> {
+  if (!OPENROUTER_API_KEY || !OPENROUTER_API_KEY.startsWith('sk-or-')) {
+    console.warn(
+      '[AI Emotional Intelligence] OpenRouter API key missing or invalid — returning default analysis.',
+    );
+    return getDefaultAnalysis();
+  }
+
   const systemPrompt = `You are an expert emotional intelligence analyst and therapist. Analyze journal entries to provide deep psychological insights. Be empathetic, insightful, and provide actionable advice.
 
 Return a JSON object with the following structure:
@@ -158,7 +186,9 @@ Focus on:
 4. Emotional shifts (transitions between states)
 5. Deep insights (self-awareness, growth opportunities, warnings, strengths)
 
-Be specific and reference actual content from entries. Limit to 2-3 items per category for clarity.`;
+Be specific and reference actual content from entries. Limit to 2-3 items per category for clarity.
+
+Respond with ONLY a valid JSON object — no markdown fences, no commentary.`;
 
   const userPrompt = `Analyze these journal entries and provide emotional intelligence insights:
 
@@ -166,34 +196,61 @@ ${entriesText}
 
 Provide your analysis as valid JSON only, no additional text.`;
 
-  const response = await fetch(`${resolveBackendUrl()}/api/journal/ai-completion`, {
+  const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
     method: 'POST',
     headers: {
+      Authorization: `Bearer ${OPENROUTER_API_KEY}`,
       'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://blink.new',
+      'X-Title': 'Vocolens',
     },
     body: JSON.stringify({
-      systemPrompt,
-      userPrompt,
+      model: MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
       temperature: 0.7,
-      maxTokens: 2000,
+      max_tokens: 2000,
     }),
   });
 
   if (!response.ok) {
     const errText = await response.text();
-    console.error('[AI Emotional Intelligence] Backend returned non-OK status:', response.status, errText);
+    console.error(
+      '[AI Emotional Intelligence] OpenRouter returned non-OK status:',
+      response.status,
+      errText,
+    );
     return getDefaultAnalysis();
   }
 
-  const json = (await response.json()) as { success: boolean; data?: unknown; error?: string };
-
-  if (!json.success || json.data === undefined) {
-    console.error('[AI Emotional Intelligence] Backend error:', json.error || 'Missing data field');
+  const data = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) {
+    console.error('[AI Emotional Intelligence] OpenRouter returned empty content');
     return getDefaultAnalysis();
   }
 
-  const analysis = json.data as AIAnalysisResponse;
-  return validateAndCleanAnalysis(analysis);
+  // Strip any code fences the model might add despite instructions
+  const cleaned = content
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/```\s*$/i, '')
+    .trim();
+
+  try {
+    const analysis = JSON.parse(cleaned) as AIAnalysisResponse;
+    return validateAndCleanAnalysis(analysis);
+  } catch (parseErr) {
+    console.error(
+      '[AI Emotional Intelligence] Failed to parse OpenRouter JSON:',
+      parseErr,
+    );
+    return getDefaultAnalysis();
+  }
 }
 
 // ============================================================================
@@ -244,7 +301,7 @@ export async function analyzeWithAI(entries: JournalEntry[]): Promise<AIAnalysis
   const entriesText = prepareEntriesForAI(entries);
 
   try {
-    return await callBackendAI(entriesText);
+    return await callOpenRouterDirect(entriesText);
   } catch (error) {
     console.warn('[AI Emotional Intelligence] Analysis failed, using default:', error);
     return getDefaultAnalysis();
