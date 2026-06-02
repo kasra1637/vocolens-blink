@@ -32,7 +32,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 const SOFT = Easing.bezier(0.16, 1, 0.3, 1);
-import { Fingerprint, Lock, Eye, ShieldCheck } from 'lucide-react-native';
+import { Fingerprint, Lock, ShieldCheck } from 'lucide-react-native';
 import { successHaptic, tapHaptic } from '@/lib/haptics';
 import useOnboardingStore, { THEME_COLORS } from '@/lib/state/onboarding-store';
 import useBiometricStore from '@/lib/state/biometric-store';
@@ -50,8 +50,8 @@ type Phase = 'intro' | 'pin_setup';
 // Privacy points shown when biometric IS available
 const BIOMETRIC_POINTS = [
   { icon: Lock,         text: 'Only you can open your journal' },
-  { icon: Eye,          text: 'No passwords to remember — just your fingerprint' },
-  { icon: ShieldCheck,  text: 'PIN backup keeps you in if biometric changes' },
+  { icon: Fingerprint,  text: 'Your fingerprint unlocks it instantly — PIN is always there as a backup' },
+  { icon: ShieldCheck,  text: 'If your biometric ever changes, your PIN keeps you in' },
 ];
 
 // Privacy points shown when only PIN is available
@@ -128,10 +128,10 @@ export function BiometricSetupScreen() {
   // ─── Render ────────────────────────────────────────────────────────────────
   if (phase === 'pin_setup') {
     const pinTitle    = biometricAvailable
-      ? 'Set a backup PIN'
+      ? 'Create Your Backup PIN'
       : 'Protect with a PIN';
     const pinSubtitle = biometricAvailable
-      ? `If your ${biometricName} ever changes, you'll use this PIN to restore access.`
+      ? `This is your backup for when your ${biometricName} isn't available.`
       : 'Choose a 4-digit PIN. Only you will be able to open Vocolens.';
 
     return (
@@ -150,13 +150,13 @@ export function BiometricSetupScreen() {
     : 'Secure your journal';
 
   const screenSubtitle = biometricAvailable
-    ? `Use ${biometricName} so only you can open Vocolens. We'll also set a backup PIN.`
+    ? `Your journal locks automatically. Use your ${biometricName} or PIN to get back in.`
     : 'Your device doesn\'t have biometrics. Set a 4-digit PIN to keep your journal private.';
 
   const ctaLabel = checking
     ? 'Checking…'
     : biometricAvailable
-      ? `Enable ${biometricName} + PIN`
+      ? 'Protect My Journal'
       : 'Set up a PIN';
 
   const privacyPoints = biometricAvailable ? BIOMETRIC_POINTS : PIN_ONLY_POINTS;
