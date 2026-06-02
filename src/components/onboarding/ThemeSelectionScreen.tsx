@@ -152,7 +152,7 @@ export function ThemeSelectionScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Live background */}
+      {/* Live background — fills the screen and updates with the active theme */}
       <LinearGradient
         colors={activeData.backgroundGradient}
         start={{ x: 0, y: 0 }}
@@ -160,285 +160,265 @@ export function ThemeSelectionScreen() {
         style={{ flex: 1 }}
       />
 
-      {/* Progress bar + back button */}
-      <View
-        style={{ position: "absolute", top: 0, left: 0, right: 0 }}
-        pointerEvents="box-none"
-      >
-        <ProgressBar currentStep={currentStep} totalSteps={23} />
-        <SafeAreaView pointerEvents="box-none">
-          <BackButton onPress={handleBack} show={currentStep > 0} />
-        </SafeAreaView>
-      </View>
-
-      {/* Main content */}
+      {/* Full-screen content — same structure as PersonalizePermissionScreen */}
       <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+        <ProgressBar currentStep={currentStep} totalSteps={23} />
+
         <SafeAreaView style={{ flex: 1 }}>
+          <BackButton onPress={handleBack} show={currentStep > 0} />
 
-          {/* Space for progress bar + back button */}
-          <View style={{ height: 72 }} />
+          {/* Identical outer padding to PersonalizePermissionScreen */}
+          <View style={{ flex: 1, paddingHorizontal: 24, paddingVertical: 12 }}>
 
-          {/* Character — fixed-height container matching PersonalizePermissionScreen */}
-          <View
-            style={{
-              height: 80,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <EmotionalCompanion
-              state="processing"
-              size={80}
-              themeColor={activeData.primary}
-            />
-          </View>
-
-          {/* Title + subtitle hint */}
-          <Animated.View
-            entering={FadeIn.delay(100).duration(900).easing(SOFT)}
-            style={{ alignItems: "center", marginBottom: 14 }}
-            pointerEvents="none"
-          >
-            <Text
+            {/* Character — identical container to PersonalizePermissionScreen */}
+            <View
               style={{
-                fontFamily: "Fraunces_700Bold",
-                fontSize: 30,
-                color: "#FFFFFF",
-                opacity: 0.92,
-                letterSpacing: 0.2,
-                lineHeight: 38,
-                textAlign: "center",
+                height: 80,
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              Pick your colors
-            </Text>
-            <Animated.Text
+              <EmotionalCompanion
+                state="processing"
+                size={80}
+                themeColor={activeData.primary}
+              />
+            </View>
+
+            {/* Title — identical timing + marginBottom to PersonalizePermissionScreen */}
+            <Animated.View
+              entering={FadeIn.delay(100).duration(900).easing(SOFT)}
+              style={{ alignItems: "center", marginBottom: 14 }}
+            >
+              <Text
+                style={{
+                  fontFamily: "Fraunces_700Bold",
+                  color: "#FFFFFF",
+                  fontSize: 30,
+                  textAlign: "center",
+                  opacity: 0.92,
+                  letterSpacing: 0.2,
+                  lineHeight: 38,
+                }}
+              >
+                Pick your colors
+              </Text>
+            </Animated.View>
+
+            {/* Subtitle hint — identical timing to PersonalizePermissionScreen */}
+            <Animated.View
               entering={FadeIn.delay(230).duration(900).easing(SOFT)}
-              style={{
-                fontFamily: "Inter_400Regular",
-                fontSize: 13,
-                color: "rgba(255,255,255,0.65)",
-                marginTop: 4,
-              }}
+              style={{ alignItems: "center", marginBottom: 8 }}
             >
-              Swipe to browse · {THEMES.length} themes
-            </Animated.Text>
-          </Animated.View>
-
-          {/* Carousel + side arrows */}
-          <View style={{ flex: 1, justifyContent: "center" }}>
-
-            {/* Left arrow */}
-            {showLeftArrow && (
-              <Animated.View
-                style={[
-                  leftArrowStyle,
-                  {
-                    position: "absolute",
-                    left: 4,
-                    zIndex: 10,
-                    alignSelf: "center",
-                    padding: 4,
-                  },
-                ]}
-                pointerEvents="none"
+              <Text
+                style={{
+                  fontFamily: "Inter_400Regular",
+                  color: "rgba(255,255,255,0.65)",
+                  fontSize: 13,
+                  textAlign: "center",
+                }}
               >
-                <ChevronLeft
-                  size={28}
-                  color="rgba(255,255,255,0.70)"
-                  strokeWidth={2.2}
-                />
-              </Animated.View>
-            )}
+                Swipe to browse · {THEMES.length} themes
+              </Text>
+            </Animated.View>
 
-            {/* Right arrow */}
-            {showRightArrow && (
-              <Animated.View
-                style={[
-                  rightArrowStyle,
-                  {
-                    position: "absolute",
-                    right: 4,
-                    zIndex: 10,
-                    alignSelf: "center",
-                    padding: 4,
-                  },
-                ]}
-                pointerEvents="none"
-              >
-                <ChevronRight
-                  size={28}
-                  color="rgba(255,255,255,0.70)"
-                  strokeWidth={2.2}
-                />
-              </Animated.View>
-            )}
+            {/* Carousel + side arrows — fills remaining space */}
+            <View style={{ flex: 1, justifyContent: "center" }}>
 
-            <ScrollView
-              ref={scrollRef}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              pagingEnabled
-              decelerationRate="fast"
-              onMomentumScrollEnd={handleScroll}
-              onScroll={handleScrollContinuous}
-              scrollEventThrottle={SCREEN_WIDTH / 2}
-              style={{ flexGrow: 0, width: SCREEN_WIDTH }}
-            >
-              {THEMES.map((theme, i) => {
-                const data     = THEME_COLORS[theme];
-                const isActive = i === activeIndex;
+              {/* Left pulsing arrow */}
+              {showLeftArrow && (
+                <Animated.View
+                  style={[
+                    leftArrowStyle,
+                    {
+                      position: "absolute",
+                      left: -20,
+                      zIndex: 10,
+                      alignSelf: "center",
+                      padding: 4,
+                    },
+                  ]}
+                  pointerEvents="none"
+                >
+                  <ChevronLeft size={28} color="rgba(255,255,255,0.70)" strokeWidth={2.2} />
+                </Animated.View>
+              )}
 
-                return (
-                  <Pressable
-                    key={theme}
-                    onPress={() => {
-                      if (!isActive) {
-                        scrollRef.current?.scrollTo({ x: i * SCREEN_WIDTH, animated: true });
-                        setActiveIndex(i);
-                        setSelectedTheme(theme);
-                        selectHaptic();
-                      }
-                    }}
-                    // Each page is SCREEN_WIDTH wide so pagingEnabled works correctly.
-                    // The inner card is centred within that page.
-                    style={{ width: SCREEN_WIDTH, alignItems: "center", justifyContent: "center" }}
-                  >
-                    {/* Card content — centred, no outer box */}
-                    <View
-                      style={{
-                        width: CARD_WIDTH,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        paddingVertical: 20,
-                        paddingHorizontal: 24,
-                        gap: 20,
-                      }}
-                    >
-                      {/* Orb with glow ring */}
-                      <View style={{ alignItems: "center", justifyContent: "center" }}>
-                        {isActive && (
-                          <View
-                            style={{
-                              position: "absolute",
-                              width: GLOW,
-                              height: GLOW,
-                              borderRadius: GLOW / 2,
-                              borderWidth: 2.5,
-                              borderColor: "rgba(255,255,255,0.90)",
-                              shadowColor: "#FFFFFF",
-                              shadowOffset: { width: 0, height: 0 },
-                              shadowOpacity: 0.55,
-                              shadowRadius: 14,
-                            }}
-                          />
-                        )}
+              {/* Right pulsing arrow */}
+              {showRightArrow && (
+                <Animated.View
+                  style={[
+                    rightArrowStyle,
+                    {
+                      position: "absolute",
+                      right: -20,
+                      zIndex: 10,
+                      alignSelf: "center",
+                      padding: 4,
+                    },
+                  ]}
+                  pointerEvents="none"
+                >
+                  <ChevronRight size={28} color="rgba(255,255,255,0.70)" strokeWidth={2.2} />
+                </Animated.View>
+              )}
 
-                        <LinearGradient
-                          colors={[data.gradientStart, data.gradientEnd]}
-                          start={{ x: 0.15, y: 0 }}
-                          end={{ x: 0.85, y: 1 }}
+              {/* Carousel — extend to full screen width by breaking out of the 24px padding */}
+              <View style={{ marginHorizontal: -24 }}>
+                <ScrollView
+                  ref={scrollRef}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  pagingEnabled
+                  decelerationRate="fast"
+                  onMomentumScrollEnd={handleScroll}
+                  onScroll={handleScrollContinuous}
+                  scrollEventThrottle={SCREEN_WIDTH / 2}
+                  style={{ flexGrow: 0, width: SCREEN_WIDTH }}
+                >
+                  {THEMES.map((theme, i) => {
+                    const data     = THEME_COLORS[theme];
+                    const isActive = i === activeIndex;
+
+                    return (
+                      <Pressable
+                        key={theme}
+                        onPress={() => {
+                          if (!isActive) {
+                            scrollRef.current?.scrollTo({ x: i * SCREEN_WIDTH, animated: true });
+                            setActiveIndex(i);
+                            setSelectedTheme(theme);
+                            selectHaptic();
+                          }
+                        }}
+                        style={{ width: SCREEN_WIDTH, alignItems: "center", justifyContent: "center" }}
+                      >
+                        <View
                           style={{
-                            width: ORB,
-                            height: ORB,
-                            borderRadius: ORB / 2,
+                            width: CARD_WIDTH,
                             alignItems: "center",
                             justifyContent: "center",
-                            overflow: "hidden",
+                            paddingVertical: 20,
+                            paddingHorizontal: 24,
+                            gap: 20,
                           }}
                         >
-                          {/* Shimmer */}
-                          <View
-                            style={{
-                              position: "absolute",
-                              top: 12, left: 12,
-                              width: 24, height: 24,
-                              borderRadius: 12,
-                              backgroundColor: "rgba(255,255,255,0.38)",
-                            }}
-                          />
-                          {/* Depth shadow */}
-                          <View
-                            style={{
-                              position: "absolute",
-                              bottom: 0, left: 0, right: 0,
-                              height: 32,
-                              borderBottomLeftRadius: ORB / 2,
-                              borderBottomRightRadius: ORB / 2,
-                              backgroundColor: "rgba(0,0,0,0.10)",
-                            }}
-                          />
-                          {isActive ? (
-                            <Check size={30} color="#FFFFFF" strokeWidth={2.8} />
-                          ) : theme === "darkMode" ? (
-                            <Moon size={26} color="rgba(255,255,255,0.7)" strokeWidth={2} />
-                          ) : null}
-                        </LinearGradient>
-                      </View>
+                          {/* Orb with glow ring */}
+                          <View style={{ alignItems: "center", justifyContent: "center" }}>
+                            {isActive && (
+                              <View
+                                style={{
+                                  position: "absolute",
+                                  width: GLOW,
+                                  height: GLOW,
+                                  borderRadius: GLOW / 2,
+                                  borderWidth: 2.5,
+                                  borderColor: "rgba(255,255,255,0.90)",
+                                  shadowColor: "#FFFFFF",
+                                  shadowOffset: { width: 0, height: 0 },
+                                  shadowOpacity: 0.55,
+                                  shadowRadius: 14,
+                                }}
+                              />
+                            )}
+                            <LinearGradient
+                              colors={[data.gradientStart, data.gradientEnd]}
+                              start={{ x: 0.15, y: 0 }}
+                              end={{ x: 0.85, y: 1 }}
+                              style={{
+                                width: ORB,
+                                height: ORB,
+                                borderRadius: ORB / 2,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                overflow: "hidden",
+                              }}
+                            >
+                              <View
+                                style={{
+                                  position: "absolute",
+                                  top: 12, left: 12,
+                                  width: 24, height: 24,
+                                  borderRadius: 12,
+                                  backgroundColor: "rgba(255,255,255,0.38)",
+                                }}
+                              />
+                              <View
+                                style={{
+                                  position: "absolute",
+                                  bottom: 0, left: 0, right: 0,
+                                  height: 32,
+                                  borderBottomLeftRadius: ORB / 2,
+                                  borderBottomRightRadius: ORB / 2,
+                                  backgroundColor: "rgba(0,0,0,0.10)",
+                                }}
+                              />
+                              {isActive ? (
+                                <Check size={30} color="#FFFFFF" strokeWidth={2.8} />
+                              ) : theme === "darkMode" ? (
+                                <Moon size={26} color="rgba(255,255,255,0.7)" strokeWidth={2} />
+                              ) : null}
+                            </LinearGradient>
+                          </View>
 
-                      {/* Name + description */}
-                      <View style={{ alignItems: "center", gap: 8 }}>
-                        <Text
-                          style={{
-                            fontFamily: "Inter_700Bold",
-                            fontSize: 24,
-                            color: "#FFFFFF",
-                            textAlign: "center",
-                            opacity: isActive ? 1 : 0.65,
-                            letterSpacing: 0.2,
-                          }}
-                        >
-                          {data.name}
-                        </Text>
-                        <Text
-                          style={{
-                            fontFamily: "Inter_400Regular",
-                            fontSize: 14,
-                            color: isActive ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.50)",
-                            textAlign: "center",
-                            lineHeight: 22,
-                          }}
-                        >
-                          {data.description}
-                        </Text>
-                      </View>
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
+                          {/* Name + description */}
+                          <View style={{ alignItems: "center", gap: 8 }}>
+                            <Text
+                              style={{
+                                fontFamily: "Inter_700Bold",
+                                fontSize: 24,
+                                color: "#FFFFFF",
+                                textAlign: "center",
+                                opacity: isActive ? 1 : 0.65,
+                                letterSpacing: 0.2,
+                              }}
+                            >
+                              {data.name}
+                            </Text>
+                            <Text
+                              style={{
+                                fontFamily: "Inter_400Regular",
+                                fontSize: 14,
+                                color: isActive ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.50)",
+                                textAlign: "center",
+                                lineHeight: 22,
+                              }}
+                            >
+                              {data.description}
+                            </Text>
+                          </View>
+                        </View>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            </View>
+
+            {/* Dots + Continue — directly below carousel, no flex spacer pushing it down */}
+            <Animated.View
+              entering={FadeIn.delay(250).duration(900).easing(SOFT)}
+              style={{ alignItems: "center", gap: 10, paddingBottom: 8 }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
+                {THEMES.map((_, i) => (
+                  <View
+                    key={i}
+                    style={{
+                      width: i === activeIndex ? 26 : 7,
+                      height: 7,
+                      borderRadius: 3.5,
+                      backgroundColor: i === activeIndex ? "#FFFFFF" : "rgba(255,255,255,0.32)",
+                    }}
+                  />
+                ))}
+              </View>
+              <View style={{ width: "100%" }}>
+                <OnboardingCTAButton label="Continue" onPress={handleContinue} />
+              </View>
+            </Animated.View>
+
           </View>
-
-          {/* Dots + Continue — flush to the carousel with no extra bottom padding */}
-          <Animated.View
-            entering={FadeIn.delay(250).duration(900).easing(SOFT)}
-            style={{
-              paddingHorizontal: 24,
-              paddingBottom: 4,
-              paddingTop: 0,
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 7 }}>
-              {THEMES.map((_, i) => (
-                <View
-                  key={i}
-                  style={{
-                    width: i === activeIndex ? 26 : 7,
-                    height: 7,
-                    borderRadius: 3.5,
-                    backgroundColor: i === activeIndex ? "#FFFFFF" : "rgba(255,255,255,0.32)",
-                  }}
-                />
-              ))}
-            </View>
-
-            <View style={{ width: "100%" }}>
-              <OnboardingCTAButton label="Continue" onPress={handleContinue} />
-            </View>
-          </Animated.View>
-
         </SafeAreaView>
       </View>
     </View>
