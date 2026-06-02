@@ -32,7 +32,7 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 const SOFT = Easing.bezier(0.16, 1, 0.3, 1);
-import { Fingerprint, Lock, Eye, KeyRound, ShieldCheck } from 'lucide-react-native';
+import { Fingerprint, Lock, Eye, ShieldCheck } from 'lucide-react-native';
 import { successHaptic, tapHaptic, errorHaptic } from '@/lib/haptics';
 import useOnboardingStore, { THEME_COLORS } from '@/lib/state/onboarding-store';
 import useBiometricStore from '@/lib/state/biometric-store';
@@ -58,7 +58,7 @@ const BIOMETRIC_POINTS = [
 // Privacy points shown when only PIN is available
 const PIN_ONLY_POINTS = [
   { icon: Lock,         text: 'Only you can open your journal' },
-  { icon: KeyRound,     text: 'A 4-digit PIN keeps your entries private' },
+  { icon: Lock,         text: 'A 4-digit PIN keeps your entries private' },
   { icon: ShieldCheck,  text: 'You can always change your PIN in Settings' },
 ];
 
@@ -194,7 +194,7 @@ export function BiometricSetupScreen() {
             style={{
               flex: 1,
               alignItems: 'center',
-              justifyContent: 'space-between',
+              justifyContent: 'flex-start',
               paddingHorizontal: 24,
               paddingTop: 8,
               paddingBottom: 40,
@@ -203,24 +203,24 @@ export function BiometricSetupScreen() {
             {/* Top: key icon + title + subtitle */}
             <Animated.View
               entering={FadeIn.duration(500).easing(SOFT)}
-              style={{ alignItems: 'center', gap: 16 }}
+              style={{ alignItems: 'center', gap: 16, width: '100%' }}
             >
-              {/* Key icon above the title */}
+              {/* Icon badge — matches PinEntryScreen lockBadge style */}
               <View
                 style={{
-                  width: 88,
-                  height: 88,
-                  borderRadius: 44,
-                  backgroundColor: 'rgba(255,255,255,0.10)',
+                  width: 82,
+                  height: 82,
+                  borderRadius: 41,
                   borderWidth: 1.5,
-                  borderColor: 'rgba(255,255,255,0.25)',
+                  borderColor: `${themeColors.primary}60`,
+                  backgroundColor: `${themeColors.primary}22`,
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
                 {biometricAvailable
-                  ? <Fingerprint size={48} color="#FFFFFF" strokeWidth={1.6} />
-                  : <KeyRound    size={44} color="#FFFFFF" strokeWidth={1.6} />
+                  ? <Fingerprint size={38} color="#FFFFFF" strokeWidth={1.8} />
+                  : <Lock        size={38} color="#FFFFFF" strokeWidth={1.8} />
                 }
               </View>
 
@@ -256,9 +256,8 @@ export function BiometricSetupScreen() {
             {/* Middle: privacy reassurance points */}
             <Animated.View
               entering={FadeIn.delay(100).duration(500).easing(SOFT)}
-              style={{ alignItems: 'center', gap: 24, width: '100%' }}
+              style={{ alignItems: 'center', width: '100%', marginTop: 28 }}
             >
-              {/* Privacy reassurance points */}
               <View style={{ gap: 12, width: '100%', maxWidth: 340 }}>
                 {privacyPoints.map((p, i) => {
                   const Icon = p.icon;
@@ -296,10 +295,10 @@ export function BiometricSetupScreen() {
               </View>
             </Animated.View>
 
-            {/* Bottom: CTA */}
+            {/* Bottom: CTA — sits directly below the feature points */}
             <Animated.View
               entering={FadeIn.delay(160).duration(500).easing(SOFT)}
-              style={{ width: '100%', gap: 12 }}
+              style={{ width: '100%', gap: 12, marginTop: 20 }}
             >
               {authError ? (
                 <Text
