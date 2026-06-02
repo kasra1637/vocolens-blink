@@ -18,7 +18,7 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { Easing } from "react-native-reanimated";
 const SOFT = Easing.bezier(0.22, 1, 0.36, 1);
 import { tapHaptic, successHaptic } from "@/lib/haptics";
-import { Smartphone, Mic, Lock, ShieldCheck } from "lucide-react-native";
+import { Smartphone, Lock, ShieldCheck } from "lucide-react-native";
 import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import { EmotionalCompanion } from "@/components/EmotionalCompanion";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
@@ -63,27 +63,21 @@ export function PrivacyPermissionsScreen() {
   const privacyFeatures = [
     {
       icon: <Smartphone size={22} color="#FFFFFF" />,
-      title: "Your entries stay on your phone",
+      title: "Your activities stay here",
       description:
-        "Voice notes, moods, and insights are all saved here, nowhere else. Your data never touches another server. Your voice notes, insights, and journaling activities are all saved here on your phone.",
-    },
-    {
-      icon: <Mic size={22} color="#FFFFFF" />,
-      title: "The AI hears you, then moves on",
-      description:
-        "Your words reach the AI just long enough to shape your insight, then they vanish completely and for good. We never store, log, read, sell, or hold onto any single part of your voice transcripts.",
+        "Everything stays here. Nothing leaves unless you choose to export it.",
     },
     {
       icon: <Lock size={22} color="#FFFFFF" />,
       title: "Locked to you alone",
       description:
-        "Use Face ID, your fingerprint, or a 4-digit PIN to open Vocolens every time you come back to it. Pick whichever option feels most natural to you, set it up just once, and it stays locked to you.",
+        "Face ID, fingerprint, or PIN. Set it up once and keep your journal private.",
     },
     {
       icon: <ShieldCheck size={22} color="#FFFFFF" />,
-      title: "Just you and your journal",
+      title: "Just you & your thoughts",
       description:
-        "We built this app entirely for you, not for advertisers. No tracking, no profiling, and absolutely no selling of your data — not ever, ever. What you share in Vocolens stays right there, always.",
+        "Your space, your words, your rules. Nobody else gets in.",
     },
   ];
 

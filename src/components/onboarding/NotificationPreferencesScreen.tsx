@@ -157,9 +157,10 @@ interface TimeWheelPickerProps {
   value: Date;
   onChange: (date: Date) => void;
   primaryColor: string;
+  onConfirm: () => void;
 }
 
-function TimeWheelPicker({ value, onChange, primaryColor }: TimeWheelPickerProps) {
+function TimeWheelPicker({ value, onChange, primaryColor, onConfirm }: TimeWheelPickerProps) {
   const rawHour   = value.getHours();
   const period    = rawHour >= 12 ? 1 : 0;                  // 0=AM 1=PM
   const hour12    = rawHour % 12 === 0 ? 12 : rawHour % 12; // 1-12
@@ -223,14 +224,51 @@ function TimeWheelPicker({ value, onChange, primaryColor }: TimeWheelPickerProps
       {/* Thin divider */}
       <View style={{ width: 12 }} />
 
-      {/* AM / PM */}
-      <WheelColumn
-        items={PERIODS}
-        selectedIndex={period}
-        onSelect={(i) => emit(hourIdx, minuteIdx, i)}
-        primaryColor={primaryColor}
-        width={64}
-      />
+      {/* AM/PM column stacked above OK button */}
+      <View style={{ alignItems: "center", gap: 16 }}>
+        <WheelColumn
+          items={PERIODS}
+          selectedIndex={period}
+          onSelect={(i) => emit(hourIdx, minuteIdx, i)}
+          primaryColor={primaryColor}
+          width={64}
+        />
+
+        {/* OK button — sits directly below the AM/PM wheel */}
+        <Pressable
+          onPress={onConfirm}
+          accessibilityLabel="Confirm time"
+          accessibilityRole="button"
+          style={({ pressed }) => ({
+            width: 64,
+            height: 44,
+            borderRadius: 22,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: pressed
+              ? primaryColor + "BB"
+              : primaryColor,
+            borderWidth: 2,
+            borderColor: "rgba(255,255,255,0.40)",
+            shadowColor: primaryColor,
+            shadowOffset: { width: 0, height: 3 },
+            shadowOpacity: 0.50,
+            shadowRadius: 8,
+            elevation: 6,
+          })}
+        >
+          <Text
+            style={{
+              fontFamily: "Inter_700Bold",
+              fontSize: 16,
+              color: "#FFFFFF",
+              letterSpacing: 0.5,
+            }}
+          >
+            OK
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -880,49 +918,13 @@ export function NotificationPreferencesScreen() {
                 We'll send your reminder at this time
               </Text>
 
-              {/* Branded scroll-wheel picker */}
+              {/* Branded scroll-wheel picker — OK button lives inside, below AM/PM */}
               <TimeWheelPicker
                 value={tempTime}
                 onChange={setTempTime}
                 primaryColor={themeColors.primary}
+                onConfirm={handleConfirmTime}
               />
-
-              {/* OK button — confirms time and immediately schedules notification */}
-              <View style={{ alignItems: "center", marginTop: 28 }}>
-                <Pressable
-                  onPress={handleConfirmTime}
-                  accessibilityLabel="Confirm time"
-                  accessibilityRole="button"
-                  style={({ pressed }) => ({
-                    width: 72,
-                    height: 72,
-                    borderRadius: 36,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: pressed
-                      ? themeColors.primary + "BB"
-                      : themeColors.primary,
-                    borderWidth: 2.5,
-                    borderColor: "rgba(255,255,255,0.45)",
-                    shadowColor: themeColors.primary,
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.55,
-                    shadowRadius: 10,
-                    elevation: 8,
-                  })}
-                >
-                  <Text
-                    style={{
-                      fontFamily: "Inter_700Bold",
-                      fontSize: 18,
-                      color: "#FFFFFF",
-                      letterSpacing: 0.5,
-                    }}
-                  >
-                    OK
-                  </Text>
-                </Pressable>
-              </View>
             </LinearGradient>
           </View>
         </Modal>
