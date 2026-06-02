@@ -23,7 +23,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn, Easing } from "react-native-reanimated";
 import { tapHaptic, selectHaptic, confirmHaptic } from "@/lib/haptics";
-import { Clock, Bell, BellOff, X, Check } from "lucide-react-native";
+import { Clock, Bell, BellOff, X } from "lucide-react-native";
 // DateTimePicker removed — replaced by custom TimeWheelPicker below
 import useOnboardingStore, {
   THEME_COLORS,
@@ -379,11 +379,26 @@ export function NotificationPreferencesScreen() {
     setShowTimePicker(true);
   };
 
-  const handleConfirmTime = () => {
+  const handleConfirmTime = async () => {
     playClickSound();
     confirmHaptic();
     setSelectedTime(tempTime);
     setShowTimePicker(false);
+
+    // Schedule notifications immediately when the user confirms the time,
+    // but only if the toggle is on and at least one day is selected.
+    if (enableNotifications && selectedDays.size > 0) {
+      try {
+        const timeString = getNotificationService().getTimeString(tempTime);
+        const daysArray = Array.from(selectedDays);
+        await getNotificationService().scheduleWeeklyNotifications(
+          timeString,
+          daysArray,
+        );
+      } catch (e) {
+        console.warn('[NotificationPreferences] handleConfirmTime scheduling error:', (e as Error)?.message);
+      }
+    }
   };
 
   const handleCancelTime = () => {
@@ -872,16 +887,16 @@ export function NotificationPreferencesScreen() {
                 primaryColor={themeColors.primary}
               />
 
-              {/* OK button — confirms selection and schedules notification */}
+              {/* OK button — confirms time and immediately schedules notification */}
               <View style={{ alignItems: "center", marginTop: 28 }}>
                 <Pressable
                   onPress={handleConfirmTime}
                   accessibilityLabel="Confirm time"
                   accessibilityRole="button"
                   style={({ pressed }) => ({
-                    width: 68,
-                    height: 68,
-                    borderRadius: 34,
+                    width: 72,
+                    height: 72,
+                    borderRadius: 36,
                     alignItems: "center",
                     justifyContent: "center",
                     backgroundColor: pressed
@@ -896,7 +911,16 @@ export function NotificationPreferencesScreen() {
                     elevation: 8,
                   })}
                 >
-                  <Check size={30} color="#FFFFFF" strokeWidth={2.8} />
+                  <Text
+                    style={{
+                      fontFamily: "Inter_700Bold",
+                      fontSize: 18,
+                      color: "#FFFFFF",
+                      letterSpacing: 0.5,
+                    }}
+                  >
+                    OK
+                  </Text>
                 </Pressable>
               </View>
             </LinearGradient>
