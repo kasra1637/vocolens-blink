@@ -513,7 +513,7 @@ export function PaywallScreen() {
                       ? "rgba(255,255,255,0.18)"
                       : "rgba(255,255,255,0.08)",
                   padding: 14,
-                  minHeight: 168,
+                  minHeight: 148,
                 }}
               >
                 <Text
@@ -559,20 +559,10 @@ export function PaywallScreen() {
                   >
                     Just {QUARTERLY_MONTHLY_EQUIVALENT}/mo
                   </Text>
-                  <Text
-                    style={{
-                      fontFamily: "Inter_600SemiBold",
-                      color: "#FFFFFF",
-                      fontSize: 12,
-                      marginTop: 2,
-                    }}
-                  >
-                    Save {QUARTERLY_SAVINGS}
-                  </Text>
                 </View>
               </Pressable>
 
-              {/* ── Annual card (highlighted as Best Value) ── */}
+              {/* ── Annual card ── */}
               <Pressable
                 onPress={() => {
                   selectHaptic();
@@ -592,36 +582,34 @@ export function PaywallScreen() {
                       ? "rgba(255,255,255,0.18)"
                       : "rgba(255,255,255,0.08)",
                   padding: 14,
-                  minHeight: 168,
+                  minHeight: 148,
                   position: "relative",
                   overflow: "hidden",
                 }}
               >
-                {/* Best value badge */}
-                {FEATURE_FLAGS.savings_label && (
-                  <View
+                {/* 3-day free trial badge — replaces Best Value */}
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    backgroundColor: "#FFFFFF",
+                    borderBottomLeftRadius: 10,
+                    paddingHorizontal: 8,
+                    paddingVertical: 3,
+                  }}
+                >
+                  <Text
                     style={{
-                      position: "absolute",
-                      top: 0,
-                      right: 0,
-                      backgroundColor: "#FFFFFF",
-                      borderBottomLeftRadius: 10,
-                      paddingHorizontal: 8,
-                      paddingVertical: 3,
+                      fontFamily: "Inter_700Bold",
+                      fontSize: 9,
+                      color: themeColors.primary,
+                      letterSpacing: 0.5,
                     }}
                   >
-                    <Text
-                      style={{
-                        fontFamily: "Inter_700Bold",
-                        fontSize: 9,
-                        color: themeColors.primary,
-                        letterSpacing: 0.5,
-                      }}
-                    >
-                      BEST VALUE
-                    </Text>
-                  </View>
-                )}
+                    3-DAY FREE TRIAL
+                  </Text>
+                </View>
 
                 <Text
                   style={{
@@ -667,39 +655,6 @@ export function PaywallScreen() {
                   >
                     Just {YEARLY_MONTHLY_EQUIVALENT}/mo
                   </Text>
-                  <Text
-                    style={{
-                      fontFamily: "Inter_600SemiBold",
-                      color: "#FFFFFF",
-                      fontSize: 12,
-                      marginTop: 2,
-                    }}
-                  >
-                    Save {YEARLY_SAVINGS}
-                  </Text>
-                  {FEATURE_FLAGS.trial_on_annual && (
-                    <View
-                      style={{
-                        backgroundColor: "rgba(255,255,255,0.20)",
-                        borderRadius: 6,
-                        paddingHorizontal: 6,
-                        paddingVertical: 2,
-                        alignSelf: "flex-start",
-                        marginTop: 6,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontFamily: "Inter_600SemiBold",
-                          color: "#FFFFFF",
-                          fontSize: 9,
-                          letterSpacing: 0.3,
-                        }}
-                      >
-                        {TRIAL_DAYS}-DAY FREE TRIAL
-                      </Text>
-                    </View>
-                  )}
                 </View>
               </Pressable>
             </Animated.View>
