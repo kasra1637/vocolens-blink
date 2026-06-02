@@ -65,13 +65,20 @@ function trackEvent(event: string, properties?: Record<string, any>) {
 }
 
 // ── Pricing ───────────────────────────────────────────────────────────────────
+// Anchors are kept in sync with Adapty Dashboard products:
+//   monthly_journal   → $9.99 / month        (exit-offer modal only)
+//   quarterly_journal → $24.99 / 3 months    (≈ $8.33/mo, ~17% off monthly)
+//   yearly_journal    → $79.99 / year        (≈ $6.67/mo, ~33% off monthly, 7-day trial)
 const MONTHLY_PRICE = "$9.99";
-const YEARLY_PRICE = "$69";
-const YEARLY_MONTHLY_EQUIVALENT = "$5.75";
-const YEARLY_SAVINGS = "42%";
+const QUARTERLY_PRICE = "$24.99";
+const QUARTERLY_MONTHLY_EQUIVALENT = "$8.33";
+const QUARTERLY_SAVINGS = "17%";
+const YEARLY_PRICE = "$79.99";
+const YEARLY_MONTHLY_EQUIVALENT = "$6.67";
+const YEARLY_SAVINGS = "33%";
 const TRIAL_DAYS = 7;
 
-type PlanType = "yearly" | "monthly";
+type PlanType = "yearly" | "quarterly" | "monthly";
 
 // ── Monthly Exit-Offer Modal ──────────────────────────────────────────────────
 function MonthlyExitModal({
@@ -214,7 +221,9 @@ export function PaywallScreen() {
   const setSubscription = useSubscriptionStore((s) => s.setSubscription);
 
   const [monthlyProduct, setMonthlyProduct] = useState<AdaptyPaywallProduct | null>(null);
+  const [quarterlyProduct, setQuarterlyProduct] = useState<AdaptyPaywallProduct | null>(null);
   const [yearlyProduct, setYearlyProduct] = useState<AdaptyPaywallProduct | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<"yearly" | "quarterly">("yearly");
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isPurchasingMonthly, setIsPurchasingMonthly] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
@@ -235,6 +244,7 @@ export function PaywallScreen() {
       if (!result.ok) return;
       const { paywall, products } = result.data;
       setYearlyProduct(products.find((p) => p.vendorProductId === "yearly_journal") ?? null);
+      setQuarterlyProduct(products.find((p) => p.vendorProductId === "quarterly_journal") ?? null);
       setMonthlyProduct(products.find((p) => p.vendorProductId === "monthly_journal") ?? null);
       await logPaywallImpression(paywall);
     })();
@@ -254,29 +264,27 @@ export function PaywallScreen() {
     return () => sub.remove();
   }, [showExitModal]);
 
-  // ── Purchase (Annual) ─────────────────────────────────────────────────────
+  // ── Purchase (Selected plan: yearly or quarterly) ─────────────────────────
   const handleCTA = async () => {
     playClickSound();
     tapHaptic();
-    trackEvent("cta_tapped", { plan: "yearly" });
+    trackEvent("cta_tapped", { plan: selectedPlan });
 
-    if (!isAdaptyEnabled()) {
-      grantAccess("yearly");
-      return;
-    }
+    const product =
+      selectedPlan === "yearly" ? yearlyProduct : quarterlyProduct;
 
-    if (!yearlyProduct) {
-      grantAccess("yearly");
+    if (!isAdaptyEnabled() || !product) {
+      grantAccess(selectedPlan);
       return;
     }
 
     setIsPurchasing(true);
-    const result = await makePurchase(yearlyProduct);
+    const result = await makePurchase(product);
     setIsPurchasing(false);
 
     if (result.ok) {
       if (hasEntitlement(result.data, "pro_journal")) {
-        grantAccess("yearly");
+        grantAccess(selectedPlan);
       }
     } else if (result.reason === "sdk_error") {
       const userCancelled = (result.error as any)?.userCancelled === true;
@@ -480,18 +488,111 @@ export function PaywallScreen() {
               </View>
             </Animated.View>
 
-            {/* ── Annual plan card (only plan on main screen) ── */}
+            {/* ── Plan selection: Quarterly + Yearly side-by-side ── */}
             <Animated.View
               entering={FadeIn.delay(180).duration(700).easing(SOFT)}
-              style={{ marginBottom: 14 }}
+              style={{ flexDirection: "row", gap: 10, marginBottom: 14 }}
             >
-              <View
+              {/* ── Quarterly card ── */}
+              <Pressable
+                onPress={() => {
+                  selectHaptic();
+                  setSelectedPlan("quarterly");
+                  trackEvent("plan_selected", { plan: "quarterly" });
+                }}
                 style={{
-                  borderRadius: 20,
-                  borderWidth: 2.5,
-                  borderColor: "#FFFFFF",
-                  backgroundColor: "rgba(255,255,255,0.18)",
-                  padding: 18,
+                  flex: 1,
+                  borderRadius: 18,
+                  borderWidth: selectedPlan === "quarterly" ? 2.5 : 1.5,
+                  borderColor:
+                    selectedPlan === "quarterly"
+                      ? "#FFFFFF"
+                      : "rgba(255,255,255,0.25)",
+                  backgroundColor:
+                    selectedPlan === "quarterly"
+                      ? "rgba(255,255,255,0.18)"
+                      : "rgba(255,255,255,0.08)",
+                  padding: 14,
+                  minHeight: 168,
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: "Inter_700Bold",
+                    color: "#FFFFFF",
+                    fontSize: 14,
+                    marginBottom: 8,
+                    letterSpacing: 0.2,
+                  }}
+                >
+                  Quarterly
+                </Text>
+
+                <Text
+                  style={{
+                    fontFamily: "Fraunces_700Bold",
+                    color: "#FFFFFF",
+                    fontSize: 26,
+                    lineHeight: 30,
+                  }}
+                >
+                  {quarterlyProduct?.price?.localizedString ?? QUARTERLY_PRICE}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: "Inter_400Regular",
+                    color: "rgba(255,255,255,0.55)",
+                    fontSize: 12,
+                    marginBottom: 10,
+                  }}
+                >
+                  every 3 months
+                </Text>
+
+                <View style={{ marginTop: "auto" }}>
+                  <Text
+                    style={{
+                      fontFamily: "Inter_400Regular",
+                      color: "rgba(255,255,255,0.70)",
+                      fontSize: 12,
+                    }}
+                  >
+                    Just {QUARTERLY_MONTHLY_EQUIVALENT}/mo
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: "Inter_600SemiBold",
+                      color: "#FFFFFF",
+                      fontSize: 12,
+                      marginTop: 2,
+                    }}
+                  >
+                    Save {QUARTERLY_SAVINGS}
+                  </Text>
+                </View>
+              </Pressable>
+
+              {/* ── Annual card (highlighted as Best Value) ── */}
+              <Pressable
+                onPress={() => {
+                  selectHaptic();
+                  setSelectedPlan("yearly");
+                  trackEvent("plan_selected", { plan: "yearly" });
+                }}
+                style={{
+                  flex: 1,
+                  borderRadius: 18,
+                  borderWidth: selectedPlan === "yearly" ? 2.5 : 1.5,
+                  borderColor:
+                    selectedPlan === "yearly"
+                      ? "#FFFFFF"
+                      : "rgba(255,255,255,0.25)",
+                  backgroundColor:
+                    selectedPlan === "yearly"
+                      ? "rgba(255,255,255,0.18)"
+                      : "rgba(255,255,255,0.08)",
+                  padding: 14,
+                  minHeight: 168,
                   position: "relative",
                   overflow: "hidden",
                 }}
@@ -504,15 +605,15 @@ export function PaywallScreen() {
                       top: 0,
                       right: 0,
                       backgroundColor: "#FFFFFF",
-                      borderBottomLeftRadius: 12,
-                      paddingHorizontal: 10,
-                      paddingVertical: 5,
+                      borderBottomLeftRadius: 10,
+                      paddingHorizontal: 8,
+                      paddingVertical: 3,
                     }}
                   >
                     <Text
                       style={{
                         fontFamily: "Inter_700Bold",
-                        fontSize: 10,
+                        fontSize: 9,
                         color: themeColors.primary,
                         letterSpacing: 0.5,
                       }}
@@ -522,30 +623,76 @@ export function PaywallScreen() {
                   </View>
                 )}
 
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <Text
+                  style={{
+                    fontFamily: "Inter_700Bold",
+                    color: "#FFFFFF",
+                    fontSize: 14,
+                    marginBottom: 8,
+                    letterSpacing: 0.2,
+                    marginTop: 14,
+                  }}
+                >
+                  Annual
+                </Text>
+
+                <Text
+                  style={{
+                    fontFamily: "Fraunces_700Bold",
+                    color: "#FFFFFF",
+                    fontSize: 26,
+                    lineHeight: 30,
+                  }}
+                >
+                  {yearlyProduct?.price?.localizedString ?? YEARLY_PRICE}
+                </Text>
+                <Text
+                  style={{
+                    fontFamily: "Inter_400Regular",
+                    color: "rgba(255,255,255,0.55)",
+                    fontSize: 12,
+                    marginBottom: 10,
+                  }}
+                >
+                  per year
+                </Text>
+
+                <View style={{ marginTop: "auto" }}>
                   <Text
                     style={{
-                      fontFamily: "Inter_700Bold",
-                      color: "#FFFFFF",
-                      fontSize: 16,
+                      fontFamily: "Inter_400Regular",
+                      color: "rgba(255,255,255,0.70)",
+                      fontSize: 12,
                     }}
                   >
-                    Annual
+                    Just {YEARLY_MONTHLY_EQUIVALENT}/mo
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: "Inter_600SemiBold",
+                      color: "#FFFFFF",
+                      fontSize: 12,
+                      marginTop: 2,
+                    }}
+                  >
+                    Save {YEARLY_SAVINGS}
                   </Text>
                   {FEATURE_FLAGS.trial_on_annual && (
                     <View
                       style={{
                         backgroundColor: "rgba(255,255,255,0.20)",
-                        borderRadius: 8,
-                        paddingHorizontal: 8,
-                        paddingVertical: 3,
+                        borderRadius: 6,
+                        paddingHorizontal: 6,
+                        paddingVertical: 2,
+                        alignSelf: "flex-start",
+                        marginTop: 6,
                       }}
                     >
                       <Text
                         style={{
                           fontFamily: "Inter_600SemiBold",
                           color: "#FFFFFF",
-                          fontSize: 10,
+                          fontSize: 9,
                           letterSpacing: 0.3,
                         }}
                       >
@@ -554,38 +701,7 @@ export function PaywallScreen() {
                     </View>
                   )}
                 </View>
-
-                <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6, marginBottom: 4 }}>
-                  <Text
-                    style={{
-                      fontFamily: "Fraunces_700Bold",
-                      color: "#FFFFFF",
-                      fontSize: 32,
-                    }}
-                  >
-                    {yearlyProduct?.price?.localizedString ?? YEARLY_PRICE}
-                  </Text>
-                  <Text
-                    style={{
-                      fontFamily: "Inter_400Regular",
-                      color: "rgba(255,255,255,0.55)",
-                      fontSize: 13,
-                    }}
-                  >
-                    /year
-                  </Text>
-                </View>
-
-                <Text
-                  style={{
-                    fontFamily: "Inter_400Regular",
-                    color: "rgba(255,255,255,0.65)",
-                    fontSize: 13,
-                  }}
-                >
-                  Just {YEARLY_MONTHLY_EQUIVALENT}/month · Save {YEARLY_SAVINGS}
-                </Text>
-              </View>
+              </Pressable>
             </Animated.View>
 
             {/* ── CTA + reassurance ── */}
@@ -634,7 +750,9 @@ export function PaywallScreen() {
                           fontSize: 18,
                         }}
                       >
-                        Start Free {TRIAL_DAYS}-Day Trial
+                        {selectedPlan === "yearly"
+                          ? `Start Free ${TRIAL_DAYS}-Day Trial`
+                          : "Continue with Quarterly"}
                       </Text>
                       <ChevronRight size={20} color="#FFFFFF" strokeWidth={2.5} />
                     </>
@@ -653,7 +771,13 @@ export function PaywallScreen() {
                   lineHeight: 18,
                 }}
               >
-                No charge for {TRIAL_DAYS} days · Then {yearlyProduct?.price?.localizedString ?? YEARLY_PRICE}/yr · Cancel anytime
+                {selectedPlan === "yearly"
+                  ? `No charge for ${TRIAL_DAYS} days · Then ${
+                      yearlyProduct?.price?.localizedString ?? YEARLY_PRICE
+                    }/yr · Cancel anytime`
+                  : `${
+                      quarterlyProduct?.price?.localizedString ?? QUARTERLY_PRICE
+                    } billed every 3 months · Cancel anytime`}
               </Text>
 
               {/* Trust cue — research-backed, app-native */}
@@ -703,8 +827,8 @@ export function PaywallScreen() {
               <Pressable
                 onPress={() => {
                   tapHaptic();
-                  trackEvent("escape_payment_tapped");
-                  setSubscription(true, "yearly");
+                  trackEvent("escape_payment_tapped", { plan: selectedPlan });
+                  setSubscription(true, selectedPlan);
                   nextStep();
                 }}
                 style={{ marginTop: 10 }}

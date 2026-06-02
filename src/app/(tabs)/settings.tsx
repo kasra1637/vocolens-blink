@@ -534,10 +534,12 @@ export default function SettingsScreen() {
                           }}
                         >
                           {planType === "yearly"
-                            ? "Yearly Pro · $69 / year"
-                            : planType === "monthly"
-                              ? "Monthly Pro · $9.99 / month"
-                              : "Pro Plan"}
+                            ? "Yearly Pro · $79.99 / year"
+                            : planType === "quarterly"
+                              ? "Quarterly Pro · $24.99 / 3 months"
+                              : planType === "monthly"
+                                ? "Monthly Pro · $9.99 / month"
+                                : "Pro Plan"}
                         </Text>
                       </View>
                       <Text
@@ -1702,10 +1704,12 @@ export default function SettingsScreen() {
               >
                 {hasSubscription
                   ? planType === "yearly"
-                    ? "Yearly Pro · $69 / year  ·  7-day free trial"
-                    : planType === "monthly"
-                      ? "Monthly Pro · $9.99 / month"
-                      : "Pro Plan — active"
+                    ? "Yearly Pro · $79.99 / year  ·  7-day free trial"
+                    : planType === "quarterly"
+                      ? "Quarterly Pro · $24.99 every 3 months"
+                      : planType === "monthly"
+                        ? "Monthly Pro · $9.99 / month"
+                        : "Pro Plan — active"
                   : "No active subscription"}
               </Text>
             </View>

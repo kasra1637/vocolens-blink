@@ -10,7 +10,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export type SubscriptionPlan = 'yearly' | 'monthly';
+export type SubscriptionPlan = 'yearly' | 'quarterly' | 'monthly';
 
 interface SubscriptionState {
   /** Locally cached subscription status (persisted). Always re-verified on launch. */
