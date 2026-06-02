@@ -169,6 +169,12 @@ const styles = StyleSheet.create({
 });
 
 export default function TabLayout() {
+  const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
+
+  // The darkest stop of the background gradient — used as the scene container
+  // background so there is never a white flash between tab switches.
+  const sceneBg = THEME_COLORS[selectedTheme].backgroundGradient[2];
+
   const TabBarComponent = React.useMemo(() => {
     const Bar = (props: BottomTabBarProps) => <CustomTabBar {...props} />;
     Bar.displayName = "CustomTabBar";
@@ -181,6 +187,10 @@ export default function TabLayout() {
       initialRouteName="insights"
       screenOptions={{
         headerShown: useClientOnlyValue(false, false),
+        // Paint the native container behind every tab screen with the theme
+        // dark colour. This eliminates the white frame that briefly shows
+        // when a tab is first rendered before its own LinearGradient paints.
+        sceneContainerStyle: { backgroundColor: sceneBg },
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Record" }} />
