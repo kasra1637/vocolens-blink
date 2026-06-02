@@ -23,7 +23,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn, Easing } from "react-native-reanimated";
 import { tapHaptic, selectHaptic, confirmHaptic } from "@/lib/haptics";
-import { Clock, Bell, BellOff } from "lucide-react-native";
+import { Clock, Bell, BellOff, X, Check } from "lucide-react-native";
 // DateTimePicker removed — replaced by custom TimeWheelPicker below
 import useOnboardingStore, {
   THEME_COLORS,
@@ -807,31 +807,52 @@ export function NotificationPreferencesScreen() {
                 borderColor: "rgba(255,255,255,0.18)",
               }}
             >
-              {/* Drag handle */}
+              {/* Header row: X dismiss (left) + title (centre) */}
               <View
                 style={{
-                  width: 40,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: "rgba(255,255,255,0.35)",
-                  alignSelf: "center",
-                  marginBottom: 24,
-                }}
-              />
-
-              {/* Heading */}
-              <Text
-                style={{
-                  fontFamily: "Fraunces_700Bold",
-                  color: "#FFFFFF",
-                  fontSize: 22,
-                  textAlign: "center",
-                  marginBottom: 4,
-                  opacity: 0.95,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 6,
                 }}
               >
-                What time works for you?
-              </Text>
+                {/* X — closes without saving */}
+                <Pressable
+                  onPress={handleCancelTime}
+                  hitSlop={12}
+                  style={({ pressed }) => ({
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: pressed
+                      ? "rgba(255,255,255,0.18)"
+                      : "rgba(255,255,255,0.10)",
+                    borderWidth: 1.5,
+                    borderColor: "rgba(255,255,255,0.22)",
+                  })}
+                  accessibilityLabel="Cancel"
+                  accessibilityRole="button"
+                >
+                  <X size={18} color="rgba(255,255,255,0.80)" strokeWidth={2.5} />
+                </Pressable>
+
+                {/* Title — centred in remaining space */}
+                <Text
+                  style={{
+                    flex: 1,
+                    fontFamily: "Fraunces_700Bold",
+                    color: "#FFFFFF",
+                    fontSize: 20,
+                    textAlign: "center",
+                    opacity: 0.95,
+                    marginRight: 36, // balance the X width so text is truly centred
+                  }}
+                >
+                  What time works for you?
+                </Text>
+              </View>
+
               <Text
                 style={{
                   fontFamily: "Inter_400Regular",
@@ -851,56 +872,31 @@ export function NotificationPreferencesScreen() {
                 primaryColor={themeColors.primary}
               />
 
-              {/* Action buttons */}
-              <View style={{ flexDirection: "row", gap: 12, marginTop: 32 }}>
-                <Pressable
-                  onPress={handleCancelTime}
-                  style={({ pressed }) => ({
-                    flex: 1,
-                    borderRadius: 18,
-                    paddingVertical: 16,
-                    alignItems: "center",
-                    backgroundColor: pressed
-                      ? "rgba(255,255,255,0.18)"
-                      : "rgba(255,255,255,0.10)",
-                    borderWidth: 1.5,
-                    borderColor: "rgba(255,255,255,0.22)",
-                  })}
-                >
-                  <Text
-                    style={{
-                      color: "rgba(255,255,255,0.75)",
-                      fontFamily: "Inter_600SemiBold",
-                      fontSize: 16,
-                    }}
-                  >
-                    Cancel
-                  </Text>
-                </Pressable>
-
+              {/* OK button — confirms selection and schedules notification */}
+              <View style={{ alignItems: "center", marginTop: 28 }}>
                 <Pressable
                   onPress={handleConfirmTime}
+                  accessibilityLabel="Confirm time"
+                  accessibilityRole="button"
                   style={({ pressed }) => ({
-                    flex: 2,
-                    borderRadius: 18,
-                    paddingVertical: 16,
+                    width: 68,
+                    height: 68,
+                    borderRadius: 34,
                     alignItems: "center",
+                    justifyContent: "center",
                     backgroundColor: pressed
                       ? themeColors.primary + "BB"
                       : themeColors.primary,
-                    borderWidth: 2,
-                    borderColor: "rgba(255,255,255,0.35)",
+                    borderWidth: 2.5,
+                    borderColor: "rgba(255,255,255,0.45)",
+                    shadowColor: themeColors.primary,
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.55,
+                    shadowRadius: 10,
+                    elevation: 8,
                   })}
                 >
-                  <Text
-                    style={{
-                      color: "#FFFFFF",
-                      fontFamily: "Inter_700Bold",
-                      fontSize: 16,
-                    }}
-                  >
-                    Set reminder
-                  </Text>
+                  <Check size={30} color="#FFFFFF" strokeWidth={2.8} />
                 </Pressable>
               </View>
             </LinearGradient>
