@@ -126,14 +126,13 @@ function PinEntryScreen({
 
   // Expose focusKeyboard so a parent Modal can call it from onShow —
   // the only reliable signal that the modal is fully visible on screen.
+  // No guard conditions and no InteractionManager — by onShow time the
+  // native view is fully on screen and focus() succeeds immediately.
   useImperativeHandle(ref, () => ({
     focusKeyboard: () => {
-      if (isLocked || busy || matched) return;
-      // Small delay lets the OS finish any residual animation frame.
-      const delay = Platform.OS === 'android' ? 100 : 50;
-      setTimeout(() => inputRef.current?.focus(), delay);
+      inputRef.current?.focus();
     },
-  }), [isLocked, busy, matched]);
+  }), []);
 
   // Focus on mount and whenever the setup phase changes
   useEffect(() => {
@@ -327,6 +326,7 @@ function PinEntryScreen({
             autoFocus
             caretHidden
             secureTextEntry
+            showSoftInputOnFocus
             editable={!busy && !matched && !isLocked}
             style={styles.hiddenInput}
             accessibilityLabel="PIN entry"
@@ -396,10 +396,12 @@ function PinEntryScreen({
 });
 
 const styles = StyleSheet.create({
-  // Zero-size, inside layout bounds so Android focus works
+  // 1×1 pixel, transparent — large enough for Android focus system
+  // to reach it, invisible to the user. position:'absolute' removed
+  // so it stays in the layout tree and is always focusable.
   hiddenInput: {
-    width: 0,
-    height: 0,
+    width: 1,
+    height: 1,
     opacity: 0,
     position: 'absolute',
   },

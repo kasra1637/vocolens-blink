@@ -15,7 +15,6 @@ import {
   Dimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
-  Platform,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -188,28 +187,15 @@ export function ThemeSelectionScreen() {
                       }
                     }}
                   >
-                    {/* Frosted-glass card */}
+                    {/* Card — layout only, no visible border or background */}
                     <View
                       style={{
                         width: CARD_WIDTH,
-                        borderRadius: 28,
                         alignItems: "center",
                         justifyContent: "center",
                         paddingVertical: 36,
                         paddingHorizontal: 24,
                         gap: 20,
-                        backgroundColor: isActive
-                          ? "rgba(255,255,255,0.18)"
-                          : "rgba(255,255,255,0.08)",
-                        borderWidth: isActive ? 2 : 1,
-                        borderColor: isActive
-                          ? "rgba(255,255,255,0.70)"
-                          : "rgba(255,255,255,0.20)",
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 8 },
-                        shadowOpacity: isActive ? 0.2 : 0.1,
-                        shadowRadius: 20,
-                        elevation: Platform.OS === "android" ? 0 : 10,
                       }}
                     >
                       {/* Orb with glow ring when active */}
