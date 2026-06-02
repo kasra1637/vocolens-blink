@@ -23,6 +23,7 @@ import {
   TextInput,
   Keyboard,
   Platform,
+  InteractionManager,
 } from 'react-native';
 import Animated, {
   FadeInDown,
@@ -82,10 +83,15 @@ export function PinEntryScreen({
     );
   }, [shakeX]);
 
-  // Open the OS keyboard on mount and re-focus on demand
+  // Open the OS keyboard on mount and re-focus on demand.
+  // InteractionManager waits for navigation animations to finish first —
+  // without it, Android drops focus() calls made during transitions.
   const focusInput = useCallback(() => {
     if (isLocked) return;
-    setTimeout(() => inputRef.current?.focus(), Platform.OS === 'android' ? 300 : 100);
+    InteractionManager.runAfterInteractions(() => {
+      const delay = Platform.OS === 'android' ? 150 : 50;
+      setTimeout(() => inputRef.current?.focus(), delay);
+    });
   }, [isLocked]);
 
   useEffect(() => {
@@ -139,7 +145,8 @@ export function PinEntryScreen({
 
   return (
     <View style={styles.container}>
-      {/* Hidden TextInput drives the native numeric keyboard */}
+      {/* Invisible TextInput — drives the native numeric keyboard.
+          Zero-size within layout bounds so Android's focus system reaches it. */}
       <TextInput
         ref={inputRef}
         value={currentPin}
@@ -252,14 +259,12 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 16,
   },
-  // Off-screen but still focusable — drives the OS numeric keyboard
+  // Zero-size within layout bounds — focusable by Android, invisible to user
   hiddenInput: {
-    position: 'absolute',
-    top: -1000,
-    left: -1000,
-    width: 1,
-    height: 1,
+    width: 0,
+    height: 0,
     opacity: 0,
+    position: 'absolute',
   },
   backBtn: {
     position: 'absolute',

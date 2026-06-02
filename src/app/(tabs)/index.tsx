@@ -17,7 +17,6 @@ import {
   Sparkles,
   Settings,
   AlertCircle,
-  Radio,
 } from "lucide-react-native";
 import Animated, {
   useAnimatedStyle,
@@ -603,13 +602,15 @@ export default function SpeakScreen() {
             }}
             className="mb-2 text-center"
           >
-            {isProcessing
-              ? "Processing..."
-              : isPaused
-                ? "Recording paused"
-                : isRecording
-                  ? "Listening..."
-                  : "Speak your mind"}
+            {isPaused
+              ? "Recording paused"
+              : isProcessing && voiceState.isTranscribing
+                ? "Transcribing..."
+                : isProcessing
+                  ? "Processing..."
+                  : isRecording
+                    ? "Listening..."
+                    : "Speak your mind"}
           </Text>
           {!isRecording ? (
             <Pressable onPress={!isProcessing ? cyclePrompt : undefined}>
@@ -958,39 +959,17 @@ export default function SpeakScreen() {
                   >
                     {isPaused
                       ? "Paused"
-                      : voiceState.isStreaming
-                        ? "Live Transcription"
-                        : "Recording..."}
+                      : voiceState.isTranscribing
+                        ? "Transcribing..."
+                        : "Recording"}
                   </Text>
                   <View className="ml-2 flex-row items-center">
-                    <LiveIndicator
-                      primaryColor={
-                        voiceState.isStreaming ? "#22C55E" : "#FFFFFF"
-                      }
-                    />
+                    <LiveIndicator primaryColor="#FFFFFF" />
                   </View>
                 </View>
-                {voiceState.isStreaming ? (
-                  <View
-                    className="flex-row items-center px-2 py-1 rounded-full"
-                    style={{ backgroundColor: hexToRgba(Colors.primary, 0.15) }}
-                  >
-                    <Radio size={10} color="#FFFFFF" strokeWidth={2} />
-                    <Text
-                      style={{
-                        fontFamily: "Inter_500Medium",
-                        color: "#FFFFFF",
-                        fontSize: 10,
-                        marginLeft: 4,
-                      }}
-                    >
-                      LIVE
-                    </Text>
-                  </View>
-                ) : null}
               </View>
 
-              {/* Live transcript display */}
+              {/* Transcript display — shows words once transcription completes */}
               {voiceState.transcript &&
               voiceState.transcript.trim().length > 0 ? (
                 <Text
@@ -1002,9 +981,6 @@ export default function SpeakScreen() {
                   }}
                 >
                   {voiceState.transcript}
-                  {!voiceState.isFinal ? (
-                    <Text style={{ color: "rgba(255, 255, 255, 0.5)" }}>|</Text>
-                  ) : null}
                 </Text>
               ) : (
                 <Text
@@ -1016,9 +992,9 @@ export default function SpeakScreen() {
                     fontStyle: "italic",
                   }}
                 >
-                  {voiceState.isStreaming
-                    ? "Start speaking... Your words will appear here in real-time."
-                    : "Keep speaking... Your words will be transcribed after you stop recording."}
+                  {voiceState.isTranscribing
+                    ? "Sending to Deepgram..."
+                    : "Speak freely. Your words will be transcribed when you stop."}
                 </Text>
               )}
             </ScrollView>

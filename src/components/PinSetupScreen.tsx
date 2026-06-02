@@ -24,6 +24,7 @@ import {
   TextInput,
   Keyboard,
   Platform,
+  InteractionManager,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -100,11 +101,15 @@ export function PinSetupScreen({
     return subtitle ?? 'Choose a 4-digit PIN. You can always change it in Settings.';
   };
 
-  // Open the system keyboard on mount and whenever the phase changes to a
-  // PIN-entry phase. A short setTimeout is needed on Android so the request
-  // isn't dropped during the screen mount/transition.
+  // Open the system keyboard on mount and whenever the phase changes.
+  // InteractionManager ensures we wait for any navigation animation to
+  // finish before calling focus() — otherwise Android drops the request.
   const focusInput = useCallback(() => {
-    setTimeout(() => inputRef.current?.focus(), Platform.OS === 'android' ? 300 : 100);
+    InteractionManager.runAfterInteractions(() => {
+      // Small extra delay on Android — the bridge needs one more frame
+      const delay = Platform.OS === 'android' ? 150 : 50;
+      setTimeout(() => inputRef.current?.focus(), delay);
+    });
   }, []);
 
   useEffect(() => {
@@ -186,8 +191,10 @@ export function PinSetupScreen({
         style={{ flex: 1 }}
       >
         <SafeAreaView style={{ flex: 1 }}>
-          {/* Hidden TextInput — drives the system numeric keyboard.
-              Off-screen rather than display:none so iOS keeps it focusable. */}
+          {/* Invisible TextInput — drives the system numeric keyboard.
+              Placed inside the visible layout at zero size so Android's
+              focus system can reach it (absolute top:-1000 is clipped
+              outside the parent bounds and gets silently ignored). */}
           <TextInput
             ref={inputRef}
             value={currentPin}
@@ -292,14 +299,13 @@ export function PinSetupScreen({
 }
 
 const styles = StyleSheet.create({
-  // Off-screen but still focusable — drives the OS numeric keyboard
+  // Off-screen but still within layout bounds so Android can focus it.
+  // width/height 0 + overflow hidden makes it truly invisible.
   hiddenInput: {
-    position: 'absolute',
-    top: -1000,
-    left: -1000,
-    width: 1,
-    height: 1,
+    width: 0,
+    height: 0,
     opacity: 0,
+    position: 'absolute',
   },
   content: {
     flex: 1,

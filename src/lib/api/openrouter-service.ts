@@ -25,8 +25,16 @@ const BACKEND_URL =
   process.env.EXPO_PUBLIC_BACKEND_URL ||
   'http://localhost:3000';
 
-const OPENROUTER_API_KEY =
-  process.env.EXPO_PUBLIC_OPENROUTER_API_KEY || '';
+// Read lazily via a function so Constants.expoConfig is fully populated.
+// Module-load-time reads can fire before the Expo config is hydrated in
+// some OTA update contexts, returning undefined even when the key exists.
+function getOpenRouterApiKey(): string {
+  return (
+    Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENROUTER_API_KEY ||
+    process.env.EXPO_PUBLIC_OPENROUTER_API_KEY ||
+    ''
+  );
+}
 
 export function resolveBackendUrl(): string {
   return BACKEND_URL;
@@ -235,7 +243,7 @@ async function callClaudeDirect(
   transcript: string,
   personalizationContext?: string,
 ): Promise<OpenRouterAnalysisResult> {
-  const apiKey = OPENROUTER_API_KEY;
+  const apiKey = getOpenRouterApiKey();
   if (!apiKey || !apiKey.startsWith('sk-or-')) {
     throw new Error('OpenRouter API key not configured client-side');
   }
@@ -325,7 +333,8 @@ export async function analyzeWithOpenRouter(
 }
 
 export async function checkOpenRouterStatus(): Promise<boolean> {
-  if (OPENROUTER_API_KEY && OPENROUTER_API_KEY.startsWith('sk-or-')) return true;
+  const apiKey = getOpenRouterApiKey();
+  if (apiKey && apiKey.startsWith('sk-or-')) return true;
   try {
     const response = await fetch(`${BACKEND_URL}/api/journal/status`);
     if (!response.ok) return false;

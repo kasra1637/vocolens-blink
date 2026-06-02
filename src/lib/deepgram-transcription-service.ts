@@ -65,9 +65,10 @@ export async function transcribeAudioFile(audioUri: string | null | undefined, l
     throw new Error('Audio file URI is missing. The recording may not have saved correctly — please try again.');
   }
 
-  const apiKey =
+  const apiKey: string | undefined =
     Constants.expoConfig?.extra?.EXPO_PUBLIC_DEEPGRAM_API_KEY ||
-    process.env.EXPO_PUBLIC_DEEPGRAM_API_KEY;
+    process.env.EXPO_PUBLIC_DEEPGRAM_API_KEY ||
+    undefined;
 
   try {
     console.log('[Deepgram] Transcribing audio file:', audioUri);
@@ -201,8 +202,9 @@ export async function transcribeAudioFile(audioUri: string | null | undefined, l
  * Check if Deepgram API is configured
  */
 export function isDeepgramConfigured(): boolean {
-  const apiKey =
+  const apiKey: string | undefined =
     Constants.expoConfig?.extra?.EXPO_PUBLIC_DEEPGRAM_API_KEY ||
-    process.env.EXPO_PUBLIC_DEEPGRAM_API_KEY;
+    process.env.EXPO_PUBLIC_DEEPGRAM_API_KEY ||
+    undefined;
   return Boolean(apiKey);
 }

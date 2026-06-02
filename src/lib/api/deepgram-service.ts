@@ -12,8 +12,18 @@
 // Use the legacy subpath — v55's top-level export no longer includes
 // `EncodingType`, which would make this file crash at runtime.
 import * as FileSystem from 'expo-file-system/legacy';
+import Constants from 'expo-constants';
 
-const DEEPGRAM_API_KEY = process.env.EXPO_PUBLIC_DEEPGRAM_API_KEY;
+// Resolved lazily inside each function so Constants.expoConfig is fully
+// populated by the time it's read (module-load-time reads can be too early).
+function getDeepgramApiKey(): string | undefined {
+  return (
+    Constants.expoConfig?.extra?.EXPO_PUBLIC_DEEPGRAM_API_KEY ||
+    process.env.EXPO_PUBLIC_DEEPGRAM_API_KEY ||
+    undefined
+  );
+}
+
 const DEEPGRAM_API_URL = 'https://api.deepgram.com/v1/listen';
 
 interface DeepgramTranscriptionOptions {
@@ -110,12 +120,14 @@ export async function transcribeAudio(
       queryParams.append('diarize', 'true');
     }
 
+    const DEEPGRAM_API_KEY = getDeepgramApiKey();
+
     // Make API request
     const response = await fetch(`${DEEPGRAM_API_URL}?${queryParams.toString()}`, {
       method: 'POST',
       headers: {
         'Authorization': `Token ${DEEPGRAM_API_KEY}`,
-        'Content-Type': 'audio/wav', // Adjust based on your recording format
+        'Content-Type': 'audio/wav',
       },
       body: audioBuffer,
     });
@@ -186,5 +198,5 @@ export async function transcribeAudioWithRetry(
  * @returns true if API key is configured
  */
 export function isDeepgramConfigured(): boolean {
-  return Boolean(DEEPGRAM_API_KEY && DEEPGRAM_API_KEY !== 'your-deepgram-api-key-here');
+  return Boolean(getDeepgramApiKey());
 }
