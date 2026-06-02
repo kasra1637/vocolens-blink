@@ -422,7 +422,7 @@ export function PaywallScreen() {
                   maxWidth: "85%",
                 }}
               >
-                Built for ADHD, OCD, autistic & Tourette's minds — speak freely, and let clarity find you.
+                Speak freely and let clarity find you.
               </Text>
             </Animated.View>
 
@@ -678,28 +678,17 @@ export function PaywallScreen() {
                 </Text>
               </View>
 
-              {/* Restore */}
-              <Pressable
-                onPress={handleRestore}
-                disabled={isRestoring}
-                style={{ marginTop: 14 }}
-              >
-                <Text
-                  style={{
-                    fontFamily: "Inter_400Regular",
-                    color: "rgba(255,255,255,0.40)",
-                    fontSize: 12,
-                  }}
-                >
-                  {isRestoring ? "Restoring..." : "Restore purchases"}
-                </Text>
-              </Pressable>
-
-              {/* Legal links */}
-              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 10 }}>
+              {/* Legal links + Restore — single row */}
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14 }}>
                 <Pressable onPress={() => Linking.openURL("https://vocolens.com/terms")} hitSlop={8}>
                   <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.35)", fontSize: 11 }}>
                     Terms of Service
+                  </Text>
+                </Pressable>
+                <Text style={{ color: "rgba(255,255,255,0.25)", fontSize: 11 }}>·</Text>
+                <Pressable onPress={handleRestore} disabled={isRestoring} hitSlop={8}>
+                  <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.35)", fontSize: 11 }}>
+                    {isRestoring ? "Restoring..." : "Restore Purchase"}
                   </Text>
                 </Pressable>
                 <Text style={{ color: "rgba(255,255,255,0.25)", fontSize: 11 }}>·</Text>
