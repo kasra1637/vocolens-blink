@@ -39,6 +39,7 @@ import {
   Crown,
   RefreshCw,
   ExternalLink,
+  KeyRound,
 } from "lucide-react-native";
 import Animated from "react-native-reanimated";
 import { FadeIn, Easing } from "react-native-reanimated";
@@ -93,10 +94,11 @@ import {
   isAdaptyEnabled,
   hasEntitlement,
 } from "@/lib/adaptyClient";
-import { removePin } from "@/lib/auth-service";
+import { removePin, changePin } from "@/lib/auth-service";
 import { exportAllDataAsCsv } from "@/lib/export-data";
 import { getLanguageByCode } from "@/lib/languages";
 import { hexToRgba, GlassLayers } from "@/lib/glass";
+import { PinEntryScreen } from "@/components/PinEntryScreen";
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
@@ -110,6 +112,10 @@ export default function SettingsScreen() {
   const [isExporting, setIsExporting] = useState(false);
   const [subscriptionModalVisible, setSubscriptionModalVisible] = useState(false);
   const [isRestoringInSettings, setIsRestoringInSettings] = useState(false);
+  const [changePinVisible, setChangePinVisible] = useState(false);
+  // 'verify' = enter current PIN, 'setup' = enter new PIN
+  const [changePinStep, setChangePinStep] = useState<'verify' | 'setup'>('verify');
+  const [pendingOldPin, setPendingOldPin] = useState('');
   // Onboarding Store (for theme and notification time)
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
   const setSelectedTheme = useOnboardingStore((s) => s.setSelectedTheme);
@@ -282,6 +288,33 @@ export default function SettingsScreen() {
       errorHaptic();
       Alert.alert("Restore Failed", "Something went wrong. Please try again.");
     }
+  };
+
+  // ── Change PIN handlers ────────────────────────────────────────────────────
+  const handleOpenChangePinModal = () => {
+    tapHaptic();
+    setPendingOldPin('');
+    setChangePinStep('verify');
+    setChangePinVisible(true);
+  };
+
+  const handleChangePinCurrentVerified = () => {
+    // Current PIN confirmed — advance to new-PIN creation step
+    confirmHaptic();
+    setChangePinStep('setup');
+  };
+
+  const handleChangePinNewSaved = async () => {
+    // PinEntryScreen mode="setup" already called setPin() with the new PIN
+    // via auth-service. We just close and celebrate.
+    successHaptic();
+    setChangePinVisible(false);
+    showAlert('success', 'PIN Updated', 'Your new PIN is active. Use it next time you open Vocolens.');
+  };
+
+  const handleChangePinCancel = () => {
+    tapHaptic();
+    setChangePinVisible(false);
   };
 
   const handleExportData = async () => {
@@ -1164,6 +1197,60 @@ export default function SettingsScreen() {
 
                 {/* Export & Reset Data */}
                 <View className="p-5">
+                  {/* Change PIN */}
+                  <Pressable
+                    onPress={handleOpenChangePinModal}
+                    className="active:opacity-70"
+                    style={{ marginBottom: 20 }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <View
+                        style={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: 12,
+                          backgroundColor: hexToRgba(Colors.primary, 0.18),
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginRight: 14,
+                        }}
+                      >
+                        <KeyRound size={20} color="#FFFFFF" strokeWidth={2} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={{
+                            fontFamily: 'Inter_600SemiBold',
+                            color: '#FFFFFF',
+                            fontSize: 15,
+                            marginBottom: 2,
+                          }}
+                        >
+                          Change PIN
+                        </Text>
+                        <Text
+                          style={{
+                            fontFamily: 'Inter_400Regular',
+                            color: 'rgba(255,255,255,0.55)',
+                            fontSize: 13,
+                          }}
+                        >
+                          Enter your current PIN, then create a new one
+                        </Text>
+                      </View>
+                      <ChevronRight size={18} color="rgba(255,255,255,0.35)" strokeWidth={2} />
+                    </View>
+                  </Pressable>
+
+                  {/* Divider */}
+                  <View
+                    style={{
+                      height: 1,
+                      backgroundColor: 'rgba(255,255,255,0.12)',
+                      marginBottom: 20,
+                    }}
+                  />
+
                   {/* Export Data */}
                   <Text
                     style={{
@@ -1737,6 +1824,34 @@ export default function SettingsScreen() {
               Cancelling stops future renewals — access continues until the current period ends.
             </Text>
           </LinearGradient>
+        </View>
+      </Modal>
+
+      {/* ── Change PIN Modal ── */}
+      <Modal
+        visible={changePinVisible}
+        transparent={false}
+        animationType="slide"
+        onRequestClose={handleChangePinCancel}
+      >
+        <View style={{ flex: 1 }}>
+          {changePinStep === 'verify' ? (
+            <PinEntryScreen
+              mode="verify"
+              title="Enter Your Current PIN"
+              subtitle="Confirm your current PIN before setting a new one."
+              onSuccess={handleChangePinCurrentVerified}
+              onBack={handleChangePinCancel}
+            />
+          ) : (
+            <PinEntryScreen
+              mode="setup"
+              title="Enter Your New PIN"
+              subtitle="Choose a new 4-digit PIN for Vocolens."
+              onComplete={handleChangePinNewSaved}
+              onCancel={handleChangePinCancel}
+            />
+          )}
         </View>
       </Modal>
 

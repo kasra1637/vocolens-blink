@@ -24,7 +24,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -139,16 +139,9 @@ export function BiometricSetupScreen() {
       setBiometricAvailable(false);
       setPhase('pin_setup');
     } else {
-      setAuthError("Couldn't verify your fingerprint. Try again, or tap \"Maybe later\".");
+      setAuthError("Couldn't verify your fingerprint. Please try again.");
     }
   }, [busy, checking, biometricAvailable, enableBiometric, playClickSound]);
-
-  // ── Skip / Maybe later ─────────────────────────────────────────────────────
-  const handleSkip = useCallback(() => {
-    playClickSound();
-    tapHaptic();
-    setHasCompletedOnboarding(true);
-  }, [setHasCompletedOnboarding, playClickSound]);
 
   // ── Called by PinSetupScreen once PIN is saved ────────────────────────────
   const handlePinSaved = useCallback(() => {
@@ -372,23 +365,6 @@ export function BiometricSetupScreen() {
                   onPress={handlePrimaryCTA}
                   disabled={busy || checking}
                 />
-
-                {/* "Maybe later" — always visible so user can opt out */}
-                <Pressable
-                  onPress={handleSkip}
-                  disabled={busy}
-                  style={{ alignItems: 'center', paddingVertical: 12 }}
-                >
-                  <Text
-                    style={{
-                      fontFamily: 'Inter_500Medium',
-                      fontSize: 14,
-                      color: 'rgba(255,255,255,0.6)',
-                    }}
-                  >
-                    Maybe later
-                  </Text>
-                </Pressable>
               </Animated.View>
             )}
           </View>
