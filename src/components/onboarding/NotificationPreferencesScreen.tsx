@@ -154,10 +154,9 @@ interface TimeWheelPickerProps {
   value: Date;
   onChange: (date: Date) => void;
   primaryColor: string;
-  onConfirm: () => void;
 }
 
-function TimeWheelPicker({ value, onChange, primaryColor, onConfirm }: TimeWheelPickerProps) {
+function TimeWheelPicker({ value, onChange, primaryColor }: TimeWheelPickerProps) {
   const rawHour   = value.getHours();
   const period    = rawHour >= 12 ? 1 : 0;                  // 0=AM 1=PM
   const hour12    = rawHour % 12 === 0 ? 12 : rawHour % 12; // 1-12
@@ -221,52 +220,14 @@ function TimeWheelPicker({ value, onChange, primaryColor, onConfirm }: TimeWheel
       {/* Thin divider */}
       <View style={{ width: 12 }} />
 
-      {/* AM/PM column + OK button stacked tightly below it */}
-      <View style={{ alignItems: "center" }}>
-        <WheelColumn
-          items={PERIODS}
-          selectedIndex={period}
-          onSelect={(i) => emit(hourIdx, minuteIdx, i)}
-          primaryColor={primaryColor}
-          width={64}
-        />
-
-        {/* OK — pulled up tight so it sits just below the PM cell */}
-        <Pressable
-          onPress={onConfirm}
-          accessibilityLabel="Confirm time"
-          accessibilityRole="button"
-          style={({ pressed }) => ({
-            width: 64,
-            height: 40,
-            borderRadius: 20,
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: 6,
-            backgroundColor: pressed
-              ? primaryColor + "BB"
-              : primaryColor,
-            borderWidth: 2,
-            borderColor: "rgba(255,255,255,0.45)",
-            shadowColor: primaryColor,
-            shadowOffset: { width: 0, height: 3 },
-            shadowOpacity: 0.55,
-            shadowRadius: 8,
-            elevation: 6,
-          })}
-        >
-          <Text
-            style={{
-              fontFamily: "Inter_700Bold",
-              fontSize: 15,
-              color: "#FFFFFF",
-              letterSpacing: 0.8,
-            }}
-          >
-            OK
-          </Text>
-        </Pressable>
-      </View>
+      {/* AM/PM */}
+      <WheelColumn
+        items={PERIODS}
+        selectedIndex={period}
+        onSelect={(i) => emit(hourIdx, minuteIdx, i)}
+        primaryColor={primaryColor}
+        width={64}
+      />
     </View>
   );
 }
@@ -415,14 +376,13 @@ export function NotificationPreferencesScreen() {
     setShowTimePicker(true);
   };
 
-  const handleConfirmTime = async () => {
+  // Saves the selected time and schedules notifications — called by X button.
+  const handleCancelTime = async () => {
     playClickSound();
     confirmHaptic();
     setSelectedTime(tempTime);
     setShowTimePicker(false);
 
-    // Schedule notifications immediately when the user confirms the time,
-    // but only if the toggle is on and at least one day is selected.
     if (enableNotifications && selectedDays.size > 0) {
       try {
         const timeString = getNotificationService().getTimeString(tempTime);
@@ -432,15 +392,9 @@ export function NotificationPreferencesScreen() {
           daysArray,
         );
       } catch (e) {
-        console.warn('[NotificationPreferences] handleConfirmTime scheduling error:', (e as Error)?.message);
+        console.warn('[NotificationPreferences] handleCancelTime scheduling error:', (e as Error)?.message);
       }
     }
-  };
-
-  const handleCancelTime = () => {
-    playClickSound();
-    tapHaptic();
-    setShowTimePicker(false);
   };
 
   // ---------- toggle ----------
@@ -916,12 +870,11 @@ export function NotificationPreferencesScreen() {
                 We'll send your reminder at this time
               </Text>
 
-              {/* Branded scroll-wheel picker — OK button lives inside, below AM/PM */}
+              {/* Branded scroll-wheel picker — X button saves and closes */}
               <TimeWheelPicker
                 value={tempTime}
                 onChange={setTempTime}
                 primaryColor={themeColors.primary}
-                onConfirm={handleConfirmTime}
               />
             </LinearGradient>
           </View>
