@@ -390,8 +390,23 @@ export function useRealtimeVoiceRecording(): [
 
       // Stop recording and get URI
       await recordingRef.current.stopAndUnloadAsync();
-      const uri = recordingRef.current.getURI();
+      const rawUri = recordingRef.current.getURI();
       recordingRef.current = null;
+
+      // On Android, the file may not be flushed to disk immediately after
+      // stopAndUnloadAsync resolves. Poll for up to 3 seconds before giving up.
+      let uri = rawUri;
+      if (uri && Platform.OS === 'android') {
+        const { FileSystem } = await import('expo-file-system');
+        let waited = 0;
+        while (waited < 3000) {
+          const info = await FileSystem.getInfoAsync(uri);
+          if (info.exists && (info as any).size > 0) break;
+          await new Promise((r) => setTimeout(r, 200));
+          waited += 200;
+        }
+      }
+
       recordingUriRef.current = uri;
 
       // Reset audio mode

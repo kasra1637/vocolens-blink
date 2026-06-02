@@ -50,7 +50,16 @@ async function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
  * @param audioUri - Local file URI of the audio file
  * @returns Transcription result
  */
-export async function transcribeAudioFile(audioUri: string, language: string = 'en'): Promise<TranscriptionResult> {
+export async function transcribeAudioFile(audioUri: string | null | undefined, language: string = 'en'): Promise<TranscriptionResult> {
+  // Guard: audioUri must be a non-empty string before we attempt any file I/O.
+  // On Android, Recording.getURI() can return null if the file was not flushed
+  // to disk yet — passing that null to FileSystem.readAsStringAsync is what
+  // causes the "cannot read base64 of undefined" crash.
+  if (!audioUri || typeof audioUri !== 'string' || audioUri.trim().length === 0) {
+    console.error('[Deepgram] transcribeAudioFile called with empty/null URI');
+    throw new Error('Audio file URI is missing. The recording may not have saved correctly — please try again.');
+  }
+
   const apiKey =
     Constants.expoConfig?.extra?.EXPO_PUBLIC_DEEPGRAM_API_KEY ||
     process.env.EXPO_PUBLIC_DEEPGRAM_API_KEY;

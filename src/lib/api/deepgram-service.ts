@@ -68,9 +68,15 @@ export interface TranscriptionResult {
  * @returns Transcription result with transcript and metadata
  */
 export async function transcribeAudio(
-  audioUri: string,
+  audioUri: string | null | undefined,
   options: DeepgramTranscriptionOptions = {}
 ): Promise<TranscriptionResult> {
+  // Guard: catch null/undefined URI before any file I/O so the error message
+  // is clear instead of "cannot read base64 of undefined".
+  if (!audioUri || typeof audioUri !== 'string' || audioUri.trim().length === 0) {
+    throw new Error('Audio file URI is missing. The recording may not have saved correctly — please try again.');
+  }
+
   try {
     // Default options optimized for voice journaling
     const transcriptionOptions: DeepgramTranscriptionOptions = {
