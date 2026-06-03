@@ -1553,38 +1553,36 @@ export default function SettingsScreen() {
                     ? handleResetStep1Confirm
                     : confirmResetAllData
                 }
-                className="rounded-3xl overflow-hidden mb-3 active:opacity-80"
+                className="rounded-full py-3 items-center mb-3 active:opacity-80"
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.18)",
+                  borderWidth: 1.5,
+                  borderColor: "rgba(255, 255, 255, 0.35)",
+                }}
               >
-                <View
-                  style={{
-                    padding: 16,
-                    alignItems: "center",
-                    backgroundColor: "rgba(239, 68, 68, 0.20)",
-                    borderWidth: 2,
-                    borderColor: hexToRgba(Colors.primary, 0.40),
-                    borderRadius: 24,
-                  }}
+                <Text
+                  className="text-sm text-white"
+                  style={{ fontFamily: "Inter_600SemiBold" }}
                 >
-                  <Text
-                    className="text-white text-lg font-bold"
-                    style={{ fontFamily: "Inter_700Bold" }}
-                  >
-                    {resetStep === 1
-                      ? "Yes, Reset Everything"
-                      : "Delete All Data Now"}
-                  </Text>
-                </View>
+                  {resetStep === 1
+                    ? "Yes, Reset Everything"
+                    : "Delete All Data Now"}
+                </Text>
               </Pressable>
 
               <Pressable
                 data-testid="cancel-reset-button"
                 onPress={cancelReset}
-                className="rounded-3xl py-4 items-center border-2"
-                style={{ borderColor: Colors.primary }}
+                className="rounded-full py-3 items-center active:opacity-80"
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.18)",
+                  borderWidth: 1.5,
+                  borderColor: "rgba(255, 255, 255, 0.35)",
+                }}
               >
                 <Text
-                  className="text-lg font-bold"
-                  style={{ fontFamily: "Inter_700Bold", color: Colors.primary }}
+                  className="text-sm text-white"
+                  style={{ fontFamily: "Inter_600SemiBold" }}
                 >
                   Cancel
                 </Text>
