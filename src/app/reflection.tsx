@@ -458,7 +458,6 @@ export default function ReflectionScreen() {
             )}
 
             <Pressable
-            <Pressable
               onPress={nextStep}
               style={[
                 s.nextBtn,
