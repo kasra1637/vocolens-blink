@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo, useEffect } from "react";
 import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import * as Print from "expo-print";
+import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useIsFocused } from "expo-router";
@@ -325,7 +325,11 @@ async function generateInsightsPDF({
 </body>
 </html>`;
 
-  const { uri } = await Print.printToFileAsync({ html, base64: false });
+  const { uri } = await (async () => {
+    const fileUri = FileSystem.cacheDirectory + `vocolens-insights-${Date.now()}.html`;
+    await FileSystem.writeAsStringAsync(fileUri, html, { encoding: FileSystem.EncodingType.UTF8 });
+    return { uri: fileUri };
+  })();
   return uri;
 }
 
@@ -706,9 +710,9 @@ function InsightsContent({
       const canShare = await Sharing.isAvailableAsync();
       if (canShare) {
         await Sharing.shareAsync(uri, {
-          mimeType: "application/pdf",
+          mimeType: "text/html",
           dialogTitle: "Share Insights Report",
-          UTI: "com.adobe.pdf",
+          UTI: "public.html",
         });
       }
     } catch (err) {
