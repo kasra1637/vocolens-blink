@@ -25,7 +25,7 @@ import { tapHaptic, successHaptic } from "@/lib/haptics";
 import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import useSettingsStore from "@/lib/state/settings-store";
 import { getThemeGradients } from "@/lib/theme";
-import { hexToRgba, GlassLayers } from "@/lib/glass";
+import { hexToRgba } from "@/lib/glass";
 import { LANGUAGES } from "@/lib/languages";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -145,10 +145,8 @@ export default function LanguagePickerModal() {
               borderWidth: 1,
               borderColor: hexToRgba(primaryColor, 0.15),
               marginBottom: 16,
-              overflow: "hidden",
             }}
           >
-            <GlassLayers primaryColor={primaryColor} borderRadius={14} />
             <Search size={15} color="rgba(255,255,255,0.55)" />
             <TextInput
               value={query}
