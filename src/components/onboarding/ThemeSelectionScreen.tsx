@@ -168,12 +168,12 @@ export function ThemeSelectionScreen() {
           <BackButton onPress={handleBack} show={currentStep > 0} />
 
           {/* Identical outer padding to PersonalizePermissionScreen */}
-          <View style={{ flex: 1, paddingHorizontal: 24, paddingVertical: 12 }}>
+          <View style={{ flex: 1, paddingHorizontal: 24, paddingVertical: 4 }}>
 
             {/* Character — identical container to PersonalizePermissionScreen */}
             <View
               style={{
-                height: 80,
+                height: 60,
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -188,7 +188,7 @@ export function ThemeSelectionScreen() {
             {/* Title — identical timing + marginBottom to PersonalizePermissionScreen */}
             <Animated.View
               entering={FadeIn.delay(100).duration(900).easing(SOFT)}
-              style={{ alignItems: "center", marginBottom: 14 }}
+              style={{ alignItems: "center", marginBottom: 6 }}
             >
               <Text
                 style={{
@@ -208,7 +208,7 @@ export function ThemeSelectionScreen() {
             {/* Subtitle hint — identical timing to PersonalizePermissionScreen */}
             <Animated.View
               entering={FadeIn.delay(230).duration(900).easing(SOFT)}
-              style={{ alignItems: "center", marginBottom: 8 }}
+              style={{ alignItems: "center", marginBottom: 4 }}
             >
               <Text
                 style={{
