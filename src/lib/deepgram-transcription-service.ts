@@ -140,21 +140,21 @@ export async function transcribeAudioFile(audioUri: string | null | undefined, l
     console.log('[Deepgram] Sending request to:', url.toString());
 
     // Prepare body for fetch (platform-specific)
-    let requestBody: Blob | ArrayBuffer;
+    // ─── Why we use a plain Uint8Array on native ────────────────────────────
+    // audioBytes comes from `atob()` which allocates a *shared* backing buffer.
+    // Calling `.buffer.slice(byteOffset, byteOffset + byteLength)` on Hermes
+    // (React Native's JS engine) produces a detached / zero-length ArrayBuffer
+    // that React Native's fetch polyfill cannot serialize — the request body
+    // arrives at Deepgram as empty, causing a misleading 401 INVALID_AUTH.
+    // Passing the Uint8Array directly avoids the detached-buffer issue because
+    // React Native's fetch handles typed arrays correctly without slicing.
+    let requestBody: Blob | Uint8Array;
     if (Platform.OS === 'web') {
       // Web: Use Blob for better compatibility
-      const audioBuffer = audioBytes.buffer.slice(
-        audioBytes.byteOffset,
-        audioBytes.byteOffset + audioBytes.byteLength
-      ) as ArrayBuffer;
-      requestBody = new Blob([audioBuffer], { type: contentType });
+      requestBody = new Blob([audioBytes], { type: contentType });
     } else {
-      // Native (iOS/Android): Use ArrayBuffer directly
-      // React Native's fetch supports ArrayBuffer but not Blob from ArrayBuffer
-      requestBody = audioBytes.buffer.slice(
-        audioBytes.byteOffset,
-        audioBytes.byteOffset + audioBytes.byteLength
-      ) as ArrayBuffer;
+      // Native (iOS/Android): Pass Uint8Array directly — do NOT slice .buffer
+      requestBody = audioBytes;
     }
 
     // Send audio to Deepgram
@@ -164,7 +164,7 @@ export async function transcribeAudioFile(audioUri: string | null | undefined, l
         Authorization: `Token ${apiKey}`,
         'Content-Type': contentType,
       },
-      body: requestBody,
+      body: requestBody as BodyInit,
     });
 
     if (!response.ok) {
