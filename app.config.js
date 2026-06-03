@@ -70,13 +70,19 @@ export default ({ config }) => ({
     },
     // Injected at bundle time from EAS secrets or local .env file.
     // These values land in Constants.expoConfig.extra on the device.
+    // IMPORTANT: Use `|| undefined` not `?? null` — if the key is missing,
+    // injecting JS null means Constants.expoConfig.extra returns null at
+    // runtime. The guard `apiKey === 'null'` only catches the STRING "null",
+    // not the JS value null, so null slips through and produces the header
+    // "Authorization: Token null" → Deepgram 401 INVALID_AUTH.
+    // undefined is falsy and is caught correctly by the `!apiKey` guard.
     EXPO_PUBLIC_DEEPGRAM_API_KEY:
-      process.env.EXPO_PUBLIC_DEEPGRAM_API_KEY ?? null,
+      process.env.EXPO_PUBLIC_DEEPGRAM_API_KEY || undefined,
     EXPO_PUBLIC_OPENROUTER_API_KEY:
-      process.env.EXPO_PUBLIC_OPENROUTER_API_KEY ?? null,
+      process.env.EXPO_PUBLIC_OPENROUTER_API_KEY || undefined,
     EXPO_PUBLIC_ADAPTY_KEY:
-      process.env.EXPO_PUBLIC_ADAPTY_KEY ?? null,
+      process.env.EXPO_PUBLIC_ADAPTY_KEY || undefined,
     EXPO_PUBLIC_BACKEND_URL:
-      process.env.EXPO_PUBLIC_BACKEND_URL ?? null,
+      process.env.EXPO_PUBLIC_BACKEND_URL || undefined,
   },
 });

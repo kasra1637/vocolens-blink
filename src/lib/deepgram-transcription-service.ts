@@ -71,9 +71,14 @@ export async function transcribeAudioFile(audioUri: string | null | undefined, l
     undefined;
 
   // Guard early — before any file I/O — so the error is clear and immediate.
-  if (!apiKey || apiKey === 'undefined' || apiKey === 'null' || apiKey === 'your_deepgram_api_key_here') {
+  // NOTE: Check for JS null/undefined explicitly in addition to string forms.
+  // app.config.js previously injected JS null (not the string "null") when the
+  // env var was missing — null passes `!apiKey` as false but `=== 'null'` also
+  // misses it because null !== 'null'. Belt-and-suspenders: cast to string first.
+  const apiKeyStr = apiKey == null ? '' : String(apiKey).trim();
+  if (!apiKeyStr || apiKeyStr === 'undefined' || apiKeyStr === 'null' || apiKeyStr === 'your_deepgram_api_key_here') {
     throw new Error(
-      'Deepgram API key is not configured. Add EXPO_PUBLIC_DEEPGRAM_API_KEY to your .env file and restart Metro.'
+      'Deepgram API key is not configured. Add EXPO_PUBLIC_DEEPGRAM_API_KEY to your EAS secrets and rebuild.'
     );
   }
 
@@ -161,7 +166,7 @@ export async function transcribeAudioFile(audioUri: string | null | undefined, l
     const response = await fetch(url.toString(), {
       method: 'POST',
       headers: {
-        Authorization: `Token ${apiKey}`,
+        Authorization: `Token ${apiKeyStr}`,
         'Content-Type': contentType,
       },
       body: requestBody as BodyInit,
