@@ -1,9 +1,9 @@
-{
+﻿{
     "name":  "vocolens",
     "version":  "1.0.0",
     "main":  "expo-router/entry",
     "scripts":  {
-                    "postinstall":  "node -e \"const fs=require(\u0027fs\u0027);let e=\u0027\u0027;if(process.env.EXPO_PUBLIC_DEEPGRAM_API_KEY)e+=\u0027EXPO_PUBLIC_DEEPGRAM_API_KEY=\u0027+process.env.EXPO_PUBLIC_DEEPGRAM_API_KEY+\u0027\n\u0027;if(process.env.EXPO_PUBLIC_OPENROUTER_API_KEY)e+=\u0027EXPO_PUBLIC_OPENROUTER_API_KEY=\u0027+process.env.EXPO_PUBLIC_OPENROUTER_API_KEY+\u0027\n\u0027;if(e)fs.writeFileSync(\u0027.env\u0027,e);console.log(\u0027ENV written:\u0027,e.length,\u0027chars\u0027)\"",
+                    "postinstall":  "node scripts/write-env.js",
                     "start":  "RCT_METRO_PORT=8084 EXPO_NO_PROMPT=1 npx expo start",
                     "tunnel":  "RCT_METRO_PORT=8084 EXPO_NO_PROMPT=1 npx expo start --tunnel --clear",
                     "lan":  "RCT_METRO_PORT=8084 EXPO_NO_PROMPT=1 npx expo start --lan --clear",
