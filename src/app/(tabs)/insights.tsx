@@ -731,32 +731,6 @@ function InsightsContent({
         end={{ x: 0, y: 1 }}
       />
 
-      {/* Share button — fixed top-right, always visible above scroll */}
-      <Pressable
-        onPress={handleSharePDF}
-        disabled={isGeneratingPDF}
-        style={{
-          position: "absolute",
-          top: insets.top + 10,
-          right: 20,
-          zIndex: 50,
-          width: 38,
-          height: 38,
-          borderRadius: 19,
-          backgroundColor: hexToRgba(Colors.primary, 0.18),
-          borderWidth: 1.5,
-          borderColor: hexToRgba(Colors.primary, 0.40),
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {isGeneratingPDF ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
-        ) : (
-          <Share2 size={17} color="#FFFFFF" strokeWidth={2} />
-        )}
-      </Pressable>
-
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
@@ -1029,6 +1003,31 @@ function InsightsContent({
           <TimeOfDayPatterns patterns={timeOfDayPatterns} />
         </Animated.View>
       </ScrollView>
+
+      {/* Share button — rendered AFTER ScrollView so it sits on top and receives touches */}
+      <Pressable
+        onPress={handleSharePDF}
+        disabled={isGeneratingPDF}
+        style={{
+          position: "absolute",
+          top: insets.top + 10,
+          right: 20,
+          width: 38,
+          height: 38,
+          borderRadius: 19,
+          backgroundColor: hexToRgba(Colors.primary, 0.18),
+          borderWidth: 1.5,
+          borderColor: hexToRgba(Colors.primary, 0.40),
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        {isGeneratingPDF ? (
+          <ActivityIndicator size="small" color="#FFFFFF" />
+        ) : (
+          <Share2 size={17} color="#FFFFFF" strokeWidth={2} />
+        )}
+      </Pressable>
     </View>
   );
 }
