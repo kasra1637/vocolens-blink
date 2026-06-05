@@ -161,6 +161,7 @@ export default function SpeakScreen() {
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [currentPrompt, setCurrentPrompt] = useState(PROMPTS[0]);
   const [duration, setDuration] = useState(0);
+  const MIN_RECORDING_SECONDS = 50;
   const [selectedTopic, setSelectedTopic] = useState<TopicCategory | undefined>(
     undefined,
   );
@@ -335,6 +336,13 @@ export default function SpeakScreen() {
   };
 
   const stopRecording = async () => {
+    // Enforce 50-second minimum for accurate emotional analysis
+    if (recordingDurationRef.current < MIN_RECORDING_SECONDS) {
+      const remaining = MIN_RECORDING_SECONDS - recordingDurationRef.current;
+      warningHaptic();
+      // Don't stop — just nudge the user
+      return;
+    }
     try {
       heavyHaptic();
       setRecordingState("processing");
@@ -1079,6 +1087,55 @@ export default function SpeakScreen() {
                 </Text>
               ) : null}
             </Text>
+
+            {/* 50-second goal progress bar */}
+            <View style={{ width: 220, marginTop: 14 }}>
+              {/* Track */}
+              <View style={{
+                height: 6,
+                borderRadius: 3,
+                backgroundColor: "rgba(255,255,255,0.12)",
+                overflow: "hidden",
+              }}>
+                <View style={{
+                  height: "100%",
+                  borderRadius: 3,
+                  width: `${Math.min(100, (duration / MIN_RECORDING_SECONDS) * 100)}%`,
+                  backgroundColor: duration >= MIN_RECORDING_SECONDS
+                    ? "#4ADE80"
+                    : Colors.primary,
+                }} />
+              </View>
+
+              {/* Milestone markers */}
+              <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 6 }}>
+                <Text style={{
+                  fontFamily: "Inter_400Regular",
+                  fontSize: 10,
+                  color: "rgba(255,255,255,0.35)",
+                }}>0s</Text>
+                <Text style={{
+                  fontFamily: "Inter_600SemiBold",
+                  fontSize: 10,
+                  color: duration >= MIN_RECORDING_SECONDS
+                    ? "#4ADE80"
+                    : duration >= 25
+                      ? "rgba(255,255,255,0.80)"
+                      : "rgba(255,255,255,0.35)",
+                }}>
+                  {duration >= MIN_RECORDING_SECONDS
+                    ? "✓ Great insight depth!"
+                    : `${MIN_RECORDING_SECONDS - duration}s to go`}
+                </Text>
+                <Text style={{
+                  fontFamily: "Inter_400Regular",
+                  fontSize: 10,
+                  color: duration >= MIN_RECORDING_SECONDS
+                    ? "#4ADE80"
+                    : "rgba(255,255,255,0.35)",
+                }}>50s</Text>
+              </View>
+            </View>
           </View>
         ) : null}
 
@@ -1177,7 +1234,7 @@ export default function SpeakScreen() {
                 <View className="items-center" style={{ gap: 6 }}>
                   <Pressable onPress={stopRecording} disabled={isProcessing}>
                     <LinearGradient
-                      colors={["#EF4444", "#DC2626"]}
+                      colors={duration >= MIN_RECORDING_SECONDS ? ["#EF4444", "#DC2626"] : ["rgba(255,255,255,0.15)", "rgba(255,255,255,0.08)"]}
                       style={{
                         width: 88,
                         height: 88,
@@ -1195,11 +1252,11 @@ export default function SpeakScreen() {
                   <Text
                     style={{
                       fontFamily: "Inter_400Regular",
-                      color: "rgba(255,255,255,0.85)",
+                      color: duration >= MIN_RECORDING_SECONDS ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.40)",
                       fontSize: 11,
                     }}
                   >
-                    Save
+                    {duration >= MIN_RECORDING_SECONDS ? "Save" : "Keep going"}
                   </Text>
                 </View>
               </View>
@@ -1234,6 +1291,20 @@ export default function SpeakScreen() {
                     ? "Monthly limit reached"
                     : `Tap to start · ${Math.floor(remainingMinutes)} min left`}
               </Text>
+              {!isProcessing && !isAtLimit && (
+                <Text
+                  style={{
+                    fontFamily: "Inter_400Regular",
+                    color: "rgba(255,255,255,0.45)",
+                    fontSize: 11,
+                    textAlign: "center",
+                    marginTop: 6,
+                    paddingHorizontal: 24,
+                  }}
+                >
+                  Record for at least 50s for accurate emotional insights
+                </Text>
+              )}
             </>
           )}
         </Animated.View>
