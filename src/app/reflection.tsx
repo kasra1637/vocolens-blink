@@ -389,7 +389,6 @@ export default function ReflectionScreen() {
                 min={-100}
                 max={100}
                 onChange={setValence}
-                accentColor={primaryEmotionColor}
               />
               <View style={s.sliderLabels}>
                 <Text style={s.sliderHint}>Unpleasant</Text>
@@ -418,7 +417,6 @@ export default function ReflectionScreen() {
                 min={0}
                 max={100}
                 onChange={setArousal}
-                accentColor={primaryEmotionColor}
               />
               <View style={s.sliderLabels}>
                 <Text style={s.sliderHint}>Calm</Text>

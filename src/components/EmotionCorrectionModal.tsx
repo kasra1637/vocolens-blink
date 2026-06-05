@@ -375,14 +375,14 @@ export default function EmotionCorrectionModal({
                       <Text style={{ fontFamily: "Inter_500Medium", fontSize: 13, color: "#FFFFFF" }}>Unpleasant ↔ Pleasant</Text>
                       <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 13, color: "#FFFFFF" }}>{valence > 0 ? `+${valence}` : `${valence}`}</Text>
                     </View>
-                    <ReflectionSlider value={valence} min={-100} max={100} onChange={setValence} accentColor={Colors.primary} />
+                    <ReflectionSlider value={valence} min={-100} max={100} onChange={setValence} />
                   </View>
                   <View>
                     <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
                       <Text style={{ fontFamily: "Inter_500Medium", fontSize: 13, color: "#FFFFFF" }}>Calm ↔ Activated</Text>
                       <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 13, color: "#FFFFFF" }}>{arousal}%</Text>
                     </View>
-                    <ReflectionSlider value={arousal} min={0} max={100} onChange={setArousal} accentColor={Colors.primary} />
+                    <ReflectionSlider value={arousal} min={0} max={100} onChange={setArousal} />
                   </View>
                 </View>
               </View>

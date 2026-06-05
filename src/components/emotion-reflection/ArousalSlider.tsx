@@ -17,7 +17,7 @@ export default function ArousalSlider({ value, onChange }: { value: number; onCh
         <Text style={{ fontSize: 12, color: "#6B7280", fontWeight: "500" }}>Calm</Text>
         <Text style={{ fontSize: 12, color: "#6B7280", fontWeight: "500" }}>Activated</Text>
       </View>
-      <UnifiedSlider value={value} min={0} max={100} onChange={onChange} accentColor="#F59E0B" trackColor="#E5E7EB" />
+      <UnifiedSlider value={value} min={0} max={100} onChange={onChange} />
       <Text style={{ textAlign: "center", fontSize: 14, fontWeight: "600", color: "#1F2937", marginTop: 8 }}>
         {arousalLabel(value)}
       </Text>
