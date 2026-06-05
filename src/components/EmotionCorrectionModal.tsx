@@ -7,7 +7,7 @@
  *  "explain"  → "Anything to add?"        — optional reason + save
  */
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -15,13 +15,9 @@ import {
   ScrollView,
   Pressable,
   TextInput,
-  LayoutChangeEvent,
   PanResponder,
-  StyleSheet,
-  Dimensions,
 } from "react-native";
-
-const SCREEN_W = Dimensions.get("window").width;
+import ReflectionSlider from "@/components/reflection/ReflectionSlider";
 import * as Haptics from "expo-haptics";
 import Animated from "react-native-reanimated";
 import {
@@ -379,14 +375,14 @@ export default function EmotionCorrectionModal({
                       <Text style={{ fontFamily: "Inter_500Medium", fontSize: 13, color: "#FFFFFF" }}>Unpleasant ↔ Pleasant</Text>
                       <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 13, color: "#FFFFFF" }}>{valence > 0 ? `+${valence}` : `${valence}`}</Text>
                     </View>
-                    <GlassSlider value={valence} min={-100} max={100} onChange={setValence} />
+                    <ReflectionSlider value={valence} min={-100} max={100} onChange={setValence} accentColor={Colors.primary} />
                   </View>
                   <View>
                     <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
                       <Text style={{ fontFamily: "Inter_500Medium", fontSize: 13, color: "#FFFFFF" }}>Calm ↔ Activated</Text>
                       <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 13, color: "#FFFFFF" }}>{arousal}%</Text>
                     </View>
-                    <GlassSlider value={arousal} min={0} max={100} onChange={setArousal} />
+                    <ReflectionSlider value={arousal} min={0} max={100} onChange={setArousal} accentColor={Colors.primary} />
                   </View>
                 </View>
               </View>
@@ -561,133 +557,6 @@ export default function EmotionCorrectionModal({
     </Modal>
   );
 }
-
-
-
-// ── GlassSlider — layout-aware PanResponder drag ─────────────────────────────
-// Uses onLayout to measure the actual rendered track width so it never overflows.
-
-function GlassSlider({
-  value,
-  min,
-  max,
-  onChange,
-}: {
-  value: number;
-  min: number;
-  max: number;
-  onChange: (v: number) => void;
-}) {
-  const [trackWidth, setTrackWidth] = useState(240);
-  const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-  const toPixel = (v: number) => ((v - min) / (max - min)) * trackWidth;
-  const toValue = (px: number) =>
-    Math.round(min + (clamp(px, 0, trackWidth) / trackWidth) * (max - min));
-
-  const thumbPx = useRef(toPixel(value));
-  const lastHapticVal = useRef(value);
-  const [displayVal, setDisplayVal] = useState(value);
-
-  // Resync thumb when track width becomes known after layout
-  useEffect(() => {
-    thumbPx.current = toPixel(value);
-    setDisplayVal(value);
-  }, [trackWidth]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleLayout = useCallback((e: LayoutChangeEvent) => {
-    const w = e.nativeEvent.layout.width;
-    if (w > 0) setTrackWidth(w);
-  }, []);
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onStartShouldSetPanResponderCapture: () => true,
-      onMoveShouldSetPanResponderCapture: () => true,
-      onPanResponderGrant: (evt: any) => {
-        const tapX = clamp(evt.nativeEvent.locationX, 0, trackWidth);
-        thumbPx.current = tapX;
-        const newVal = toValue(tapX);
-        lastHapticVal.current = newVal;
-        setDisplayVal(newVal);
-        onChange(newVal);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      },
-      onPanResponderMove: (_: any, gs: any) => {
-        const rawPx = clamp(thumbPx.current + gs.dx, 0, trackWidth);
-        const newVal = toValue(rawPx);
-        setDisplayVal(newVal);
-        onChange(newVal);
-        if (Math.abs(newVal - lastHapticVal.current) >= 5) {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-          lastHapticVal.current = newVal;
-        }
-      },
-      onPanResponderRelease: (_: any, gs: any) => {
-        const finalPx = clamp(thumbPx.current + gs.dx, 0, trackWidth);
-        thumbPx.current = finalPx;
-        const finalVal = toValue(finalPx);
-        setDisplayVal(finalVal);
-        onChange(finalVal);
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      },
-    })
-  ).current;
-
-  const normalized = clamp((displayVal - min) / (max - min), 0, 1);
-  const THUMB = 28;
-  const thumbLeft = normalized * trackWidth - THUMB / 2;
-
-  return (
-    <View onLayout={handleLayout} style={{ width: "100%" }}>
-      <View
-        {...panResponder.panHandlers}
-        style={{ height: 44, justifyContent: "center" }}
-      >
-        {/* Track */}
-        <View
-          style={{
-            height: 8,
-            backgroundColor: "rgba(255,255,255,0.15)",
-            borderRadius: 4,
-            overflow: "hidden",
-          }}
-        >
-          <View
-            style={{
-              width: `${normalized * 100}%`,
-              height: "100%",
-              backgroundColor: "#FFFFFF",
-              opacity: 0.85,
-              borderRadius: 4,
-            }}
-          />
-        </View>
-
-        {/* Thumb */}
-        <View
-          style={{
-            position: "absolute",
-            left: Math.max(0, Math.min(thumbLeft, trackWidth - THUMB)),
-            width: THUMB,
-            height: THUMB,
-            borderRadius: THUMB / 2,
-            backgroundColor: "#FFFFFF",
-            borderWidth: 3,
-            borderColor: "rgba(255,255,255,0.6)",
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 3 },
-            shadowOpacity: 0.30,
-            shadowRadius: 6,
-            elevation: 6,
-          }}
-        />
-      </View>
-    </View>
-  );
-}
-
 
 
 
