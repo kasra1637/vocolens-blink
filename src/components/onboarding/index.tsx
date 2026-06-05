@@ -60,6 +60,7 @@ import { FreeTrialPreviewScreen } from './FreeTrialPreviewScreen';
 import { ReminderScreen } from './ReminderScreen';
 import { PaywallScreen } from './PaywallScreen';
 import { BiometricSetupScreen } from './BiometricSetupScreen';
+import { OnboardingGlowOrbs } from './OnboardingGlowOrbs';
 
 export function OnboardingFlow() {
   const currentStep = useOnboardingStore((s) => s.currentStep);
@@ -106,7 +107,8 @@ export function OnboardingFlow() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1" style={{ overflow: "hidden" }}>
+      <OnboardingGlowOrbs />
       {renderScreen()}
     </View>
   );
