@@ -99,6 +99,7 @@ import { WeeklyReflectionCard } from "@/components/WeeklyReflectionCard";
 import { StreakCalendar } from "@/components/StreakCalendar";
 import { MoodStoryTimeline } from "@/components/MoodStoryTimeline";
 import ValenceArousalChart from "@/components/ValenceArousalChart";
+import BodyHeatmapCard from "@/components/BodyHeatmapCard";
 import { AnimatedStreakFlame } from "@/components/AnimatedStreakFlame";
 
 // ── PDF Report Generator ───────────────────────────────────────────────────────
@@ -826,6 +827,16 @@ function InsightsContent({
             primaryColor={Colors.primary}
           />
         </Animated.View>
+
+        {/* Body Sensation Heatmap — shows region patterns from body scans */}
+        {entries.length >= 1 && (
+          <Animated.View entering={ENTER_3} className="mb-6">
+            <BodyHeatmapCard
+              entries={entries}
+              primaryColor={Colors.primary}
+            />
+          </Animated.View>
+        )}
 
         {/* Where You Feel Things — Body Frequency Card */}
         {entries.length >= 3 &&
