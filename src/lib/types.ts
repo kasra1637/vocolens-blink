@@ -52,7 +52,6 @@ export type BodyRegion =
   | "neck"
   | "chest"
   | "stomach"
-  | "back"
   | "arms"
   | "hands"
   | "legs";
@@ -69,7 +68,6 @@ export const ALL_BODY_REGIONS: BodyRegion[] = [
   "neck",
   "chest",
   "stomach",
-  "back",
   "arms",
   "hands",
   "legs",
@@ -81,7 +79,6 @@ export const BODY_REGION_LABELS: Record<BodyRegion, string> = {
   neck: "Neck",
   chest: "Chest",
   stomach: "Stomach",
-  back: "Back",
   arms: "Arms",
   hands: "Hands",
   legs: "Legs",
@@ -93,7 +90,6 @@ export const BODY_REGION_EMOJIS: Record<BodyRegion, string> = {
   neck: "🗣",
   chest: "🫁",
   stomach: "🫃",
-  back: "🔙",
   arms: "💪",
   hands: "🤲",
   legs: "🦵",
