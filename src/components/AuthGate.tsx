@@ -26,7 +26,6 @@ import { BiometricLockScreen } from './BiometricLockScreen';
 import { StandalonePaywall } from './StandalonePaywall';
 import { FirstLaunchCelebration } from './FirstLaunchCelebration';
 import { SplashScreen } from './onboarding/SplashScreen';
-import { OnboardingGlowOrbs } from './onboarding/OnboardingGlowOrbs';
 import { activateAdapty, getProfile, isAdaptyEnabled, hasEntitlement } from '@/lib/adaptyClient';
 import { NotificationService } from '@/lib/services/notification-service';
 
@@ -120,12 +119,7 @@ export function AuthGate({ children }: AuthGateProps) {
 
   // Step 1 — onboarding not done yet (paywall is embedded as step 16)
   if (!hasCompletedOnboarding) {
-    return (
-      <View style={{ flex: 1 }}>
-        <OnboardingGlowOrbs />
-        <OnboardingFlow />
-      </View>
-    );
+    return <OnboardingFlow />;
   }
 
   // Step 2 — onboarding done but no active subscription → show standalone paywall

@@ -1,16 +1,16 @@
 /**
  * OnboardingGlowOrbs
  *
- * Persistent pulsing background glow orbs rendered behind all onboarding screens.
- * Mounted once in AuthGate — never remounts on step changes, so no hooks violation.
- * Color adapts to the user's selected theme primary color.
+ * Pulsing background glow orbs rendered as a full-screen absolute overlay
+ * ON TOP of each screen's LinearGradient (rendered as the LAST child of
+ * OnboardingFlow so it sits above the gradient but below interactive content).
  *
- * Usage: render as the FIRST child inside a `position: "relative"` or `flex: 1` View,
- * followed by the screen content. Orbs are absolutely positioned and non-interactive.
+ * Uses pointerEvents="none" so it never blocks any touches.
+ * Color adapts to the user's selected theme primary color.
  */
 
 import React, { useEffect } from "react";
-import { useWindowDimensions, StyleSheet } from "react-native";
+import { View, useWindowDimensions, StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -33,10 +33,10 @@ export function OnboardingGlowOrbs() {
   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const selectedTheme = useOnboardingStore((s) => s.selectedTheme);
   const primary = THEME_COLORS[selectedTheme].primary;
-  const glowColor = hexToRgba(primary, 0.14);
+  const glowColor = hexToRgba(primary, 0.18);
 
-  const orb1Opacity = useSharedValue(0.25);
-  const orb2Opacity = useSharedValue(0.12);
+  const orb1Opacity = useSharedValue(0.3);
+  const orb2Opacity = useSharedValue(0.15);
 
   const orb1Style = useAnimatedStyle(() => ({ opacity: orb1Opacity.value }));
   const orb2Style = useAnimatedStyle(() => ({ opacity: orb2Opacity.value }));
@@ -44,8 +44,8 @@ export function OnboardingGlowOrbs() {
   useEffect(() => {
     orb1Opacity.value = withRepeat(
       withSequence(
-        withTiming(0.60, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.20, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.70, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
+        withTiming(0.25, { duration: 1800, easing: Easing.inOut(Easing.ease) }),
       ),
       -1,
       false,
@@ -54,8 +54,8 @@ export function OnboardingGlowOrbs() {
       700,
       withRepeat(
         withSequence(
-          withTiming(0.45, { duration: 2200, easing: Easing.inOut(Easing.ease) }),
-          withTiming(0.10, { duration: 2200, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.55, { duration: 2200, easing: Easing.inOut(Easing.ease) }),
+          withTiming(0.12, { duration: 2200, easing: Easing.inOut(Easing.ease) }),
         ),
         -1,
         false,
@@ -64,16 +64,31 @@ export function OnboardingGlowOrbs() {
   }, []);
 
   return (
-    <>
-      {/* Orb 1 — upper-left quadrant */}
+    // absoluteFill wrapper — sits on top of screen gradient, below interactive UI
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      {/* Orb 1 — upper-left */}
       <Animated.View
-        pointerEvents="none"
         style={[
-          styles.orb,
           orb1Style,
           {
-            top: screenHeight * 0.05,
-            left: -screenWidth * 0.20,
+            position: "absolute",
+            top: screenHeight * 0.04,
+            left: -screenWidth * 0.22,
+            width: screenWidth * 0.90,
+            height: screenWidth * 0.90,
+            borderRadius: screenWidth * 0.45,
+            backgroundColor: glowColor,
+          },
+        ]}
+      />
+      {/* Orb 2 — lower-right */}
+      <Animated.View
+        style={[
+          orb2Style,
+          {
+            position: "absolute",
+            bottom: screenHeight * 0.04,
+            right: -screenWidth * 0.28,
             width: screenWidth * 0.85,
             height: screenWidth * 0.85,
             borderRadius: screenWidth * 0.425,
@@ -81,29 +96,6 @@ export function OnboardingGlowOrbs() {
           },
         ]}
       />
-      {/* Orb 2 — lower-right quadrant */}
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          styles.orb,
-          orb2Style,
-          {
-            bottom: screenHeight * 0.05,
-            right: -screenWidth * 0.25,
-            width: screenWidth * 0.80,
-            height: screenWidth * 0.80,
-            borderRadius: screenWidth * 0.40,
-            backgroundColor: glowColor,
-          },
-        ]}
-      />
-    </>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  orb: {
-    position: "absolute",
-    zIndex: 0,
-  },
-});
