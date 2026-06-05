@@ -626,6 +626,20 @@ export async function createJournalEntry(
   // If reflection override is provided, skip AI analysis and use user-adjusted data
   if (reflectionOverride && preTranscribedText) {
     transcript = preTranscribedText;
+
+    // Generate a 3-word personalized title from emotion + time context
+    const primaryEmotion = reflectionOverride.primaryEmotion || reflectionOverride.emotions[0] || "trust";
+    const hour = new Date().getHours();
+    const timeWord =
+      hour >= 5 && hour < 12 ? "Morning" :
+      hour >= 12 && hour < 17 ? "Afternoon" :
+      hour >= 17 && hour < 21 ? "Evening" : "Night";
+    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+    const valenceWord =
+      reflectionOverride.valence > 20 ? "Bright" :
+      reflectionOverride.valence < -20 ? "Heavy" : "Quiet";
+    const generatedTitle = `${valenceWord} ${timeWord} ${capitalize(primaryEmotion)}`;
+
     analysis = {
       emotions: reflectionOverride.emotions,
       primaryEmotion: reflectionOverride.primaryEmotion,
@@ -657,6 +671,7 @@ export async function createJournalEntry(
       emotionScores: reflectionOverride.emotionScores,
       emotionIntensityLabels: reflectionOverride.emotionIntensityLabels,
       topics: ["reflection"],
+      title: generatedTitle,
       analysis: "Journal entry recorded with user reflection.",
       valence: reflectionOverride.valence,
       arousal: reflectionOverride.arousal,

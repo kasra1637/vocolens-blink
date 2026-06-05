@@ -2,7 +2,6 @@ import React, { useRef, useCallback, useEffect, useState } from "react";
 import {
   View,
   PanResponder,
-  StyleSheet,
   LayoutChangeEvent,
 } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -30,20 +29,15 @@ export default function UnifiedSlider({
   onChange,
   accentColor = "rgba(255,255,255,0.85)",
   trackColor = "rgba(255,255,255,0.15)",
-  touchAreaHeight = 44,
-  trackHeight = 8,
-  thumbSize = 28,
+  touchAreaHeight = 52,
+  trackHeight = 10,
+  thumbSize = 32,
 }: UnifiedSliderProps) {
   const [trackWidth, setTrackWidth] = useState(0);
   const trackWidthRef = useRef(0);
   const lastHapticVal = useRef(value);
-  const thumbPxRef = useRef(0);
-
-  useEffect(() => {
-    if (trackWidthRef.current > 0) {
-      thumbPxRef.current = valueToPixel(value, trackWidthRef.current);
-    }
-  }, [value, trackWidth]);
+  // Pixel position of thumb at the START of each gesture — never mutated mid-drag
+  const startThumbPxRef = useRef(0);
 
   function valueToPixel(v: number, tw: number): number {
     return ((v - min) / (max - min)) * tw;
@@ -53,11 +47,17 @@ export default function UnifiedSlider({
     return Math.round(min + (clamp(px, 0, tw) / tw) * (max - min));
   }
 
+  useEffect(() => {
+    if (trackWidthRef.current > 0) {
+      startThumbPxRef.current = valueToPixel(value, trackWidthRef.current);
+    }
+  }, [value]);
+
   const handleLayout = useCallback((e: LayoutChangeEvent) => {
     const w = e.nativeEvent.layout.width;
     if (w > 0) {
       trackWidthRef.current = w;
-      thumbPxRef.current = valueToPixel(value, w);
+      startThumbPxRef.current = valueToPixel(value, w);
       setTrackWidth(w);
     }
   }, [value, min, max]);
@@ -68,20 +68,24 @@ export default function UnifiedSlider({
       onMoveShouldSetPanResponder: () => true,
       onStartShouldSetPanResponderCapture: () => true,
       onMoveShouldSetPanResponderCapture: () => true,
+
       onPanResponderGrant: (evt) => {
         const tw = trackWidthRef.current;
         if (tw <= 0) return;
+        // Snap thumb to wherever the finger touches
         const tapX = clamp(evt.nativeEvent.locationX, 0, tw);
-        thumbPxRef.current = tapX;
+        startThumbPxRef.current = tapX;
         const newVal = pixelToValue(tapX, tw);
         lastHapticVal.current = newVal;
         onChange(newVal);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       },
+
       onPanResponderMove: (_, gs) => {
         const tw = trackWidthRef.current;
         if (tw <= 0) return;
-        const rawPx = clamp(thumbPxRef.current + gs.dx, 0, tw);
+        // Use start position + cumulative dx — 1:1 finger tracking
+        const rawPx = clamp(startThumbPxRef.current + gs.dx, 0, tw);
         const newVal = pixelToValue(rawPx, tw);
         onChange(newVal);
         if (Math.abs(newVal - lastHapticVal.current) >= 5) {
@@ -89,14 +93,23 @@ export default function UnifiedSlider({
           lastHapticVal.current = newVal;
         }
       },
+
       onPanResponderRelease: (_, gs) => {
         const tw = trackWidthRef.current;
         if (tw <= 0) return;
-        const finalPx = clamp(thumbPxRef.current + gs.dx, 0, tw);
-        thumbPxRef.current = finalPx;
+        const finalPx = clamp(startThumbPxRef.current + gs.dx, 0, tw);
+        // Commit the final position as the new start for the next gesture
+        startThumbPxRef.current = finalPx;
         const finalVal = pixelToValue(finalPx, tw);
         onChange(finalVal);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      },
+
+      onPanResponderTerminate: (_, gs) => {
+        const tw = trackWidthRef.current;
+        if (tw <= 0) return;
+        const finalPx = clamp(startThumbPxRef.current + gs.dx, 0, tw);
+        startThumbPxRef.current = finalPx;
       },
     })
   ).current;
@@ -141,7 +154,9 @@ export default function UnifiedSlider({
               bottom: 0,
               backgroundColor: accentColor,
               borderRadius: trackHeight / 2,
-              width: isBipolar ? `${(Math.abs(value) / (max - min)) * 200}%` as any : `${normalized * 100}%` as any,
+              width: isBipolar
+                ? `${(Math.abs(value) / (max - min)) * 200}%` as any
+                : `${normalized * 100}%` as any,
               left: isBipolar && value >= 0 ? "50%" : undefined,
               right: isBipolar && value < 0 ? "50%" : undefined,
             }}

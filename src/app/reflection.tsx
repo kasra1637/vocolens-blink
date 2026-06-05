@@ -379,7 +379,7 @@ export default function ReflectionScreen() {
             >
               <View style={s.sliderHeader}>
                 <Text style={s.sliderTitle}>Pleasant ↔ Unpleasant</Text>
-                <Text style={[s.sliderValue, { color: primaryEmotionColor }]}>
+                <Text style={s.sliderValue}>
                   {valence > 0 ? "+" : ""}
                   {valence}
                 </Text>
@@ -408,7 +408,7 @@ export default function ReflectionScreen() {
             >
               <View style={s.sliderHeader}>
                 <Text style={s.sliderTitle}>Calm ↔ Activated</Text>
-                <Text style={[s.sliderValue, { color: primaryEmotionColor }]}>
+                <Text style={s.sliderValue}>
                   {arousal}%
                 </Text>
               </View>
