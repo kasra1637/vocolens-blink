@@ -336,13 +336,6 @@ export default function SpeakScreen() {
   };
 
   const stopRecording = async () => {
-    // Enforce 50-second minimum for accurate emotional analysis
-    if (recordingDurationRef.current < MIN_RECORDING_SECONDS) {
-      const remaining = MIN_RECORDING_SECONDS - recordingDurationRef.current;
-      warningHaptic();
-      // Don't stop — just nudge the user
-      return;
-    }
     try {
       heavyHaptic();
       setRecordingState("processing");
@@ -1234,7 +1227,7 @@ export default function SpeakScreen() {
                 <View className="items-center" style={{ gap: 6 }}>
                   <Pressable onPress={stopRecording} disabled={isProcessing}>
                     <LinearGradient
-                      colors={duration >= MIN_RECORDING_SECONDS ? ["#EF4444", "#DC2626"] : ["rgba(255,255,255,0.15)", "rgba(255,255,255,0.08)"]}
+                      colors={["#EF4444", "#DC2626"]}
                       style={{
                         width: 88,
                         height: 88,
@@ -1252,11 +1245,11 @@ export default function SpeakScreen() {
                   <Text
                     style={{
                       fontFamily: "Inter_400Regular",
-                      color: duration >= MIN_RECORDING_SECONDS ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.40)",
+                      color: "rgba(255,255,255,0.85)",
                       fontSize: 11,
                     }}
                   >
-                    {duration >= MIN_RECORDING_SECONDS ? "Save" : "Keep going"}
+                    Save
                   </Text>
                 </View>
               </View>
