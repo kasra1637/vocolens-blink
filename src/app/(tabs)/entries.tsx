@@ -744,7 +744,7 @@ function EntryCard({
   };
 
   return (
-    <Pressable>
+    <Pressable onPress={onPress} style={{ activeOpacity: 0.85 }}>
       <View
         style={[
           {
@@ -1002,25 +1002,28 @@ function EntryCard({
             </View>
           )}
 
-          {/* Action Buttons */}
-          <View className="flex-row items-center" style={{ gap: 12 }}>
-            <Pressable
-              onPress={onPress}
-              className="flex-1 rounded-full py-3 items-center"
+          {/* Action row — delete only; whole card is tappable to open */}
+          <View className="flex-row items-center justify-between" style={{ gap: 12 }}>
+            <View
+              className="flex-1 rounded-full py-3 items-center flex-row justify-center"
               style={{
-                backgroundColor: "rgba(255, 255, 255, 0.18)",
+                backgroundColor: "rgba(255, 255, 255, 0.10)",
                 borderWidth: 1.5,
-                borderColor: "rgba(255, 255, 255, 0.35)",
+                borderColor: "rgba(255, 255, 255, 0.22)",
+                gap: 6,
               }}
             >
               <Text
-                style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
+                style={{ fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.85)" }}
                 className="text-sm"
               >
                 View Full Analysis
               </Text>
-            </Pressable>
-            <Pressable onPress={onDelete}>
+            </View>
+            <Pressable
+              onPress={(e) => { e.stopPropagation?.(); onDelete(); }}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
               <Trash2 size={20} color="#FFFFFF" strokeWidth={2} />
             </Pressable>
           </View>

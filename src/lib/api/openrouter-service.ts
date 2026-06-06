@@ -105,7 +105,7 @@ function buildSystemPrompt(personalizationContext?: string): string {
 Analyse the journal transcript text and return ONLY a valid JSON object — no markdown, no explanation.${personalization}
 
 {
-  "title": "Quiet Morning Clarity",
+  "title": "Quiet Morning Finally Brings Clarity",
   "emotions": ["emotion1", "emotion2"],
   "primaryEmotion": "emotion",
   "emotionIntensity": 75,
@@ -144,7 +144,7 @@ Rules:
 - ambivalenceFlags: opposite pairs both ≥ 35 → "e1↔e2"
   Pairs: happiness↔sadness, anger↔fear, trust↔disgust, anticipation↔surprise
 - valence: −100 to +100 | arousal: 0–100 | distressLevel: low|moderate|high
-- title: 3–4 word evocative title in Title Case capturing the emotional core (e.g. "Tension at Work Eases", "Quiet Morning Clarity")
+- title: 5 word evocative title in Title Case capturing the emotional core (e.g. "Tension At Work Finally Eases", "Quiet Morning Brings Unexpected Clarity")
 - reflection: warm, second-person ("you"), suitable for TTS
 - Plutchik tiers: 0-35=low(Serenity/Acceptance/...), 36-69=mid, 70-100=high(Ecstasy/Admiration/...)
 - Only valid base emotions: happiness, sadness, anger, disgust, fear, surprise, trust, anticipation`;
@@ -214,7 +214,7 @@ function parseDirectResponse(content: string): OpenRouterAnalysisResult {
 
   return {
     title: (typeof result.title === 'string' && result.title.trim().length > 0)
-      ? result.title.trim().slice(0, 60)
+      ? result.title.trim().slice(0, 80)
       : 'Journal Entry',
     emotions,
     primaryEmotion,
