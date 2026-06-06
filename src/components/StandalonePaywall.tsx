@@ -209,9 +209,15 @@ export function StandalonePaywall() {
     (async () => {
       const result = await getOfferings();
       if (!result.ok) return;
-      const allPkgs = result.data.offerings.flatMap((o) => o.availablePackages);
-      setYearlyPkg( allPkgs.find((p) => p.product.identifier === "yearly")  ?? null);
-      setMonthlyPkg(allPkgs.find((p) => p.product.identifier === "monthly") ?? null);
+      const allPkgs = (result.data.current?.availablePackages ?? []).length > 0
+        ? result.data.current!.availablePackages
+        : result.data.offerings.flatMap((o: any) => o.availablePackages);
+      setYearlyPkg(
+        allPkgs.find((p: any) => p.packageType === "ANNUAL"  || p.identifier === "$rc_annual"  || p.product.identifier === "yearly")  ?? null
+      );
+      setMonthlyPkg(
+        allPkgs.find((p: any) => p.packageType === "MONTHLY" || p.identifier === "$rc_monthly" || p.product.identifier === "monthly") ?? null
+      );
     })();
   }, []);
 

@@ -90,10 +90,13 @@ export const hasEntitlement = (
 ): boolean => info.entitlements.active[entitlementId]?.isActive === true;
 
 /** Fetch available offerings from RevenueCat dashboard. */
-export const getOfferings = (): Promise<RCResult<{ offerings: PurchasesOffering[] }>> =>
+export const getOfferings = (): Promise<RCResult<{ offerings: PurchasesOffering[]; current: PurchasesOffering | null }>> =>
   guard("getOfferings", async () => {
-    const offerings = await Purchases!.getOfferings();
-    return { offerings: Object.values(offerings.all) };
+    const result = await Purchases!.getOfferings();
+    return {
+      offerings: Object.values(result.all),
+      current: result.current ?? null,
+    };
   });
 
 /** Purchase a package. Returns updated CustomerInfo on success. */

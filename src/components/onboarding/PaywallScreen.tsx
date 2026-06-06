@@ -172,11 +172,20 @@ export function PaywallScreen() {
     (async () => {
       const result = await getOfferings();
       if (!result.ok) return;
-      // Walk all packages across all offerings, match by productIdentifier
-      const allPkgs = result.data.offerings.flatMap((o) => o.availablePackages);
-      setYearlyPkg(    allPkgs.find((p) => p.product.identifier === "yearly")       ?? null);
-      setThreeMonthPkg(allPkgs.find((p) => p.product.identifier === "three_month")  ?? null);
-      setMonthlyPkg(   allPkgs.find((p) => p.product.identifier === "monthly")      ?? null);
+      // Prefer the current offering; fall back to all packages across all offerings.
+      // Match by RC packageType, then RC package identifier, then product identifier.
+      const allPkgs = (result.data.current?.availablePackages ?? []).length > 0
+        ? result.data.current!.availablePackages
+        : result.data.offerings.flatMap((o: any) => o.availablePackages);
+      setYearlyPkg(
+        allPkgs.find((p: any) => p.packageType === "ANNUAL"      || p.identifier === "$rc_annual"      || p.product.identifier === "yearly")       ?? null
+      );
+      setThreeMonthPkg(
+        allPkgs.find((p: any) => p.packageType === "THREE_MONTH" || p.identifier === "$rc_three_month" || p.product.identifier === "three_month")  ?? null
+      );
+      setMonthlyPkg(
+        allPkgs.find((p: any) => p.packageType === "MONTHLY"     || p.identifier === "$rc_monthly"     || p.product.identifier === "monthly")      ?? null
+      );
     })();
   }, []);
 
