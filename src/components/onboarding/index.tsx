@@ -21,7 +21,8 @@
  *  14 SelfAwarenessScreen
  *  15 SelfAwarenessInsightScreen  ← NEW
  *  16 ProcessingStyleScreen
- *  17 AppFeelingScreen
+ *  17 ProcessingStyleInsightScreen  ← NEW
+ *  18 AppFeelingScreen
  *  17 NotificationPreferencesScreen
  *  18 LanguageSelectionScreen
  *  19 PrivacyPermissionsScreen
@@ -52,6 +53,7 @@ import { JournalingFrequencyInsightScreen } from './JournalingFrequencyInsightSc
 import { SelfAwarenessScreen } from './SelfAwarenessScreen';
 import { SelfAwarenessInsightScreen } from './SelfAwarenessInsightScreen';
 import { ProcessingStyleScreen } from './ProcessingStyleScreen';
+import { ProcessingStyleInsightScreen } from './ProcessingStyleInsightScreen';
 import { AppFeelingScreen } from './AppFeelingScreen';
 import { NotificationPreferencesScreen } from './NotificationPreferencesScreen';
 import { LanguageSelectionScreen } from './LanguageSelectionScreen';
@@ -84,7 +86,8 @@ export function OnboardingFlow() {
       case 14: return <SelfAwarenessScreen />;
       case 15: return <SelfAwarenessInsightScreen />;
       case 16: return <ProcessingStyleScreen />;
-      case 17: return <AppFeelingScreen />;
+      case 17: return <ProcessingStyleInsightScreen />;
+      case 18: return <AppFeelingScreen />;
       case 17: return <NotificationPreferencesScreen />;
       case 18: return <LanguageSelectionScreen />;
       case 19: return <PrivacyPermissionsScreen />;
@@ -121,6 +124,7 @@ export { JournalingFrequencyInsightScreen } from './JournalingFrequencyInsightSc
 export { SelfAwarenessScreen } from './SelfAwarenessScreen';
 export { SelfAwarenessInsightScreen } from './SelfAwarenessInsightScreen';
 export { ProcessingStyleScreen } from './ProcessingStyleScreen';
+export { ProcessingStyleInsightScreen } from './ProcessingStyleInsightScreen';
 export { AppFeelingScreen } from './AppFeelingScreen';
 export { NotificationPreferencesScreen } from './NotificationPreferencesScreen';
 export { LanguageSelectionScreen } from './LanguageSelectionScreen';
