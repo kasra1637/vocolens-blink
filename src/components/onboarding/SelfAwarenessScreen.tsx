@@ -1,6 +1,6 @@
 /**
  * Onboarding: Self Awareness Screen
- * "When do you feel most like yourself?"
+ * "I feel most like myself when..."
  */
 
 import React, { useState } from "react";
@@ -104,7 +104,7 @@ export function SelfAwarenessScreen() {
                   lineHeight: 38,
                 }}
               >
-                When do you feel most like yourself?
+                I feel most like myself when...
               </Text>
               <Text
                 style={{

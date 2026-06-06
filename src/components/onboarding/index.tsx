@@ -18,9 +18,10 @@
  *  11 GoalInsightScreen
  *  12 ReflectionFeelingsScreen
  *  13 JournalingFrequencyInsightScreen
- *  14 SelfAwarenessScreen        ← NEW
- *  15 ProcessingStyleScreen      ← NEW
- *  16 AppFeelingScreen           ← NEW
+ *  14 SelfAwarenessScreen
+ *  15 SelfAwarenessInsightScreen  ← NEW
+ *  16 ProcessingStyleScreen
+ *  17 AppFeelingScreen
  *  17 NotificationPreferencesScreen
  *  18 LanguageSelectionScreen
  *  19 PrivacyPermissionsScreen
@@ -49,6 +50,7 @@ import { GoalInsightScreen } from './GoalInsightScreen';
 import { ReflectionFeelingsScreen } from './ReflectionFeelingsScreen';
 import { JournalingFrequencyInsightScreen } from './JournalingFrequencyInsightScreen';
 import { SelfAwarenessScreen } from './SelfAwarenessScreen';
+import { SelfAwarenessInsightScreen } from './SelfAwarenessInsightScreen';
 import { ProcessingStyleScreen } from './ProcessingStyleScreen';
 import { AppFeelingScreen } from './AppFeelingScreen';
 import { NotificationPreferencesScreen } from './NotificationPreferencesScreen';
@@ -80,8 +82,9 @@ export function OnboardingFlow() {
       case 12: return <ReflectionFeelingsScreen />;
       case 13: return <JournalingFrequencyInsightScreen />;
       case 14: return <SelfAwarenessScreen />;
-      case 15: return <ProcessingStyleScreen />;
-      case 16: return <AppFeelingScreen />;
+      case 15: return <SelfAwarenessInsightScreen />;
+      case 16: return <ProcessingStyleScreen />;
+      case 17: return <AppFeelingScreen />;
       case 17: return <NotificationPreferencesScreen />;
       case 18: return <LanguageSelectionScreen />;
       case 19: return <PrivacyPermissionsScreen />;
@@ -116,6 +119,7 @@ export { GoalInsightScreen } from './GoalInsightScreen';
 export { ReflectionFeelingsScreen } from './ReflectionFeelingsScreen';
 export { JournalingFrequencyInsightScreen } from './JournalingFrequencyInsightScreen';
 export { SelfAwarenessScreen } from './SelfAwarenessScreen';
+export { SelfAwarenessInsightScreen } from './SelfAwarenessInsightScreen';
 export { ProcessingStyleScreen } from './ProcessingStyleScreen';
 export { AppFeelingScreen } from './AppFeelingScreen';
 export { NotificationPreferencesScreen } from './NotificationPreferencesScreen';
