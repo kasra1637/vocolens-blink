@@ -144,7 +144,7 @@ Rules:
 - ambivalenceFlags: opposite pairs both ≥ 35 → "e1↔e2"
   Pairs: happiness↔sadness, anger↔fear, trust↔disgust, anticipation↔surprise
 - valence: −100 to +100 | arousal: 0–100 | distressLevel: low|moderate|high
-- title: 5 word evocative title in Title Case capturing the emotional core (e.g. "Tension At Work Finally Eases", "Quiet Morning Brings Unexpected Clarity")
+- title: 4 to 5 word evocative title in Title Case capturing the emotional core (e.g. "Tension At Work Eases", "Quiet Morning Brings Clarity")
 - reflection: warm, second-person ("you"), suitable for TTS
 - Plutchik tiers: 0-35=low(Serenity/Acceptance/...), 36-69=mid, 70-100=high(Ecstasy/Admiration/...)
 - Only valid base emotions: happiness, sadness, anger, disgust, fear, surprise, trust, anticipation`;
