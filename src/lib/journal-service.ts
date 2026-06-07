@@ -627,29 +627,43 @@ export async function createJournalEntry(
   if (reflectionOverride && preTranscribedText) {
     transcript = preTranscribedText;
 
-    // Derive a unique title from the transcript via AI.
-    // We run a lightweight title-only fetch in the background so it doesn't
-    // block saving. For the synchronous path we extract a 3-6 word phrase
-    // directly from the transcript content so the title is always specific.
+    // Fetch the AI title (and reflection) upfront so the entry is stored with
+    // its final title from the very first write — no follow-up update needed.
+    let aiTitle: string | undefined;
+    let aiReflectionText: string | undefined;
+    try {
+      const orResult = await analyzeWithOpenRouter(transcript);
+      if (
+        orResult.title &&
+        orResult.title.trim().length > 0 &&
+        !/^(journal entry|untitled|entry|new entry)$/i.test(orResult.title.trim())
+      ) {
+        aiTitle = orResult.title.trim();
+      }
+      if (orResult.reflection && orResult.reflection.trim().length > 0) {
+        aiReflectionText = orResult.reflection;
+      }
+    } catch (err) {
+      console.warn("[createJournalEntry] AI title fetch failed, using local fallback:", err);
+    }
+
+    // Local title fallback: first meaningful sentence fragment (3-6 words)
     const deriveLocalTitle = (text: string): string => {
       const clean = text.replace(/\s+/g, " ").trim();
-      // Take the first meaningful sentence fragment (≥3 words) as the title
       const sentences = clean.split(/[.!?\n]+/).map((s) => s.trim()).filter(Boolean);
       for (const sentence of sentences) {
         const words = sentence.split(/\s+/).filter(Boolean);
         if (words.length >= 3) {
-          // Capitalise first letter of each word, cap at 6 words
           return words
             .slice(0, 6)
             .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
             .join(" ");
         }
       }
-      // Last resort: first 6 words of raw text
       const fallbackWords = clean.split(/\s+/).slice(0, 6);
       return fallbackWords.map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
     };
-    const generatedTitle = deriveLocalTitle(transcript);
+    const generatedTitle = aiTitle ?? deriveLocalTitle(transcript);
 
     analysis = {
       emotions: reflectionOverride.emotions,
@@ -684,6 +698,7 @@ export async function createJournalEntry(
       topics: ["reflection"],
       title: generatedTitle,
       analysis: "Journal entry recorded with user reflection.",
+      reflection: aiReflectionText,
       valence: reflectionOverride.valence,
       arousal: reflectionOverride.arousal,
       suggestedBodySensations: [],
@@ -762,31 +777,6 @@ export async function createJournalEntry(
     conversationTopic,
     conversationPrompt,
   });
-
-  // Fire-and-forget: after saving, fetch AI title + reflection to replace the local-derived ones
-  if (reflectionOverride && preTranscribedText && transcript.trim().length > 0) {
-    analyzeWithOpenRouter(transcript)
-      .then((orResult) => {
-        const updates: Partial<JournalEntry> = {};
-        // Only replace title if AI returned a non-generic, non-empty one
-        if (
-          orResult.title &&
-          orResult.title.trim().length > 0 &&
-          !/^(journal entry|untitled|entry|new entry)$/i.test(orResult.title.trim())
-        ) {
-          updates.title = orResult.title.trim();
-        }
-        if (orResult.reflection && orResult.reflection.trim().length > 0) {
-          updates.aiReflection = orResult.reflection;
-        }
-        if (Object.keys(updates).length > 0) {
-          journalStore.updateEntry(entry.id, updates);
-        }
-      })
-      .catch((err) => {
-        console.warn("[createJournalEntry] background AI update failed:", err);
-      });
-  }
 
   // Update user stats - IMPORTANT: incrementEntries MUST be called first
   userStatsStore.incrementEntries();
