@@ -620,12 +620,11 @@ function BadgeCard({ badge, delay, onPress }: BadgeCardProps) {
             borderColor: "rgba(255, 255, 255, 0.20)",
             borderRadius: BorderRadius.xlarge,
             padding: 16,
-            opacity: 1,
-            overflow: "hidden",
             shadowColor: badge.unlocked ? "#FFFFFF" : "#000",
             shadowOffset: { width: 0, height: badge.unlocked ? 0 : 4 },
-            shadowOpacity: badge.unlocked ? 0.15 : 0.08,
-            shadowRadius: badge.unlocked ? 10 : 8,
+            shadowOpacity: badge.unlocked ? 0.35 : 0.08,
+            shadowRadius: badge.unlocked ? 14 : 8,
+            elevation: badge.unlocked ? 8 : 2,
           }}
         >
           {/* Badge Icon */}
