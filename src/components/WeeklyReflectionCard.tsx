@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,10 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withRepeat,
+  withSequence,
+  withTiming,
+  Easing,
 } from "react-native-reanimated";
 import { selectHaptic, tapHaptic } from "@/lib/haptics";
 import {
@@ -27,6 +31,33 @@ import { BorderRadius } from "@/lib/theme";
 
 interface WeeklyReflectionCardProps {
   primaryColor: string;
+}
+
+// ─── Bouncing chevron indicator ──────────────────────────────────────────────
+
+function BouncingChevron({ color }: { color: string }) {
+  const translateY = useSharedValue(0);
+
+  useEffect(() => {
+    translateY.value = withRepeat(
+      withSequence(
+        withTiming(5, { duration: 480, easing: Easing.inOut(Easing.sine) }),
+        withTiming(0, { duration: 480, easing: Easing.inOut(Easing.sine) }),
+      ),
+      -1, // infinite
+      false,
+    );
+  }, []);
+
+  const animStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return (
+    <Animated.View style={[{ marginTop: 4 }, animStyle]}>
+      <ChevronDown size={16} color={color} strokeWidth={2} />
+    </Animated.View>
+  );
 }
 
 export function WeeklyReflectionCard({
@@ -459,19 +490,25 @@ export function WeeklyReflectionCard({
                   </Animated.View>
                 )}
 
-                {/* Tap hint */}
+                {/* Tap hint — larger text + animated chevron */}
                 {!expanded && (
-                  <Text
-                    style={{
-                      fontFamily: "Inter_400Regular",
-                      fontSize: 11,
-                      color: "rgba(255,255,255,0.4)",
-                      textAlign: "center",
-                      marginTop: 4,
-                    }}
+                  <Animated.View
+                    entering={FadeIn.duration(400)}
+                    style={{ alignItems: "center", marginTop: 6 }}
                   >
-                    Tap to read your full reflection
-                  </Text>
+                    <Text
+                      style={{
+                        fontFamily: "Inter_500Medium",
+                        fontSize: 13,
+                        color: "rgba(255,255,255,0.55)",
+                        textAlign: "center",
+                        letterSpacing: 0.1,
+                      }}
+                    >
+                      Tap to read your full reflection
+                    </Text>
+                    <BouncingChevron color="rgba(255,255,255,0.4)" />
+                  </Animated.View>
                 )}
               </Animated.View>
             ) : null}

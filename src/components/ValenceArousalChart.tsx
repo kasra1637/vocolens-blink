@@ -432,24 +432,50 @@ export default function ValenceArousalChart({
         <EmptyState range={range} />
       ) : (
         <Animated.View key={range} entering={FadeIn.duration(300)}>
-          {/* SVG Chart */}
+          {/* SVG Chart + emoji overlay */}
           <View
             style={{ paddingHorizontal: 20, paddingBottom: 8, alignItems: "center" }}
             onLayout={onLayout}
           >
-            <ChartSvg
-              chartSize={CHART_H}
-              points={points}
-              ghostPoints={ghostPoints}
-              selectedPoint={selectedPoint}
-              onPointPress={(p) => {
-                tapHaptic();
-                setSelectedPoint((prev) =>
-                  prev?.entryId === p.entryId ? null : p,
+            {/* Wrapper allows the emoji layer to overflow the SVG bounds */}
+            <View style={{ width: CHART_H, height: CHART_H }}>
+              <ChartSvg
+                chartSize={CHART_H}
+                points={points}
+                ghostPoints={ghostPoints}
+                selectedPoint={selectedPoint}
+                onPointPress={(p) => {
+                  tapHaptic();
+                  setSelectedPoint((prev) =>
+                    prev?.entryId === p.entryId ? null : p,
+                  );
+                }}
+                primaryColor={primaryColor}
+              />
+              {/* Emoji overlay — rendered as native Text so they never clip */}
+              {points.map((p, i) => {
+                const isSelected = selectedPoint?.entryId === p.entryId;
+                const r = isSelected ? 16 : 13;
+                // Pin emoji to the right edge of the dot, vertically centred
+                return (
+                  <Text
+                    key={`emoji-${p.entryId}-${i}`}
+                    style={{
+                      position: "absolute",
+                      // left edge of emoji = centre of dot + radius + 2px gap
+                      left: p.x + r + 2,
+                      // vertically centre on the dot (emoji height ≈ 16px)
+                      top: p.y - 9,
+                      fontSize: 14,
+                      lineHeight: 18,
+                    }}
+                    pointerEvents="none"
+                  >
+                    {p.emoji}
+                  </Text>
                 );
-              }}
-              primaryColor={primaryColor}
-            />
+              })}
+            </View>
           </View>
 
           {/* Axis labels row below chart */}
@@ -810,20 +836,6 @@ function ChartSvg({
           </G>
         );
       })}
-
-      {/* Emoji labels (drawn last so they appear on top) */}
-      {points.map((p, i) => (
-        <SvgText
-          key={`emoji-${p.entryId}-${i}`}
-          x={p.x}
-          y={p.y + 5}
-          fontSize={12}
-          textAnchor="middle"
-          onPress={() => onPointPress(p)}
-        >
-          {p.emoji}
-        </SvgText>
-      ))}
     </Svg>
   );
 }
