@@ -847,7 +847,7 @@ export default function EntryDetailScreen() {
                         <View key={br.region} className="flex-row items-center px-2.5 py-1.5 rounded-full" style={{ backgroundColor: GLASS_INNER_BG, borderWidth: 1, borderColor: GLASS_INNER_BORDER }}>
                           <Text style={{ fontSize: 10, marginRight: 4 }}>{BODY_REGION_EMOJIS[br.region]}</Text>
                           <Text style={{ fontFamily: "Inter_500Medium", color: "#FFFFFF", fontSize: 10, textTransform: "capitalize" }}>{br.region}</Text>
-                          <Text style={{ fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.5)", fontSize: 9, marginLeft: 4 }}>{"●".repeat(br.intensity)}</Text>
+                          <Text style={{ fontFamily: "Inter_600SemiBold", color: "rgba(255,255,255,0.5)", fontSize: 9, marginLeft: 4 }}>{br.intensity ? "●".repeat(br.intensity) : ""}</Text>
                         </View>
                       ))}
                     </View>

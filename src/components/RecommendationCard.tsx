@@ -105,7 +105,7 @@ export function RecommendationCard({
   compact = false,
 }: RecommendationCardProps) {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true); // default open so advice is immediately visible
 
   // Stop speech on unmount
   useEffect(() => () => { Speech.stop(); }, []);

@@ -166,12 +166,15 @@ export default function BodyHeatmapCard({ entries, primaryColor }: Props) {
   // Aggregate per-region — intensity 0 is valid (region selected, no intensity set)
   const stats: RegionStats = useMemo(() => {
     const raw: Record<string, { count: number; total: number }> = {};
-    filtered.forEach((e) => {
+    // Use filtered for the selected range; fall back to ALL entries if filtered has no body data
+    const pool = filtered.some((e) => (e.bodyRegions ?? []).length > 0)
+      ? filtered
+      : entries; // show all-time data when no body scans fall in current range
+    pool.forEach((e) => {
       // Include entries where bodyRegions exist (any region selected counts)
       (e.bodyRegions ?? []).forEach((br) => {
         if (!raw[br.region]) raw[br.region] = { count: 0, total: 0 };
         raw[br.region].count++;
-        // intensity may be 0 if user selected the region without setting intensity
         raw[br.region].total += br.intensity ?? 0;
       });
     });
@@ -186,11 +189,13 @@ export default function BodyHeatmapCard({ entries, primaryColor }: Props) {
       };
     });
     return result;
-  }, [filtered]);
+  }, [filtered, entries]);
 
   // hasData: any entry that has at least one body region selected (intensity optional)
   const hasData = Object.keys(stats).length > 0;
-  const totalScans = filtered.filter((e) => (e.bodyRegions ?? []).length > 0).length;
+  // Count scans from the same pool used for stats (all-time fallback if range has no data)
+  const scanPool = filtered.some((e) => (e.bodyRegions ?? []).length > 0) ? filtered : entries;
+  const totalScans = scanPool.filter((e) => (e.bodyRegions ?? []).length > 0).length;
   const selectedStat = selected ? stats[selected] : null;
 
   const REGIONS: BodyRegion[] = ["head", "face", "neck", "chest", "stomach", "arms", "hands", "legs"];
@@ -208,7 +213,7 @@ export default function BodyHeatmapCard({ entries, primaryColor }: Props) {
           <Text style={s.subtitle}>
             {hasData
               ? `${totalScans} body scan${totalScans !== 1 ? "s" : ""} · tap a region to explore`
-              : "Complete body scans during journaling to see patterns here"}
+              : "Select body regions in the reflection step after journaling"}
           </Text>
         </View>
       </View>

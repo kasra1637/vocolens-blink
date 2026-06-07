@@ -1,9 +1,15 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { z } from "zod";
 import { sampleRouter } from "./routes/sample";
 import { journalRouter } from "./routes/journal";
 import { usageRouter } from "./routes/usage";
 import { logger } from "hono/logger";
+import {
+  generateRecommendation,
+  analyzeTranscriptWithRetry,
+  isOpenRouterConfigured,
+} from "./lib/openrouter";
 
 const app = new Hono();
 
@@ -16,20 +22,50 @@ app.route("/api/journal", journalRouter);
 app.route("/api/usage", usageRouter);
 
 // ── Short-path aliases used by the frontend openrouter-service.ts ─────────────
-// Frontend calls /api/recommend and /api/analyze — forward to the journal router
-app.post("/api/recommend", (c) => {
-  // Re-route: mutate path so journalRouter matches its "/recommendation" sub-route
-  const url = new URL(c.req.url);
-  url.pathname = "/recommendation";
-  const rewritten = new Request(url.toString(), c.req.raw);
-  return journalRouter.fetch(rewritten, c.env);
+// The frontend calls /api/recommend and /api/analyze directly.
+// These handlers are identical to the ones in journalRouter but registered at
+// the top-level app so Hono can match them without path-rewriting tricks.
+
+const recommendSchema = z.object({
+  transcript: z.string().min(1, "Transcript is required"),
+  primaryEmotion: z.string().optional().default("happiness"),
 });
 
-app.post("/api/analyze", (c) => {
-  const url = new URL(c.req.url);
-  url.pathname = "/analyze";
-  const rewritten = new Request(url.toString(), c.req.raw);
-  return journalRouter.fetch(rewritten, c.env);
+app.post("/api/recommend", async (c) => {
+  let body: unknown;
+  try { body = await c.req.json(); } catch { return c.json({ error: "Invalid JSON body" }, 400); }
+  const parsed = recommendSchema.safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message ?? "Validation failed" }, 400);
+  if (!isOpenRouterConfigured()) return c.json({ error: "OpenRouter API key not configured" }, 503);
+  try {
+    const result = await generateRecommendation(parsed.data.transcript, parsed.data.primaryEmotion);
+    return c.json({ success: true, data: result });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Recommendation failed";
+    console.error("[/api/recommend]", msg);
+    return c.json({ error: msg }, 500);
+  }
+});
+
+const analyzeSchema = z.object({
+  transcript: z.string().min(1, "Transcript is required"),
+  audioBase64: z.string().optional(),
+});
+
+app.post("/api/analyze", async (c) => {
+  let body: unknown;
+  try { body = await c.req.json(); } catch { return c.json({ error: "Invalid JSON body" }, 400); }
+  const parsed = analyzeSchema.safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message ?? "Validation failed" }, 400);
+  if (!isOpenRouterConfigured()) return c.json({ error: "OpenRouter API key not configured" }, 503);
+  try {
+    const result = await analyzeTranscriptWithRetry(parsed.data.transcript, 3, parsed.data.audioBase64);
+    return c.json({ success: true, data: result });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Analysis failed";
+    console.error("[/api/analyze]", msg);
+    return c.json({ error: msg }, 500);
+  }
 });
 
 export default app;
