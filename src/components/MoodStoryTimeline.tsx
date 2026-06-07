@@ -186,7 +186,9 @@ function WeekView({
   const innerH = CHART_H - PAD_Y - PAD_BOTTOM;
 
   const onLayout = (e: LayoutChangeEvent) => {
-    const w = e.nativeEvent.layout.width - 40; // container has 20px horizontal padding each side
+    // The onLayout view has no padding itself — its parent provides paddingHorizontal:20
+    // Subtracting 40 was incorrectly double-counting that padding, cutting off Sunday.
+    const w = e.nativeEvent.layout.width;
     if (w > 0) setChartWidth(w);
   };
 
