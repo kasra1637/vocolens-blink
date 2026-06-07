@@ -11,11 +11,36 @@ import {
   isOpenRouterConfigured,
 } from "./lib/openrouter";
 
-const app = new Hono();
+// ── Cloudflare Worker env bindings type ───────────────────────────────────────
+// Matches the secrets / vars configured in the Cloudflare dashboard for the
+// vocolens-api Worker.  Add any new bindings here as you create them.
+type WorkerEnv = {
+  OPENROUTER_API_KEY?: string;
+  DEEPGRAM_API_KEY?: string;
+};
+
+// Hono generic carries WorkerEnv so c.env is typed everywhere in this file
+const app = new Hono<{ Bindings: WorkerEnv }>();
+
+// ── initEnv middleware ────────────────────────────────────────────────────────
+// Cloudflare Workers does NOT expose env bindings via process.env.
+// This middleware runs on every request and copies the relevant bindings into
+// globalThis so that module-level helpers (getApiKey / isOpenRouterConfigured)
+// that don't have access to a Hono context can still read them.
+app.use("*", async (c, next) => {
+  const g = globalThis as Record<string, unknown>;
+  if (c.env?.OPENROUTER_API_KEY) {
+    g.__OPENROUTER_API_KEY = c.env.OPENROUTER_API_KEY;
+  }
+  if (c.env?.DEEPGRAM_API_KEY) {
+    g.__DEEPGRAM_API_KEY = c.env.DEEPGRAM_API_KEY;
+  }
+  await next();
+});
 
 app.use("*", cors({ origin: "*", credentials: true }));
 app.use("*", logger());
-app.get("/health", (c) => c.json({ status: "ok" }));
+app.get("/health", (c) => c.json({ status: "ok", model: "anthropic/claude-3-7-sonnet" }));
 
 app.route("/api/sample", sampleRouter);
 app.route("/api/journal", journalRouter);

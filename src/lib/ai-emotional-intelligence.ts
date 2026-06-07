@@ -14,7 +14,6 @@
 // instead so the Insights tab never breaks.
 
 import { JournalEntry } from './types';
-import Constants from 'expo-constants';
 import {
   DeepInsight,
   EmotionalPattern,
@@ -33,20 +32,12 @@ export interface AIAnalysisResponse {
 }
 
 // ============================================================================
-// CONFIG (mirrors openrouter-service.ts)
+// CONFIG
 // ============================================================================
 
-const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
-const MODEL = 'anthropic/claude-3-7-sonnet';
-
-// Read lazily via a function so Constants.expoConfig is fully populated.
-// Module-load-time reads fire before the Expo config is hydrated on device,
-// returning '' even when the EAS secret is correctly set.
-function getOpenRouterApiKey(): string {
+function getBackendUrl(): string {
   return (
-    Constants.expoConfig?.extra?.EXPO_PUBLIC_OPENROUTER_API_KEY ||
-    process.env.EXPO_PUBLIC_OPENROUTER_API_KEY ||
-    ''
+    (process.env.EXPO_PUBLIC_BACKEND_URL || "https://vocolens-api.kasrammarvel.workers.dev").trim()
   );
 }
 
@@ -120,17 +111,20 @@ Content: ${entry.transcript.slice(0, 300)}${entry.transcript.length > 300 ? '...
 }
 
 // ============================================================================
-// DIRECT OPENROUTER CALL (replaces former backend proxy call)
+// BACKEND PROXY CALL (routes through the Cloudflare Worker)
 // ============================================================================
 
+function getBackendUrl(): string {
+  return (
+    (process.env.EXPO_PUBLIC_BACKEND_URL || "https://vocolens-api.kasrammarvel.workers.dev").trim()
+  );
+}
+
 async function callOpenRouterDirect(entriesText: string): Promise<AIAnalysisResponse> {
-  const OPENROUTER_API_KEY = getOpenRouterApiKey();
-  if (!OPENROUTER_API_KEY || !OPENROUTER_API_KEY.startsWith('sk-or-')) {
-    console.warn(
-      '[AI Emotional Intelligence] OpenRouter API key missing or invalid — returning default analysis.',
-    );
-    return getDefaultAnalysis();
-  }
+  // Route through the backend Worker so all activity is billed to the
+  // server-side API key and appears in the OpenRouter dashboard.
+  // The /api/journal/ai-completion endpoint accepts { systemPrompt, userPrompt }.
+  const backendUrl = getBackendUrl();
 
   const systemPrompt = `You are an expert emotional intelligence analyst and therapist. Analyze journal entries to provide deep psychological insights. Be empathetic, insightful, and provide actionable advice.
 
@@ -182,23 +176,45 @@ Return a JSON object with the following structure:
   "insights": [
     {
       "category": "self_awareness|growth|warning|strength|recommendation",
-      "title": "Short title",
-      "message": "Detailed message (2-3 sentences)",
-      "evidence": ["Evidence 1", "Evidence 2"],
+      "title": "Insight title",
+      "message": "Detailed message",
+      "evidence": ["evidence1", "evidence2"],
       "priority": "high|medium|low",
       "emoji": "relevant emoji"
     }
   ]
 }
 
-Focus on:
-1. Emotional patterns (recurring themes, correlations)
-2. Triggers (what causes certain emotions)
-3. Mood cycles (time-based patterns)
-4. Emotional shifts (transitions between states)
-5. Deep insights (self-awareness, growth opportunities, warnings, strengths)
-
 Be specific and reference actual content from entries. Limit to 2-3 items per category for clarity.
+
+Respond with ONLY a valid JSON object — no markdown fences, no commentary.`;
+
+  const userPrompt = `Analyze these journal entries and provide emotional intelligence insights:\n\n${entriesText}\n\nProvide your analysis as valid JSON only, no additional text.`;
+
+  try {
+    const response = await fetch(`${backendUrl}/api/journal/ai-completion`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ systemPrompt, userPrompt, temperature: 0.7, maxTokens: 2000 }),
+    });
+
+    if (!response.ok) {
+      console.error('[AI Emotional Intelligence] Backend returned', response.status);
+      return getDefaultAnalysis();
+    }
+
+    const json = await response.json() as { success?: boolean; data?: unknown; error?: string };
+    if (!json.success || !json.data) {
+      console.error('[AI Emotional Intelligence] Backend error:', json.error);
+      return getDefaultAnalysis();
+    }
+
+    return validateAndCleanAnalysis(json.data as AIAnalysisResponse);
+  } catch (err) {
+    console.error('[AI Emotional Intelligence] Network error:', err);
+    return getDefaultAnalysis();
+  }
+}
 
 Respond with ONLY a valid JSON object — no markdown fences, no commentary.`;
 
@@ -218,53 +234,6 @@ Provide your analysis as valid JSON only, no additional text.`;
     },
     body: JSON.stringify({
       model: MODEL,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error(
-      '[AI Emotional Intelligence] OpenRouter returned non-OK status:',
-      response.status,
-      errText,
-    );
-    return getDefaultAnalysis();
-  }
-
-  const data = (await response.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) {
-    console.error('[AI Emotional Intelligence] OpenRouter returned empty content');
-    return getDefaultAnalysis();
-  }
-
-  // Strip any code fences the model might add despite instructions
-  const cleaned = content
-    .replace(/^```json\s*/i, '')
-    .replace(/^```\s*/i, '')
-    .replace(/```\s*$/i, '')
-    .trim();
-
-  try {
-    const analysis = JSON.parse(cleaned) as AIAnalysisResponse;
-    return validateAndCleanAnalysis(analysis);
-  } catch (parseErr) {
-    console.error(
-      '[AI Emotional Intelligence] Failed to parse OpenRouter JSON:',
-      parseErr,
-    );
-    return getDefaultAnalysis();
-  }
-}
-
 // ============================================================================
 // VALIDATION & CLEANING
 // ============================================================================

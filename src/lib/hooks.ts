@@ -456,112 +456,57 @@ export function useWeeklyReflection(weekOffset: number = 0) {
   return useQuery({
     queryKey: [...queryKeys.weeklyReflection(weekStartStr), weekLabel],
     queryFn: async (): Promise<WeeklyReflectionResult & { isDemo?: boolean }> => {
-      // Direct OpenRouter (Claude 3.7 Sonnet) call — no backend required.
-      // The backend path was removed so the Insights tab works in production
-      // without a deployed server. If the direct call fails for any reason,
-      // we fall back to DEMO_REFLECTION so the UI never breaks.
-      const apiKey = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY || '';
-      if (!apiKey || !apiKey.startsWith('sk-or-')) {
-        console.log('[WeeklyReflection] OpenRouter key missing, using demo data');
-        return DEMO_REFLECTION;
-      }
-
-      const entryDigest = weekEntries
-        .map((e, i) => {
-          const date = new Date(e.createdAt).toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'short',
-            day: 'numeric',
-          });
-          const transcript = e.transcript ?? '';
-          return `Entry ${i + 1} (${date}) — Emotion: ${e.primaryEmotion} (${e.emotionIntensity}% intensity)\nTopics: ${e.topics.join(', ')}\nExcerpt: "${transcript.slice(0, 300)}${transcript.length > 300 ? '...' : ''}"`;
-        })
-        .join('\n\n---\n\n');
-
-      const systemPrompt = `You are a warm, insightful journaling companion creating a weekly reflection digest.
-Your tone is compassionate, personal, and encouraging — like a wise friend who truly listened.
-Write as if speaking directly to the person. Keep narratives warm and intimate, not clinical.
-
-Respond with ONLY a valid JSON object — no markdown fences, no commentary:
-{
-  "narrativeSummary": "2-3 sentence warm narrative overview of their week's emotional journey",
-  "emotionalJourney": "1-2 sentences describing how their emotions evolved through the week",
-  "keyThemes": ["theme1", "theme2", "theme3"],
-  "growthMoment": "1 sentence highlighting a meaningful moment or insight from their entries",
-  "weekAhead": "1 encouraging sentence for the coming week",
-  "dominantEmotion": "the most prevalent emotion (must be one of: happiness, sadness, anger, disgust, fear, surprise, trust, anticipation)",
-  "emotionalRange": "brief phrase describing their emotional range e.g. 'Mostly grounded with moments of joy'"
-}`;
+      // Route through the Cloudflare Worker backend so all activity appears
+      // in the OpenRouter dashboard under the server-side API key.
+      const backendUrl = (
+        process.env.EXPO_PUBLIC_BACKEND_URL ||
+        'https://vocolens-api.kasrammarvel.workers.dev'
+      ).trim();
 
       try {
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        const response = await fetch(`${backendUrl}/api/journal/weekly-reflection`, {
           method: 'POST',
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-            'HTTP-Referer': 'https://vocolens-api.kasrammarvel.workers.dev',
-            'X-Title': 'Vocolens',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'anthropic/claude-3-7-sonnet',
-            messages: [
-              { role: 'system', content: systemPrompt },
-              {
-                role: 'user',
-                content: `Here are my journal entries from ${weekLabel}:\n\n${entryDigest}\n\nPlease create my weekly reflection digest.`,
-              },
-            ],
-            temperature: 0.8,
-            max_tokens: 800,
+            entries: weekEntries.map((e) => ({
+              transcript: e.transcript ?? '',
+              primaryEmotion: e.primaryEmotion,
+              emotionIntensity: e.emotionIntensity,
+              topics: e.topics,
+              createdAt: e.createdAt,
+              title: e.title,
+            })),
+            weekLabel,
           }),
         });
 
         if (!response.ok) {
-          console.log(
-            '[WeeklyReflection] OpenRouter returned non-OK status, using demo data',
-            response.status,
-          );
+          console.log('[WeeklyReflection] Backend returned', response.status, '— using demo data');
           return DEMO_REFLECTION;
         }
 
-        const data = (await response.json()) as {
-          choices?: Array<{ message?: { content?: string } }>;
+        const json = await response.json() as {
+          success?: boolean;
+          data?: Partial<WeeklyReflectionResult>;
+          error?: string;
         };
-        const content = data.choices?.[0]?.message?.content;
-        if (!content) {
-          console.log('[WeeklyReflection] OpenRouter returned empty content, using demo data');
+
+        if (!json.success || !json.data) {
+          console.log('[WeeklyReflection] Backend error:', json.error, '— using demo data');
           return DEMO_REFLECTION;
         }
 
-        const cleaned = content
-          .replace(/^```json\s*/i, '')
-          .replace(/^```\s*/i, '')
-          .replace(/```\s*$/i, '')
-          .trim();
-
-        const parsed = JSON.parse(cleaned) as Partial<WeeklyReflectionResult>;
-
+        const parsed = json.data;
         const validEmotions: EmotionType[] = [
-          'happiness',
-          'sadness',
-          'anger',
-          'disgust',
-          'fear',
-          'surprise',
-          'trust',
-          'anticipation',
+          'happiness', 'sadness', 'anger', 'disgust',
+          'fear', 'surprise', 'trust', 'anticipation',
         ];
 
         return {
-          narrativeSummary:
-            parsed.narrativeSummary || 'A week of meaningful reflection.',
-          emotionalJourney:
-            parsed.emotionalJourney || 'Your emotions told a story this week.',
-          keyThemes: Array.isArray(parsed.keyThemes)
-            ? parsed.keyThemes.slice(0, 4)
-            : [],
-          growthMoment:
-            parsed.growthMoment || 'You showed up for yourself this week.',
+          narrativeSummary: parsed.narrativeSummary || 'A week of meaningful reflection.',
+          emotionalJourney: parsed.emotionalJourney || 'Your emotions told a story this week.',
+          keyThemes: Array.isArray(parsed.keyThemes) ? parsed.keyThemes.slice(0, 4) : [],
+          growthMoment: parsed.growthMoment || 'You showed up for yourself this week.',
           weekAhead: parsed.weekAhead || "Carry this week's wisdom forward.",
           dominantEmotion:
             parsed.dominantEmotion && validEmotions.includes(parsed.dominantEmotion)
@@ -573,10 +518,7 @@ Respond with ONLY a valid JSON object — no markdown fences, no commentary:
           isDemo: false,
         };
       } catch (error) {
-        console.log(
-          '[WeeklyReflection] Error fetching reflection, using demo data:',
-          error,
-        );
+        console.log('[WeeklyReflection] Network error, using demo data:', error);
         return DEMO_REFLECTION;
       }
     },

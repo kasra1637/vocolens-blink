@@ -11,8 +11,26 @@ export const MODEL = "anthropic/claude-3-7-sonnet";
 export const AUDIO_MODEL = MODEL;
 export const TEXT_FALLBACK_MODEL = MODEL;
 
+/**
+ * Retrieve the OpenRouter API key.
+ *
+ * Cloudflare Workers does NOT populate process.env — environment variable
+ * bindings are only available on the `env` object passed to the Worker's
+ * fetch handler.  Hono propagates that object to every handler as `c.env`.
+ *
+ * To make the key accessible from module-level helpers (getApiKey / 
+ * isOpenRouterConfigured) that are called before a Hono context is available,
+ * we store the key in globalThis the very first time a request is handled
+ * (see backend/src/index.ts → initEnv middleware).
+ *
+ * Fallback chain:
+ *   1. globalThis.__OPENROUTER_API_KEY  (set by initEnv on first request)
+ *   2. process.env.OPENROUTER_API_KEY   (local dev / Node.js / Bun)
+ */
 export function getApiKey(): string | undefined {
-  return process.env.OPENROUTER_API_KEY;
+  return (
+    (globalThis as Record<string, unknown>).__OPENROUTER_API_KEY as string | undefined
+  ) ?? process.env.OPENROUTER_API_KEY;
 }
 
 export type EmotionType =

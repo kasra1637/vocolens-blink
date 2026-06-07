@@ -21,7 +21,7 @@ journalRouter.get("/status", (c) => {
   const configured = isOpenRouterConfigured();
   return c.json({
     openrouter: configured ? "connected" : "not_configured",
-    model: "openai/gpt-4o-audio-preview (with gpt-4o text fallback)",
+    model: "anthropic/claude-3-7-sonnet",
     baseUrl: "https://openrouter.ai",
     status: configured ? "ok" : "missing_api_key",
   });
