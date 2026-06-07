@@ -15,7 +15,11 @@
  */
 
 // ─── Model ───────────────────────────────────────────────────────────────────
-const MODEL = "anthropic/claude-sonnet-4";
+// PRIMARY & ONLY model for the entire app. All AI features (analysis,
+// recommendation, weekly reflection, AI completion) route exclusively to
+// GPT 5.4 Mini via OpenRouter so that all usage is attributable in the
+// OpenRouter dashboard. Do NOT add fallbacks to other providers.
+const MODEL = "openai/gpt-5.4-mini";
 
 // ─── CORS headers ─────────────────────────────────────────────────────────────
 const CORS = {
@@ -208,7 +212,7 @@ async function handleAnalyze(request, env) {
 
   const data    = await resp.json();
   const content = data.choices?.[0]?.message?.content;
-  if (!content) return json({ error: "Empty response from Claude" }, 502);
+  if (!content) return json({ error: "Empty response from GPT 5.4 Mini" }, 502);
 
   const result = JSON.parse(stripCodeFences(content));
   return json({ success: true, data: result });
@@ -246,7 +250,7 @@ async function handleRecommend(request, env) {
 
   const data    = await resp.json();
   const content = data.choices?.[0]?.message?.content;
-  if (!content) return json({ error: "Empty response from Claude" }, 502);
+  if (!content) return json({ error: "Empty response from GPT 5.4 Mini" }, 502);
 
   const result     = JSON.parse(stripCodeFences(content));
   const advice     = typeof result.advice === "string" && result.advice.trim().length >= 60
@@ -313,7 +317,7 @@ Respond with ONLY a valid JSON object — no markdown fences, no commentary:
 
   const data    = await resp.json();
   const content = data.choices?.[0]?.message?.content;
-  if (!content) return json({ error: "Empty response from Claude" }, 502);
+  if (!content) return json({ error: "Empty response from GPT 5.4 Mini" }, 502);
 
   const result = JSON.parse(stripCodeFences(content));
   const validEmotions = ["happiness","sadness","anger","disgust","fear","surprise","trust","anticipation"];
@@ -363,7 +367,7 @@ async function handleAICompletion(request, env) {
 
   const data    = await resp.json();
   const content = data.choices?.[0]?.message?.content;
-  if (!content) return json({ error: "Empty response from Claude" }, 502);
+  if (!content) return json({ error: "Empty response from GPT 5.4 Mini" }, 502);
 
   const result = JSON.parse(stripCodeFences(content));
   return json({ success: true, data: result });

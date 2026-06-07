@@ -1,7 +1,17 @@
 # PRD - VocoLens Voice Journal App
 
 ## Overview
-React Native / Expo Voice Journal with AI Emotion Analysis (OpenRouter GPT-4o). Runs seamlessly in the Emergent ecosystem: native phone mockup in the App Preview + Expo Go QR code for real-device testing.
+React Native / Expo Voice Journal with AI Emotion Analysis. **Primary & ONLY LLM: `openai/gpt-5.4-mini` via OpenRouter** (no fallbacks to other providers). Runs seamlessly in the Emergent ecosystem: native phone mockup in the App Preview + Expo Go QR code for real-device testing.
+
+## AI Model Policy (2026-01)
+- **All AI features** (analysis, recommendation, weekly reflection, AI completion) route exclusively through `openai/gpt-5.4-mini` on OpenRouter.
+- Single source of truth: `MODEL` constant in `/app/backend/src/worker.js` (deployed Cloudflare Worker) and the model strings in `/app/backend/src/lib/openrouter.ts` (local Hono backend).
+- **No Claude / Anthropic fallback.** Any deviation breaks OpenRouter usage attribution.
+
+### Bugfix 2026-01: GPT 5.4 Mini showed no activity on OpenRouter
+The deployed Cloudflare Worker at `vocolens-api.kasrammarvel.workers.dev` had `MODEL = "anthropic/claude-3-7-sonnet"` hardcoded, so every AI request was being charged to Claude instead of GPT 5.4 Mini.
+**Fix applied** in `/app/backend/src/worker.js`: set `MODEL = "openai/gpt-5.4-mini"` and updated all "Empty response from Claude" error strings. Also updated `/health` in `/app/backend/src/index.ts`.
+**Action required by user:** redeploy the Cloudflare Worker (via `wrangler deploy` or the Cloudflare dashboard) for changes to take effect on the live Worker URL.
 
 ## Architecture
 | Service | Port | Description |
@@ -11,7 +21,7 @@ React Native / Expo Voice Journal with AI Emotion Analysis (OpenRouter GPT-4o). 
 | FastAPI Backend | 8001 | Journal analysis (OpenRouter), usage tracking |
 
 ## How the Preview Works
-1. Emergent opens `https://XXX.preview.emergentagent.com` → `proxy-server.js` returns iPhone mockup HTML
+1. Emergent opens `https://gpt54-debug.preview.emergentagent.com` → `proxy-server.js` returns iPhone mockup HTML
 2. Inside the mockup, `<iframe src="/app.html">` loads the Expo web app (proxied from Metro:3001)
 3. All assets + WebSocket HMR proxied transparently to Metro
 4. Right panel polls `/tunnel-url` every 3 s — shows live QR code for Expo Go
