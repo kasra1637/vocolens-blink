@@ -392,7 +392,23 @@ export function MilestoneCelebration() {
   const contentOpacity = useSharedValue(0);
 
   const theme = THEME_COLORS[selectedTheme] ?? THEME_COLORS.darkMode;
-  const rarity = badge ? RARITY_CONFIG[badge.rarity] : RARITY_CONFIG.common;
+  // Use the active theme color for all badge accents — matches the Awards screen
+  const themeColor = theme.accent;
+  const rarity = badge ? {
+    gradient: [themeColor, themeColor + "BB"] as readonly [string, string],
+    glow: themeColor,
+    chipBg: themeColor + "2E",
+    chipBorder: themeColor + "80",
+    chipText: "#FFFFFF",
+    label: RARITY_CONFIG[badge.rarity].label,
+  } : {
+    gradient: [themeColor, themeColor + "BB"] as readonly [string, string],
+    glow: themeColor,
+    chipBg: themeColor + "2E",
+    chipBorder: themeColor + "80",
+    chipText: "#FFFFFF",
+    label: "Common",
+  };
 
   // Watch for new celebrations
   useEffect(() => {
