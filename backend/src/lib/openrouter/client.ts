@@ -281,7 +281,7 @@ export async function generateRecommendation(
         },
       ],
       temperature: 0.85,
-      max_tokens: 500,
+      max_tokens: 800,
     }),
   });
 

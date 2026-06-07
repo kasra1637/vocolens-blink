@@ -57,7 +57,7 @@ Threshold: both opposites ≥ 35 → flag as ambivalence.
 Return ONLY a valid JSON object — no markdown, no explanation, no preamble:
 
 {
-  "title": "Calm Before The Storm Fades",
+  "title": "Calm Before The Coming Storm Today",
   "emotions": ["emotion1", "emotion2"],
   "primaryEmotion": "emotion",
   "emotionIntensity": 75,
@@ -84,7 +84,7 @@ Return ONLY a valid JSON object — no markdown, no explanation, no preamble:
 }
 
 OUTPUT FIELD RULES:
-- title: 5 word evocative title capturing the emotional core of the entry (e.g. "Quiet Morning Finally Brings Clarity", "Tension At Work Slowly Eases"). Title Case. No quotes in the value.
+- title: MUST be exactly 6 or 7 words in Title Case capturing the emotional core of the entry. Count every word before responding. 6-word examples: "Feeling Lost But Finding My Way", "Tension At Work Finally Starting Up". 7-word examples: "Feeling Lost But Slowly Finding My Way", "Work Stress Is Finally Starting To Lift". DO NOT produce titles with fewer than 6 words or more than 7 words. No quotes in the value.
 - emotionScores: all 8 emotions scored 0–100, based on textual evidence only
 - emotions: only emotions with score ≥ 30, max 4
 - primaryEmotion: highest scoring emotion
@@ -128,13 +128,13 @@ TONE GUIDELINES:
 Return ONLY a valid JSON object — no markdown, no explanation, no preamble:
 
 {
-  "advice": "3–4 sentence warm recommendation grounded in the specific emotional content of the entry. Acknowledge the emotion, validate the experience, then offer one or two gentle, specific actions tailored to what was shared.",
-  "audioAdvice": "1–2 sentence spoken version. Warmer and more personal in tone. Suitable for TTS — use natural rhythm, no lists or bullet points."
+  "advice": "4–5 sentence warm recommendation (75–125 words total) grounded in the specific emotional content of the entry. Acknowledge the emotion, validate the experience, then offer one or two gentle, specific actions tailored to what was shared. End with an encouraging, forward-looking thought. This should take 30–50 seconds to read aloud.",
+  "audioAdvice": "2–3 sentences (75–125 words). Warmer and more personal in tone. Suitable for TTS — use natural rhythm, no lists or bullet points. Should take 30–50 seconds to read aloud."
 }
 
 RULES:
-- "advice": 3–4 sentences. Specific to the entry content and primary emotion. Warm, not generic.
-- "audioAdvice": 1–2 sentences max. More intimate and conversational. No em-dashes or special characters.
+- "advice": 4–5 sentences, 75–125 words. Specific to the entry content and primary emotion. Warm, not generic.
+- "audioAdvice": 2–3 sentences, 75–125 words. More intimate and conversational. No em-dashes or special characters.
 - Both fields must always be present and non-empty.
 - Never start with "I" — always address the person directly.
 - Ground the advice in at least one specific detail from the transcript.`;
