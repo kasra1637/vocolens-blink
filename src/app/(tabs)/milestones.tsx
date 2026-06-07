@@ -27,6 +27,7 @@ import {
   Heart,
   Smile,
   Lock,
+  Unlock,
   Check,
   Trophy,
   Star,
@@ -621,10 +622,10 @@ function BadgeCard({ badge, delay, onPress }: BadgeCardProps) {
             padding: 16,
             opacity: 1,
             overflow: "hidden",
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.08,
-            shadowRadius: 8,
+            shadowColor: badge.unlocked ? "#FFFFFF" : "#000",
+            shadowOffset: { width: 0, height: badge.unlocked ? 0 : 4 },
+            shadowOpacity: badge.unlocked ? 0.15 : 0.08,
+            shadowRadius: badge.unlocked ? 10 : 8,
           }}
         >
           {/* Badge Icon */}
@@ -676,9 +677,9 @@ function BadgeCard({ badge, delay, onPress }: BadgeCardProps) {
                 }}
               >
                 {badge.unlocked ? (
-                  <Check size={14} color={Colors.primary} strokeWidth={3} />
+                  <Unlock size={12} color={Colors.primary} strokeWidth={2.5} />
                 ) : (
-                  <Lock size={14} color={Colors.primary} strokeWidth={2} />
+                  <Lock size={12} color={Colors.primary} strokeWidth={2} />
                 )}
               </View>
             </View>
