@@ -41,8 +41,8 @@ function BouncingChevron({ color }: { color: string }) {
   useEffect(() => {
     translateY.value = withRepeat(
       withSequence(
-        withTiming(5, { duration: 480, easing: Easing.inOut(Easing.sine) }),
-        withTiming(0, { duration: 480, easing: Easing.inOut(Easing.sine) }),
+        withTiming(5, { duration: 480, easing: Easing.inOut(Easing.sin) }),
+        withTiming(0, { duration: 480, easing: Easing.inOut(Easing.sin) }),
       ),
       -1, // infinite
       false,
