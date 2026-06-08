@@ -49,15 +49,15 @@ type Phase = 'intro' | 'pin_setup';
 
 // Privacy points shown when biometric IS available
 const BIOMETRIC_POINTS = [
-  { icon: Lock,         text: 'Only you can open your journal' },
-  { icon: Fingerprint,  text: 'Your fingerprint unlocks it instantly — PIN is always there as a backup' },
+  { icon: ShieldCheck,  text: 'Only you can open your journal' },
+  { icon: ShieldCheck,  text: 'Your fingerprint unlocks it instantly — PIN is always there as a backup' },
   { icon: ShieldCheck,  text: 'If your biometric ever changes, your PIN keeps you in' },
 ];
 
 // Privacy points shown when only PIN is available
 const PIN_ONLY_POINTS = [
-  { icon: Lock,         text: 'Only you can open your journal' },
-  { icon: Lock,         text: 'A PIN keeps your entries private' },
+  { icon: ShieldCheck,  text: 'Only you can open your journal' },
+  { icon: ShieldCheck,  text: 'A PIN keeps your entries private' },
   { icon: ShieldCheck,  text: 'Change your PIN anytime in Settings' },
 ];
 

@@ -17,7 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn, Easing } from "react-native-reanimated";
 const SOFT = Easing.bezier(0.22, 1, 0.36, 1);
 import { tapHaptic, successHaptic } from "@/lib/haptics";
-import { Smartphone, Lock, ShieldCheck } from "lucide-react-native";
+import { ShieldCheck } from "lucide-react-native";
 import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import { EmotionalCompanion } from "@/components/EmotionalCompanion";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
@@ -61,13 +61,13 @@ export function PrivacyPermissionsScreen() {
 
   const privacyFeatures = [
     {
-      icon: Smartphone,
+      icon: ShieldCheck,
       title: "Your activities stay here",
       description:
         "Everything stays here. Nothing leaves unless you choose to export it.",
     },
     {
-      icon: Lock,
+      icon: ShieldCheck,
       title: "Locked to you alone",
       description:
         "Face ID, fingerprint, or PIN. Set it up once and keep your journal private.",

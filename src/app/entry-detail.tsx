@@ -34,6 +34,7 @@ import {
   BarChart2,
   RefreshCw,
   CheckCircle2,
+  Mic,
   Heart,
   AlertTriangle,
   Wind,
@@ -537,9 +538,12 @@ export default function EntryDetailScreen() {
               }}
             >
               <View style={{ padding: 20 }}>
-                <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15, marginBottom: 14 }}>
-                  Your recording
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 14 }}>
+                  <Mic size={13} color="#FFFFFF" strokeWidth={2} />
+                  <Text style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15 }}>
+                    Your recording
+                  </Text>
+                </View>
                 <AudioPlayer
                   audioUri={entry.audioUri}
                   primaryColor={Colors.primary}

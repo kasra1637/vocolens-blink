@@ -874,21 +874,16 @@ function BadgeModal({ visible, badge, onClose, onShare }: BadgeModalProps) {
       animationType="fade"
       onRequestClose={onClose}
     >
-      {/* Scrim with theme tint */}
+      {/* Scrim — transparent background, no overlay color */}
       <View
         style={{
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
           padding: 20,
+          backgroundColor: "rgba(0,0,0,0.6)",
         }}
       >
-        <LinearGradient
-          colors={[theme.gradientEnd + "F0", "rgba(4,2,12,0.96)"]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-        />
 
         <View
           style={{
