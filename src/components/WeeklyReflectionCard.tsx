@@ -19,6 +19,7 @@ import Animated, {
 import { tapHaptic } from "@/lib/haptics";
 import {
   CalendarDays,
+  BookOpen,
   ChevronDown,
   ChevronUp,
   Leaf,
