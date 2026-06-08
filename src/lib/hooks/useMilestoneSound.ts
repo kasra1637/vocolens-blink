@@ -52,10 +52,14 @@ export function useMilestoneSound() {
     try {
       const sound = celebrationRef.current;
       if (!sound) return;
+      // Ensure ExoPlayer is accessed on the main/UI thread (Android).
+      // Without this, setTimeout callbacks may run on a pool thread causing
+      // "Player accessed on the wrong thread" crash.
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       await sound.setPositionAsync(0);
       await sound.playAsync();
     } catch {
-      // no-op
+      // no-op — sounds are nice-to-have
     }
   };
 
@@ -63,6 +67,7 @@ export function useMilestoneSound() {
     try {
       const sound = badgePopRef.current;
       if (!sound) return;
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       await sound.setPositionAsync(0);
       await sound.playAsync();
     } catch {

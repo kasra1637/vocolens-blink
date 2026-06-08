@@ -260,7 +260,7 @@ export function BiometricLockScreen() {
           )}
 
           {/* PIN fallback */}
-          {view === 'pin_fallback' && pinContext && (
+          {view === 'pin_fallback' && pinContext && !showCelebration && (
             <PinEntryScreen
               onSuccess={handlePinFallbackSuccess}
               onBack={undefined}
@@ -270,7 +270,7 @@ export function BiometricLockScreen() {
           )}
 
           {/* PIN setup — invalidation edge case */}
-          {view === 'pin_setup' && pinContext && (
+          {view === 'pin_setup' && pinContext && !showCelebration && (
             <PinEntryScreen
               mode="setup"
               onComplete={handlePinSetupComplete}
