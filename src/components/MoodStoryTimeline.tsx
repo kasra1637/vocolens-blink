@@ -215,7 +215,7 @@ function PatternsView({
       if (bestDay !== worstDay) {
         const bestName = WEEKDAYS[bestDay];
         const worstName = WEEKDAYS[worstDay];
-        insight = `You tend to feel best on ${bestName}s and lowest on ${worstName}s over the last 30 days.`;
+        insight = `You tend to feel most intense on ${bestName}s and calmest on ${worstName}s over the last 30 days.`;
       } else if (mostActiveDay >= 0) {
         insight = `You journal most consistently on ${WEEKDAYS[mostActiveDay]}s.`;
       }
@@ -348,7 +348,7 @@ function PatternsView({
                           letterSpacing: 0.5,
                         }}
                       >
-                        {isBest ? "Best" : "Low"}
+                        {isBest ? "Peak" : "Calm"}
                       </Text>
                     </View>
                   )}
