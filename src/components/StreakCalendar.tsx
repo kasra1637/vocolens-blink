@@ -4,6 +4,9 @@ import Animated, {
   FadeIn,
   FadeInDown,
   FadeOutDown,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
 } from "react-native-reanimated";
 import { tapHaptic } from "@/lib/haptics";
 import {

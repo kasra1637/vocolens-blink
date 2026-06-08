@@ -524,6 +524,7 @@ function InsightsContent({
     "7D" | "14D" | "30D"
   >("30D");
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [showDeeper, setShowDeeper] = useState(false);
 
   // Get theme from context
   const { Colors, Gradients, Shadows } = useTheme();
@@ -911,6 +912,45 @@ function InsightsContent({
           <MoodStoryTimeline entries={entries} primaryColor={Colors.primary} />
         </Animated.View>
 
+        {/* ── "Explore deeper" collapsible — reduces cognitive load ── */}
+        {!showDeeper && (
+          <Pressable
+            onPress={() => { tapHaptic(); setShowDeeper(true); }}
+            style={{
+              marginBottom: 20,
+              paddingVertical: 14,
+              borderRadius: 16,
+              backgroundColor: "rgba(255, 255, 255, 0.08)",
+              borderWidth: 1,
+              borderColor: "rgba(255, 255, 255, 0.15)",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Inter_600SemiBold",
+                fontSize: 14,
+                color: "#FFFFFF",
+              }}
+            >
+              Explore deeper ↓
+            </Text>
+            <Text
+              style={{
+                fontFamily: "Inter_400Regular",
+                fontSize: 11,
+                color: "rgba(255,255,255,0.5)",
+                marginTop: 4,
+              }}
+            >
+              Emotional landscape, body map, triggers & more
+            </Text>
+          </Pressable>
+        )}
+
+        {showDeeper && (
+          <>
+
         {/* Valence-Arousal Emotional Landscape */}
         <Animated.View
           entering={ENTER_3}
@@ -995,6 +1035,9 @@ function InsightsContent({
         <Animated.View entering={ENTER_5}>
           <TimeOfDayPatterns patterns={timeOfDayPatterns} />
         </Animated.View>
+
+          </>
+        )}
       </ScrollView>
 
       {/* Share button — rendered AFTER ScrollView so it sits on top and receives touches */}
