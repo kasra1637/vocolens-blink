@@ -1,23 +1,14 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { View, Text, Pressable, Modal } from "react-native";
 import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withSequence,
-  withTiming,
-  withDelay,
-  Easing,
   FadeIn,
   FadeInDown,
   FadeOutDown,
 } from "react-native-reanimated";
 import { tapHaptic } from "@/lib/haptics";
 import {
-  Flame,
   ChevronLeft,
   ChevronRight,
-  Calendar,
 } from "lucide-react-native";
 import { JournalEntry } from "@/lib/types";
 
@@ -300,34 +291,6 @@ export function StreakCalendar({
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [selectedDay, setSelectedDay] = useState<SelectedDayInfo | null>(null);
 
-  // ── Streak pill celebratory animation ──
-  // Pops the pill with a glow whenever the streak increases.
-  const pillScale = useSharedValue(1);
-  const pillGlow = useSharedValue(0);
-  const prevStreak = useSharedValue(currentStreak);
-
-  useEffect(() => {
-    const prev = prevStreak.value;
-    if (currentStreak > prev && currentStreak > 0) {
-      pillScale.value = withSequence(
-        withSpring(1.22, { damping: 7, stiffness: 220 }),
-        withSpring(1, { damping: 11, stiffness: 200 }),
-      );
-      pillGlow.value = withSequence(
-        withTiming(1, { duration: 160 }),
-        withDelay(120, withTiming(0, { duration: 720, easing: Easing.out(Easing.ease) })),
-      );
-    }
-    prevStreak.value = currentStreak;
-  }, [currentStreak]);
-
-  const pillAnimStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pillScale.value }],
-  }));
-  const pillGlowStyle = useAnimatedStyle(() => ({
-    opacity: pillGlow.value,
-  }));
-
   // Build entry count map
   const entryMap = useMemo<Record<string, number>>(() => {
     const map: Record<string, number> = {};
@@ -401,14 +364,6 @@ export function StreakCalendar({
 
   return (
     <View style={{ marginBottom: 24 }}>
-      {/* ── Header ── */}
-      <View
-        style={{
-          marginBottom: 16,
-        }}
-      >
-      </View>
-
       {/* ── Month Navigation ── */}
       <View
         style={{
