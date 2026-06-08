@@ -50,12 +50,19 @@ export function useEntrySavedSound() {
     try {
       const sound = soundRef.current;
       if (!sound) return;
+      // Reset audio session to playback mode — required on iOS because the
+      // recording hook leaves the session in recording mode. Without this,
+      // playAsync() silently fails after stopRecording().
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        allowsRecordingIOS: false,
+      });
       // Ensure ExoPlayer is accessed on the main/UI thread (Android)
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       await sound.setPositionAsync(0);
       await sound.playAsync();
     } catch {
-      // no-op
+      // no-op — sounds are nice-to-have
     }
   }, []);
 

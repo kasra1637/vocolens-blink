@@ -391,7 +391,11 @@ export const formatDuration = (seconds: number): string => {
 };
 
 // Helper to format short duration (for cards)
+// Shows seconds for entries under 1 minute, minutes otherwise
 export const formatShortDuration = (seconds: number): string => {
+  if (seconds < 60) {
+    return `${Math.round(seconds)}s`;
+  }
   const mins = Math.floor(seconds / 60);
   return `${mins}m`;
 };
