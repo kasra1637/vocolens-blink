@@ -1166,7 +1166,7 @@ export default function SpeakScreen() {
                   <ProcessingDot
                     key={i}
                     delay={i * 180}
-                    primaryColor={Colors.primary}
+                    primaryColor="#FFFFFF"
                   />
                 ))}
               </View>

@@ -99,11 +99,15 @@ export function useCreateEntry() {
       );
     },
     onSuccess: () => {
-      // Invalidate all related queries
+      // Invalidate local-compute queries only.
+      // Do NOT invalidate AI-powered queries (deepInsights, priorityInsights,
+      // emotionalTriggers, moodCycles, emotionalShifts, weeklyReflection) here
+      // because each one triggers a new LLM API call — causing 4+ duplicate
+      // billings per entry save. Those queries have their own 10-min staleTime
+      // and will refetch naturally when the user visits the Insights tab.
       queryClient.invalidateQueries({ queryKey: queryKeys.entries });
       queryClient.invalidateQueries({ queryKey: queryKeys.stats });
       queryClient.invalidateQueries({ queryKey: queryKeys.badges });
-      queryClient.invalidateQueries({ queryKey: ['insights'] });
       queryClient.invalidateQueries({ queryKey: ['moodTrend'] });
     },
   });
