@@ -43,7 +43,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type TabId = "week" | "patterns" | "emotions";
+type TabId = "patterns" | "emotions";
 
 interface Tab {
   id: TabId;
@@ -56,7 +56,6 @@ interface Tab {
 }
 
 const TABS: Tab[] = [
-  { id: "week", label: "This Week", Icon: TrendingUp },
   { id: "patterns", label: "Patterns", Icon: CalendarDays },
   { id: "emotions", label: "Emotions", Icon: Sparkles },
 ];
@@ -74,7 +73,7 @@ export function MoodStoryTimeline({
   entries,
   primaryColor,
 }: MoodStoryTimelineProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("week");
+  const [activeTab, setActiveTab] = useState<TabId>("patterns");
 
   const handleTabPress = (id: TabId) => {
     tapHaptic();
@@ -153,9 +152,6 @@ export function MoodStoryTimeline({
 
       {/* Content */}
       <Animated.View key={activeTab} entering={FadeIn.duration(300)}>
-        {activeTab === "week" && (
-          <WeekView entries={entries} primaryColor={primaryColor} />
-        )}
         {activeTab === "patterns" && (
           <PatternsView entries={entries} primaryColor={primaryColor} />
         )}
@@ -167,15 +163,7 @@ export function MoodStoryTimeline({
   );
 }
 
-// ─── Week View ────────────────────────────────────────────────────────────────
-
-function WeekView({
-  entries,
-  primaryColor,
-}: {
-  entries: JournalEntry[];
-  primaryColor: string;
-}) {
+// ─── Patterns View ────────────────────────────────────────────────────────────
   const [chartWidth, setChartWidth] = useState(280);
 
   const CHART_H = 160;
@@ -816,6 +804,48 @@ function PatternsView({
               );
             })}
           </View>
+
+          {/* Intensity legend — explains the numbers */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginTop: 14,
+              paddingHorizontal: 4,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Inter_400Regular",
+                fontSize: 10,
+                color: "rgba(255,255,255,0.4)",
+              }}
+            >
+              0 = calm, minimal feeling
+            </Text>
+            <Text
+              style={{
+                fontFamily: "Inter_400Regular",
+                fontSize: 10,
+                color: "rgba(255,255,255,0.4)",
+              }}
+            >
+              100 = strongest emotions
+            </Text>
+          </View>
+
+          <Text
+            style={{
+              fontFamily: "Inter_400Regular",
+              fontSize: 11,
+              color: "rgba(255,255,255,0.5)",
+              textAlign: "center",
+              marginTop: 8,
+              lineHeight: 16,
+            }}
+          >
+            Higher = stronger emotions felt · Lower = calmer state
+          </Text>
 
           {/* Insight callout */}
           {insight !== "" && (
