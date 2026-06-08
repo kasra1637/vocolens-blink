@@ -458,6 +458,33 @@ export default function ValenceArousalChart({
         <EmptyState range={range} />
       ) : (
         <Animated.View key={range} entering={FadeIn.duration(300)}>
+          {/* One-sentence summary — eliminates chart interpretation for ADHD users */}
+          {dominantQuadrant && (
+            <View style={{ paddingHorizontal: 20, marginBottom: 12 }}>
+              <View
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.08)",
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: "rgba(255,255,255,0.12)",
+                  paddingHorizontal: 14,
+                  paddingVertical: 10,
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: "Inter_500Medium",
+                    fontSize: 13,
+                    color: "rgba(255,255,255,0.85)",
+                    textAlign: "center",
+                    lineHeight: 18,
+                  }}
+                >
+                  You've been mostly <Text style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF" }}>{dominantQuadrant.label}</Text> this period — {dominantQuadrant.desc.toLowerCase()}
+                </Text>
+              </View>
+            </View>
+          )}
           {/* SVG Chart + emoji overlay */}
           <View
             style={{ paddingHorizontal: 20, paddingBottom: 8, alignItems: "center" }}

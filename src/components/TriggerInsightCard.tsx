@@ -222,6 +222,32 @@ export function TriggerInsightCard({ trigger, index = 0, onPress }: TriggerInsig
               {trigger.insight}
             </Text>
 
+            {/* Coping micro-action — one concrete step, no questions */}
+            <View
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.06)',
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: 'rgba(255,255,255,0.10)',
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                marginBottom: 14,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: 'Inter_500Medium',
+                  fontSize: 12,
+                  color: 'rgba(255,255,255,0.8)',
+                  lineHeight: 18,
+                }}
+              >
+                💡 Try: {isPositive
+                  ? `When "${triggerLabel.toLowerCase()}" comes up, lean in — it reliably lifts your mood.`
+                  : `Before engaging with "${triggerLabel.toLowerCase()}", take 4 slow breaths (in for 4, hold 2, out for 6).`}
+              </Text>
+            </View>
+
             {/* Stats section with better spacing */}
             <View
               style={{
