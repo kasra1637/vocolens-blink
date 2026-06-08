@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { tapHaptic } from '@/lib/haptics';
 import useOnboardingStore, { THEME_COLORS } from '@/lib/state/onboarding-store';
+import { AnimatedPill } from '@/components/AnimatedPill';
 import {
   Briefcase,
   Heart,
@@ -367,42 +368,45 @@ export function TriggerSectionHeader({ timeWindow, onTimeWindowChange }: Trigger
       {/* Time window selector */}
       <View style={{ flexDirection: 'row', gap: 8 }}>
         {timeWindows.map((tw) => (
-          <Pressable
+          <AnimatedPill
             key={tw}
+            label={getLabel(tw)}
+            isActive={timeWindow === tw}
             onPress={() => {
               tapHaptic();
               onTimeWindowChange?.(tw);
             }}
-            style={({ pressed }) => ({
-              flex: 1,
+            activeStyle={{
               paddingVertical: 8,
               borderRadius: 12,
-              opacity: pressed ? 0.7 : 1,
-              transform: [{ scale: pressed ? 0.96 : 1 }],
-              backgroundColor: timeWindow === tw
-                ? isDarkModeTheme
-                  ? hexToRgba(primaryColor, 0.25)
-                  : 'rgba(255, 255, 255, 0.15)'
-                : 'rgba(255, 255, 255, 0.05)',
+              backgroundColor: isDarkModeTheme
+                ? hexToRgba(primaryColor, 0.25)
+                : 'rgba(255, 255, 255, 0.15)',
               borderWidth: 1,
-              borderColor: timeWindow === tw
-                ? isDarkModeTheme
-                  ? hexToRgba(primaryColor, 0.6)
-                  : 'rgba(255, 255, 255, 0.25)'
-                : 'rgba(255, 255, 255, 0.1)',
-              alignItems: 'center',
-            })}
-          >
-            <Text
-              style={{
-                fontFamily: timeWindow === tw ? 'Inter_600SemiBold' : 'Inter_500Medium',
-                fontSize: 12,
-                color: timeWindow === tw ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)',
-              }}
-            >
-              {getLabel(tw)}
-            </Text>
-          </Pressable>
+              borderColor: isDarkModeTheme
+                ? hexToRgba(primaryColor, 0.6)
+                : 'rgba(255, 255, 255, 0.25)',
+              alignItems: 'center' as const,
+            }}
+            inactiveStyle={{
+              paddingVertical: 8,
+              borderRadius: 12,
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderWidth: 1,
+              borderColor: 'rgba(255, 255, 255, 0.1)',
+              alignItems: 'center' as const,
+            }}
+            activeTextStyle={{
+              fontFamily: 'Inter_600SemiBold',
+              fontSize: 12,
+              color: '#FFFFFF',
+            }}
+            inactiveTextStyle={{
+              fontFamily: 'Inter_500Medium',
+              fontSize: 12,
+              color: 'rgba(255, 255, 255, 0.6)',
+            }}
+          />
         ))}
       </View>
     </View>

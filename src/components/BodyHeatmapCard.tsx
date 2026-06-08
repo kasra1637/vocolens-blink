@@ -18,6 +18,7 @@ import Svg, { Ellipse, Rect, G, Circle, Line } from "react-native-svg";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { tapHaptic } from "@/lib/haptics";
 import useOnboardingStore from "@/lib/state/onboarding-store";
+import { AnimatedPill } from "@/components/AnimatedPill";
 import {
   JournalEntry,
   BodyRegion,
@@ -226,16 +227,40 @@ export default function BodyHeatmapCard({ entries, primaryColor }: Props) {
       {/* ── Time range selector ── */}
       <View style={s.rangeRow}>
         {(["7D", "14D", "30D"] as TimeRange[]).map((r) => (
-          <Pressable
+          <AnimatedPill
             key={r}
+            label={r}
+            isActive={range === r}
             onPress={() => { tapHaptic(); setRange(r); setSelected(null); }}
-            style={({ pressed }) => [s.rangeBtn, range === r && {
+            activeStyle={{
+              paddingHorizontal: 14,
+              paddingVertical: 7,
+              borderRadius: 10,
               backgroundColor: isDarkModeTheme ? hexToRgba(primaryColor, 0.25) : "rgba(255,255,255,0.15)",
+              borderWidth: 1,
               borderColor: isDarkModeTheme ? hexToRgba(primaryColor, 0.6) : "rgba(255,255,255,0.25)",
-            }, pressed && { opacity: 0.7, transform: [{ scale: 0.96 }] }]}
-          >
-            <Text style={[s.rangeTxt, range === r && { color: "#FFFFFF" }]}>{r}</Text>
-          </Pressable>
+              alignItems: "center" as const,
+            }}
+            inactiveStyle={{
+              paddingHorizontal: 14,
+              paddingVertical: 7,
+              borderRadius: 10,
+              backgroundColor: "rgba(255,255,255,0.07)",
+              borderWidth: 1,
+              borderColor: "rgba(255,255,255,0.12)",
+              alignItems: "center" as const,
+            }}
+            activeTextStyle={{
+              fontFamily: "Inter_600SemiBold",
+              fontSize: 12,
+              color: "#FFFFFF",
+            }}
+            inactiveTextStyle={{
+              fontFamily: "Inter_500Medium",
+              fontSize: 12,
+              color: "rgba(255,255,255,0.5)",
+            }}
+          />
         ))}
       </View>
 

@@ -44,6 +44,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { tapHaptic, selectionHaptic } from "@/lib/haptics";
 import useOnboardingStore from "@/lib/state/onboarding-store";
 import { hexToRgba } from "@/lib/glass";
+import { AnimatedPill } from "@/components/AnimatedPill";
 import {
   JournalEntry,
   EMOTION_COLORS,
@@ -395,43 +396,44 @@ export default function ValenceArousalChart({
           {RANGE_OPTIONS.map((opt) => {
             const isActive = range === opt.id;
             return (
-              <Pressable
+              <AnimatedPill
                 key={opt.id}
+                label={opt.label}
+                isActive={isActive}
                 onPress={() => handleRangePress(opt.id)}
-                style={({ pressed }) => ({
-                  flex: 1,
+                activeStyle={{
                   borderRadius: 9,
-                  overflow: "hidden",
                   paddingHorizontal: 12,
                   paddingVertical: 8,
-                  alignItems: "center",
-                  opacity: pressed ? 0.7 : 1,
-                  transform: [{ scale: pressed ? 0.96 : 1 }],
-                  backgroundColor: isActive
-                    ? isDarkModeTheme
-                      ? hexToRgba(primaryColor, 0.25)
-                      : "rgba(255,255,255,0.15)"
-                    : "transparent",
-                  borderWidth: isActive ? 1 : 0,
-                  borderColor: isActive
-                    ? isDarkModeTheme
-                      ? hexToRgba(primaryColor, 0.6)
-                      : "rgba(255,255,255,0.25)"
-                    : "transparent",
-                })}
-              >
-                <Text
-                  style={{
-                    fontFamily: isActive
-                      ? "Inter_600SemiBold"
-                      : "Inter_400Regular",
-                    fontSize: 13,
-                    color: isActive ? "#FFFFFF" : "rgba(255,255,255,0.45)",
-                  }}
-                >
-                  {opt.label}
-                </Text>
-              </Pressable>
+                  alignItems: "center" as const,
+                  backgroundColor: isDarkModeTheme
+                    ? hexToRgba(primaryColor, 0.25)
+                    : "rgba(255,255,255,0.15)",
+                  borderWidth: 1,
+                  borderColor: isDarkModeTheme
+                    ? hexToRgba(primaryColor, 0.6)
+                    : "rgba(255,255,255,0.25)",
+                }}
+                inactiveStyle={{
+                  borderRadius: 9,
+                  paddingHorizontal: 12,
+                  paddingVertical: 8,
+                  alignItems: "center" as const,
+                  backgroundColor: "transparent",
+                  borderWidth: 1,
+                  borderColor: "transparent",
+                }}
+                activeTextStyle={{
+                  fontFamily: "Inter_600SemiBold",
+                  fontSize: 13,
+                  color: "#FFFFFF",
+                }}
+                inactiveTextStyle={{
+                  fontFamily: "Inter_400Regular",
+                  fontSize: 13,
+                  color: "rgba(255,255,255,0.45)",
+                }}
+              />
             );
           })}
         </View>

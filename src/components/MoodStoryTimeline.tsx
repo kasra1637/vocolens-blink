@@ -31,6 +31,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import useOnboardingStore from "@/lib/state/onboarding-store";
 import { hexToRgba } from "@/lib/glass";
+import { AnimatedPill } from "@/components/AnimatedPill";
 import {
   JournalEntry,
   EMOTION_COLORS,
@@ -112,47 +113,48 @@ export function MoodStoryTimeline({
             backgroundColor: "rgba(255,255,255,0.07)",
             borderRadius: 14,
             marginBottom: 20,
+            gap: 4,
           }}
         >
           {TABS.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
-              <Pressable
+              <AnimatedPill
                 key={tab.id}
-                onPress={() => handleTabPress(tab.id)}
-                style={({ pressed }) => ({
-                  flex: 1,
+                label={tab.label}
+                isActive={isActive}
+                onPress={() => { tapHaptic(); setActiveTab(tab.id); }}
+                activeStyle={{
                   borderRadius: 11,
-                  overflow: "hidden",
                   paddingVertical: 8,
-                  alignItems: "center",
-                  opacity: pressed ? 0.7 : 1,
-                  transform: [{ scale: pressed ? 0.96 : 1 }],
-                  backgroundColor: isActive
-                    ? isDarkMode
-                      ? hexToRgba(primaryColor, 0.25)
-                      : "rgba(255,255,255,0.15)"
-                    : "transparent",
-                  borderWidth: isActive ? 1 : 0,
-                  borderColor: isActive
-                    ? isDarkMode
-                      ? hexToRgba(primaryColor, 0.6)
-                      : "rgba(255,255,255,0.25)"
-                    : "transparent",
-                })}
-              >
-                <Text
-                  style={{
-                    fontFamily: isActive
-                      ? "Inter_600SemiBold"
-                      : "Inter_400Regular",
-                    fontSize: 12,
-                    color: isActive ? "#FFFFFF" : "rgba(255,255,255,0.5)",
-                  }}
-                >
-                  {tab.label}
-                </Text>
-              </Pressable>
+                  alignItems: "center" as const,
+                  backgroundColor: isDarkMode
+                    ? hexToRgba(primaryColor, 0.25)
+                    : "rgba(255,255,255,0.15)",
+                  borderWidth: 1,
+                  borderColor: isDarkMode
+                    ? hexToRgba(primaryColor, 0.6)
+                    : "rgba(255,255,255,0.25)",
+                }}
+                inactiveStyle={{
+                  borderRadius: 11,
+                  paddingVertical: 8,
+                  alignItems: "center" as const,
+                  backgroundColor: "transparent",
+                  borderWidth: 1,
+                  borderColor: "transparent",
+                }}
+                activeTextStyle={{
+                  fontFamily: "Inter_600SemiBold",
+                  fontSize: 12,
+                  color: "#FFFFFF",
+                }}
+                inactiveTextStyle={{
+                  fontFamily: "Inter_400Regular",
+                  fontSize: 12,
+                  color: "rgba(255,255,255,0.5)",
+                }}
+              />
             );
           })}
         </View>
