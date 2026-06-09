@@ -1,19 +1,12 @@
 /**
  * PinKeypad
  *
- * Elegant minimal numeric keypad for PIN entry.
- * Clean, borderless design with generous tap targets and subtle feedback.
- *
- * Layout — classic dial pad:
- *   ┌─────┬─────┬─────┐
- *   │  1  │  2  │  3  │
- *   ├─────┼─────┼─────┤
- *   │  4  │  5  │  6  │
- *   ├─────┼─────┼─────┤
- *   │  7  │  8  │  9  │
- *   ├─────┼─────┼─────┤
- *   │  ⌫  │  0  │ OK  │
- *   └─────┴─────┴─────┘
+ * Dark circular keypad matching the reference design:
+ * - Solid dark circular keys on the theme background
+ * - White digits centered in each circle
+ * - Backspace icon (bottom-left), 0 (bottom-center), Check (bottom-right)
+ * - Confirm button uses the theme's primary color when enabled
+ * - Clean, minimal, no borders
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -34,19 +27,12 @@ import { tapHaptic } from '@/lib/haptics';
 import useOnboardingStore, { THEME_COLORS } from '@/lib/state/onboarding-store';
 
 export interface PinKeypadProps {
-  /** Current digit string (for OK-enabled gating) */
   value: string;
-  /** Required length before OK is enabled (default 4) */
   maxLength?: number;
-  /** Globally disable every key (used during async work) */
   disabled?: boolean;
-  /** A digit 0-9 was pressed */
   onDigit: (digit: string) => void;
-  /** Backspace pressed */
   onBackspace: () => void;
-  /** OK pressed (fires only when value.length === maxLength) */
   onSubmit: () => void;
-  /** Extra style on the outer wrapper */
   style?: ViewStyle;
 }
 
@@ -70,13 +56,6 @@ export function PinKeypad({
   const themeColors = THEME_COLORS[selectedTheme];
 
   const canSubmit = value.length === maxLength && !disabled;
-
-  const okEnabledStyle = useMemo(
-    () => ({
-      backgroundColor: `${themeColors.primary}40`,
-    }),
-    [themeColors.primary],
-  );
 
   const handlePress = useCallback(
     (key: typeof ROWS[number][number]) => {
@@ -115,7 +94,7 @@ export function PinKeypad({
                 (key !== 'BACK' && key !== 'OK' && value.length >= maxLength)
               }
               onPress={() => handlePress(key)}
-              okEnabledStyle={key === 'OK' && canSubmit ? okEnabledStyle : null}
+              canSubmit={canSubmit}
               primaryColor={themeColors.primary}
             />
           ))}
@@ -130,7 +109,7 @@ interface KeypadButtonProps {
   label: string;
   disabled: boolean;
   onPress: () => void;
-  okEnabledStyle: ViewStyle | null;
+  canSubmit: boolean;
   primaryColor: string;
 }
 
@@ -138,7 +117,7 @@ function KeypadButton({
   label,
   disabled,
   onPress,
-  okEnabledStyle,
+  canSubmit,
   primaryColor,
 }: KeypadButtonProps) {
   const scale = useSharedValue(1);
@@ -148,10 +127,10 @@ function KeypadButton({
 
   const handlePressIn = () => {
     if (disabled) return;
-    scale.value = withTiming(0.9, { duration: 80 });
+    scale.value = withTiming(0.9, { duration: 60 });
   };
   const handlePressOut = () => {
-    scale.value = withTiming(1, { duration: 150 });
+    scale.value = withTiming(1, { duration: 140 });
   };
 
   const isBack = label === 'BACK';
@@ -159,13 +138,17 @@ function KeypadButton({
   const isDigit = !isBack && !isOk;
 
   const content = (() => {
-    if (isBack) return <Delete size={24} color="rgba(255,255,255,0.6)" strokeWidth={1.8} />;
-    if (isOk)   return <Check  size={24} color="#FFFFFF" strokeWidth={2.2} />;
+    if (isBack) return <Delete size={22} color="#FFFFFF" strokeWidth={1.8} />;
+    if (isOk)   return <Check  size={22} color="#FFFFFF" strokeWidth={2.5} />;
     return <Text style={styles.digitText}>{label}</Text>;
   })();
 
+  // OK button gets the primary color when enabled
+  const okStyle: ViewStyle | undefined =
+    isOk && canSubmit ? { backgroundColor: primaryColor } : undefined;
+
   return (
-    <Animated.View style={[styles.btnAnimWrap, animatedStyle]}>
+    <Animated.View style={[styles.btnWrap, animatedStyle]}>
       <Pressable
         onPress={onPress}
         onPressIn={handlePressIn}
@@ -176,14 +159,12 @@ function KeypadButton({
           isBack ? 'Delete last digit' : isOk ? 'Submit PIN' : `Digit ${label}`
         }
         accessibilityState={{ disabled }}
-        style={({ pressed }) => [
+        style={[
           styles.btn,
           isDigit && styles.digitBtn,
-          isBack && styles.actionBtn,
-          isOk && styles.actionBtn,
-          okEnabledStyle ?? null,
+          (isBack || isOk) && styles.actionBtn,
+          okStyle,
           disabled && styles.btnDisabled,
-          pressed && !disabled && styles.btnPressed,
         ]}
       >
         {content}
@@ -195,43 +176,39 @@ function KeypadButton({
 const styles = StyleSheet.create({
   wrap: {
     width: '100%',
-    maxWidth: 300,
+    maxWidth: 280,
     alignSelf: 'center',
-    gap: 12,
+    gap: 14,
   },
   row: {
     flexDirection: 'row',
-    gap: 12,
     justifyContent: 'center',
+    gap: 20,
   },
-  btnAnimWrap: {
-    flex: 1,
-    aspectRatio: 1.4,
-    maxHeight: 64,
+  btnWrap: {
+    width: 72,
+    height: 72,
   },
   btn: {
-    flex: 1,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     alignItems: 'center',
     justifyContent: 'center',
   },
   digitBtn: {
-    backgroundColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   actionBtn: {
-    backgroundColor: 'transparent',
-  },
-  btnPressed: {
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   btnDisabled: {
-    opacity: 0.3,
+    opacity: 0.35,
   },
   digitText: {
     fontFamily: 'Fraunces_700Bold',
-    fontSize: 30,
+    fontSize: 28,
     color: '#FFFFFF',
-    letterSpacing: 0.5,
   },
 });
 
