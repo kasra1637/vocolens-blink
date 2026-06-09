@@ -57,7 +57,7 @@ try {
   RevenueCatUI = ui.default;
   PAYWALL_RESULT = ui.PAYWALL_RESULT;
 } catch {
-  console.log("[StandalonePaywall] RevenueCatUI not available (Expo Go).");
+  console.log("[StandalonePaywall] RevenueCatUI not available — need development build (not Expo Go).");
 }
 
 const YEARLY_PRICE  = "$79.99";

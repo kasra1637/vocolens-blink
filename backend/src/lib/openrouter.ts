@@ -17,8 +17,15 @@ const AUDIO_MODEL = "openai/gpt-5.4-mini";
 const TEXT_FALLBACK_MODEL = "openai/gpt-5.4-mini";
 
 // ── API key loader ───────────────────────────────────────────
+// Cloudflare Workers does NOT populate process.env. The initEnv middleware
+// in index.ts copies c.env bindings into globalThis on each request.
+// Fallback chain:
+//   1. globalThis.__OPENROUTER_API_KEY  (Cloudflare Worker via middleware)
+//   2. process.env.OPENROUTER_API_KEY   (local dev / Node.js / Bun)
 function getApiKey(): string | undefined {
-  return process.env.OPENROUTER_API_KEY;
+  return (
+    (globalThis as Record<string, unknown>).__OPENROUTER_API_KEY as string | undefined
+  ) ?? process.env.OPENROUTER_API_KEY;
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────

@@ -54,7 +54,10 @@ export default ({ config }) => ({
       },
     ],
     'expo-updates',
-    // react-native-purchases has no Expo config plugin — native linking only
+    // RevenueCat — Expo config plugins auto-link native iOS/Android modules
+    // during `npx expo prebuild`. Required for development builds & EAS Build.
+    'react-native-purchases',
+    'react-native-purchases-ui',
   ],
   owner: 'kasra1637',
   runtimeVersion: '1.0.0',

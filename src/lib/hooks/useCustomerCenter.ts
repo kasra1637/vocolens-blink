@@ -22,7 +22,7 @@ let RevenueCatUI: typeof import("react-native-purchases-ui").default | null = nu
 try {
   RevenueCatUI = require("react-native-purchases-ui").default;
 } catch {
-  // not available (Expo Go / web)
+  // Not available — expected in Expo Go. Requires development build.
 }
 
 export function useCustomerCenter() {
