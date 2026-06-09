@@ -44,6 +44,7 @@ import {
 } from "@/lib/revenueCatClient";
 import type { PurchasesPackage } from "react-native-purchases";
 import { NotificationService } from "@/lib/services/notification-service";
+import { TestPurchaseDialog } from "@/components/TestPurchaseDialog";
 
 // ── Pricing fallbacks (shown when SDK not available) ──────────────────────────
 const MONTHLY_PRICE    = "$9.99";
@@ -162,6 +163,8 @@ export function PaywallScreen() {
   const [isPurchasingMonthly, setIsPurchasingMonthly] = useState(false);
   const [isRestoring,        setIsRestoring]         = useState(false);
   const [showExitModal,      setShowExitModal]       = useState(false);
+  const [showTestDialog,     setShowTestDialog]      = useState(false);
+  const [testDialogPlan,     setTestDialogPlan]      = useState<PlanKey>("yearly");
 
   // ── Load offerings ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -207,7 +210,10 @@ export function PaywallScreen() {
     const pkg = selectedPlan === "yearly" ? yearlyPkg : threeMonthPkg;
 
     if (!isRevenueCatEnabled() || !pkg) {
-      grantAccess(selectedPlan); return;
+      // Show test purchase dialog (simulates RevenueCat Test Store)
+      setTestDialogPlan(selectedPlan);
+      setShowTestDialog(true);
+      return;
     }
 
     setIsPurchasing(true);
@@ -233,7 +239,11 @@ export function PaywallScreen() {
     trackEvent("cta_tapped", { plan: "monthly" });
 
     if (!isRevenueCatEnabled() || !monthlyPkg) {
-      grantAccess("monthly"); return;
+      // Show test purchase dialog (simulates RevenueCat Test Store)
+      setTestDialogPlan("monthly");
+      setShowExitModal(false);
+      setShowTestDialog(true);
+      return;
     }
 
     setIsPurchasingMonthly(true);
@@ -437,6 +447,15 @@ export function PaywallScreen() {
         onDecline={() => { setShowExitModal(false); prevStep(); }}
         isPurchasing={isPurchasingMonthly}
         monthlyPrice={monthlyPrice}
+      />
+
+      <TestPurchaseDialog
+        visible={showTestDialog}
+        plan={testDialogPlan === "three_month" ? "Quarterly" : testDialogPlan}
+        price={testDialogPlan === "yearly" ? yearlyPrice : testDialogPlan === "three_month" ? threeMonthPrice : monthlyPrice}
+        onSuccess={() => { setShowTestDialog(false); grantAccess(testDialogPlan); }}
+        onFail={() => Alert.alert("Payment Failed", "The test purchase was declined.")}
+        onCancel={() => setShowTestDialog(false)}
       />
     </View>
   );
