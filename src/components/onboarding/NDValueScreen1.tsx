@@ -11,7 +11,7 @@ import { View, Text, ScrollView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn, Easing } from "react-native-reanimated";
-import { Brain, Frown, Meh, Angry } from "lucide-react-native";
+import { HelpCircle, Frown, Meh, Angry } from "lucide-react-native";
 import { tapHaptic } from "@/lib/haptics";
 import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import { OnboardingCTAButton } from "@/components/onboarding/OnboardingCTAButton";
@@ -23,7 +23,7 @@ const SOFT = Easing.bezier(0.22, 1, 0.36, 1);
 
 const PAIN_POINTS = [
   {
-    icon: Brain,
+    icon: HelpCircle,
     headline: "Feelings are hard to name",
     body: "You feel it, but can't say it — just speak and Vocolens finds the words for you.",
   },
