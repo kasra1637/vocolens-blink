@@ -48,7 +48,6 @@ import {
 } from "@/lib/revenueCatClient";
 import type { PurchasesPackage } from "react-native-purchases";
 import { NotificationService } from "@/lib/services/notification-service";
-import { TestPurchaseDialog } from "@/components/TestPurchaseDialog";
 
 // ── RevenueCatUI — lazy load so Expo Go doesn't crash ─────────────────────────
 let RevenueCatUI: typeof import("react-native-purchases-ui").default | null = null;
@@ -203,8 +202,6 @@ export function StandalonePaywall() {
   const [isPurchasingMonthly, setIsPurchasingMonthly] = useState(false);
   const [isRestoring,         setIsRestoring]         = useState(false);
   const [showExitModal,       setShowExitModal]       = useState(false);
-  const [showTestDialog,      setShowTestDialog]      = useState(false);
-  const [testDialogPlan,      setTestDialogPlan]      = useState<"yearly" | "monthly">("yearly");
 
   useEffect(() => {
     if (!isRevenueCatEnabled()) return;
@@ -242,12 +239,7 @@ export function StandalonePaywall() {
 
   const handleContinue = async () => {
     tapHaptic();
-    if (!isRevenueCatEnabled() || !yearlyPkg) {
-      // Show test purchase dialog (simulates RevenueCat Test Store)
-      setTestDialogPlan("yearly");
-      setShowTestDialog(true);
-      return;
-    }
+    if (!isRevenueCatEnabled() || !yearlyPkg) { grantYearly(); return; }
     setIsPurchasing(true);
     const result = await purchasePackage(yearlyPkg);
     setIsPurchasing(false);
@@ -262,13 +254,7 @@ export function StandalonePaywall() {
 
   const handleMonthlyAccept = async () => {
     tapHaptic();
-    if (!isRevenueCatEnabled() || !monthlyPkg) {
-      // Show test purchase dialog (simulates RevenueCat Test Store)
-      setTestDialogPlan("monthly");
-      setShowExitModal(false);
-      setShowTestDialog(true);
-      return;
-    }
+    if (!isRevenueCatEnabled() || !monthlyPkg) { grantMonthly(); return; }
     setIsPurchasingMonthly(true);
     const result = await purchasePackage(monthlyPkg);
     setIsPurchasingMonthly(false);
@@ -303,7 +289,7 @@ export function StandalonePaywall() {
   // ── Present RevenueCat managed paywall (primary path) ─────────────────────
   const handlePresentRCPaywall = async () => {
     if (!RevenueCatUI || !isRevenueCatEnabled()) {
-      // Fallback: show test purchase dialog
+      // Fallback: use custom paywall CTA
       handleContinue();
       return;
     }
@@ -452,15 +438,6 @@ export function StandalonePaywall() {
         onDecline={() => setShowExitModal(false)}
         isPurchasing={isPurchasingMonthly}
         monthlyPrice={monthlyPrice}
-      />
-
-      <TestPurchaseDialog
-        visible={showTestDialog}
-        plan={testDialogPlan === "yearly" ? "Annual" : "Monthly"}
-        price={testDialogPlan === "yearly" ? yearlyPrice : monthlyPrice}
-        onSuccess={() => { setShowTestDialog(false); testDialogPlan === "yearly" ? grantYearly() : grantMonthly(); }}
-        onFail={() => Alert.alert("Payment Failed", "The test purchase was declined.")}
-        onCancel={() => setShowTestDialog(false)}
       />
     </View>
   );
