@@ -233,31 +233,32 @@ export function BiometricLockScreen() {
       >
         <SafeAreaView style={{ flex: 1 }}>
 
-          {/* Loading — shown briefly during the async capability check */}
+          {/* Initial biometric prompt — fires fingerprint immediately */}
           {view === 'loading' && (
             <View style={styles.content}>
-              <View />
               <Animated.View
                 entering={FadeIn.duration(400)}
-                style={{ alignItems: 'center' }}
+                style={styles.centeredBlock}
               >
                 <EmotionalCompanion
                   state="idle"
-                  size={90}
+                  size={100}
                   themeColor={themeColor}
                 />
+                <Text style={styles.heading}>Welcome Back</Text>
+                <Text style={styles.subtitle}>
+                  Sign in using your biometrics or PIN to continue
+                </Text>
               </Animated.View>
-              <View />
             </View>
           )}
 
           {/* Re-registration in progress */}
           {view === 'reregistering' && (
             <View style={styles.content}>
-              <View />
               <Animated.View
                 entering={FadeIn.duration(400)}
-                style={{ alignItems: 'center', gap: 20 }}
+                style={styles.centeredBlock}
               >
                 <EmotionalCompanion
                   state="processing"
@@ -269,7 +270,6 @@ export function BiometricLockScreen() {
                   Scan your fingerprint once to re-register it with Vocolens.
                 </Text>
               </Animated.View>
-              <View />
             </View>
           )}
 
@@ -308,10 +308,12 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: 28,
-    paddingTop: 40,
-    paddingBottom: 60,
+  },
+  centeredBlock: {
+    alignItems: 'center',
+    gap: 20,
   },
   heading: {
     fontFamily: 'Fraunces_700Bold',
@@ -321,6 +323,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
     lineHeight: 34,
     opacity: 0.92,
+    marginTop: 4,
   },
   subtitle: {
     fontFamily: 'Inter_400Regular',
