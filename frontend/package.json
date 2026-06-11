@@ -1,8 +1,0 @@
-{
-  "name": "vocolens-frontend",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "start": "cd /app && EXPO_TUNNEL=true EXPO_NO_DEV_CLIENT=true METRO_PORT=3001 npx expo start --tunnel --port 3001 & node /app/frontend/proxy-server.js"
-  }
-}
