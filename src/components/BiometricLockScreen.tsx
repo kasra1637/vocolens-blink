@@ -2,23 +2,21 @@
  * BiometricLockScreen
  *
  * Flow (biometric path):
- *  App opens → biometric fires immediately (no welcome screen, no delay)
- *  → Success → celebration (which shows the warm greeting + companion)
- *  → app opens.
- *  → Cancelled / failed → PIN screen → celebration → app opens.
+ *  App opens → biometric fires immediately → Success → app opens directly.
+ *  → Cancelled / failed → PIN screen → app opens.
  *
  * Flow (PIN-only path):
- *  Biometric never set up → PIN entry → celebration → app opens.
+ *  Biometric never set up → PIN entry → app opens.
  *
  * Flow (invalidation path):
  *  Fingerprints changed → PIN verification → re-register biometric → app.
  *
- * The welcome screen ("Welcome back, [Name]. Your journal is ready for you.")
- * has been removed entirely. The celebration already carries that greeting:
- *   "Good to see you, [Name]. / Your journal is here. Ready when you are."
- * Removing the welcome screen eliminates the collision where the welcome
- * screen was visible underneath the celebration overlay on the PIN path,
- * and removes the Knox-dialog window-of-opportunity on Android.
+ * Layout: content (companion character, headline, subtitle) is positioned in
+ * the upper portion of the screen to match the visual placement used throughout
+ * onboarding screens.
+ *
+ * No celebration screen is shown — successful authentication proceeds directly
+ * to the main application interface.
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -36,7 +34,6 @@ import {
   isPinSet,
 } from '@/lib/auth-service';
 import { EmotionalCompanion } from '@/components/EmotionalCompanion';
-import { BiometricUnlockCelebration } from '@/components/BiometricUnlockCelebration';
 import { PinEntryScreen } from '@/components/PinEntryScreen';
 
 // ─── View states ──────────────────────────────────────────────────────────────
@@ -60,7 +57,6 @@ export function BiometricLockScreen() {
 
   const [view,            setView]            = useState<LockView>('loading');
   const [authenticating,  setAuthenticating]  = useState(false);
-  const [showCelebration, setShowCelebration] = useState(false);
   const [pinContext,      setPinContext]       = useState<{ title: string; subtitle: string } | null>(null);
 
   // ─── SECURITY: Block hardware back button on Android ──────────────────────
@@ -88,7 +84,7 @@ export function BiometricLockScreen() {
     if (result.success) {
       enableBiometric();
       successHaptic();
-      setShowCelebration(true);
+      setUnlocked(true);
       return;
     }
 
@@ -181,10 +177,10 @@ export function BiometricLockScreen() {
 
   // ─── PIN success ──────────────────────────────────────────────────────────
   const handlePinFallbackSuccess = useCallback(async () => {
-    // PIN-only device path → celebration carries the greeting
+    // PIN-only device path → unlock directly
     if (!isBiometricEnabled) {
       successHaptic();
-      setShowCelebration(true);
+      setUnlocked(true);
       return;
     }
 
@@ -196,11 +192,7 @@ export function BiometricLockScreen() {
     );
     enableBiometric();
     successHaptic();
-    if (result.success) {
-      setShowCelebration(true);
-    } else {
-      setUnlocked(true);
-    }
+    setUnlocked(true);
   }, [isBiometricEnabled, clearBiometricInvalidation, enableBiometric, setUnlocked]);
 
   const handlePinSetupComplete = useCallback(async () => {
@@ -211,16 +203,8 @@ export function BiometricLockScreen() {
     );
     enableBiometric();
     successHaptic();
-    if (result.success) {
-      setShowCelebration(true);
-    } else {
-      setUnlocked(true);
-    }
-  }, [clearBiometricInvalidation, enableBiometric, setUnlocked]);
-
-  const handleCelebrationDone = useCallback(() => {
     setUnlocked(true);
-  }, [setUnlocked]);
+  }, [clearBiometricInvalidation, enableBiometric, setUnlocked]);
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
@@ -274,7 +258,7 @@ export function BiometricLockScreen() {
           )}
 
           {/* PIN fallback */}
-          {view === 'pin_fallback' && pinContext && !showCelebration && (
+          {view === 'pin_fallback' && pinContext && (
             <PinEntryScreen
               onSuccess={handlePinFallbackSuccess}
               onBack={undefined}
@@ -284,7 +268,7 @@ export function BiometricLockScreen() {
           )}
 
           {/* PIN setup — invalidation edge case */}
-          {view === 'pin_setup' && pinContext && !showCelebration && (
+          {view === 'pin_setup' && pinContext && (
             <PinEntryScreen
               mode="setup"
               onComplete={handlePinSetupComplete}
@@ -295,11 +279,6 @@ export function BiometricLockScreen() {
 
         </SafeAreaView>
       </LinearGradient>
-
-      {/* Celebration — renders over everything, carries the warm greeting */}
-      {showCelebration && (
-        <BiometricUnlockCelebration onDone={handleCelebrationDone} />
-      )}
     </View>
   );
 }
@@ -308,8 +287,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     paddingHorizontal: 28,
+    paddingTop: 60,
   },
   centeredBlock: {
     alignItems: 'center',
