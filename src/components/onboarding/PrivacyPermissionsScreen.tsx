@@ -88,7 +88,7 @@ export function PrivacyPermissionsScreen() {
       icon: ShieldCheck,
       title: "Delete means delete",
       description:
-        "Remove the app and your data is gone for good, with no copies kept.",
+        "In Settings, Delete Account wipes all your data with no copies kept.",
     },
   ];
 
