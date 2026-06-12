@@ -63,32 +63,27 @@ export function PrivacyPermissionsScreen() {
     {
       icon: ShieldCheck,
       title: "Your activities stay here",
-      description:
-        "Everything stays here. Nothing leaves unless you choose to export it.",
+      description: "Nothing leaves unless you export it.",
     },
     {
       icon: ShieldCheck,
       title: "No cloud, no servers",
-      description:
-        "Your journal lives only on this device, never on a server we control.",
+      description: "Lives on this device only.",
     },
     {
       icon: ShieldCheck,
       title: "Locked to you alone",
-      description:
-        "Face ID, fingerprint, or PIN. Set it up once and keep your journal private.",
+      description: "Face ID, fingerprint, or PIN.",
     },
     {
       icon: ShieldCheck,
       title: "Hardware-encrypted security",
-      description:
-        "Your PIN is encrypted in the device's secure hardware-backed keystore.",
+      description: "PIN stored in secure keystore.",
     },
     {
       icon: ShieldCheck,
       title: "Delete means delete",
-      description:
-        "In Settings, Delete Account wipes all your data with no copies kept.",
+      description: "Wipe everything from Settings.",
     },
   ];
 
@@ -153,7 +148,7 @@ export function PrivacyPermissionsScreen() {
                   lineHeight: 38,
                 }}
               >
-                You own your data
+                Truly Yours
               </Text>
             </Animated.View>
 
