@@ -25,6 +25,7 @@ import useBiometricStore from '@/lib/state/biometric-store';
 import useSubscriptionStore from '@/lib/state/subscription-store';
 import { OnboardingFlow } from './onboarding';
 import { BiometricLockScreen } from './BiometricLockScreen';
+import { BiometricUnlockCelebration } from './BiometricUnlockCelebration';
 import { StandalonePaywall } from './StandalonePaywall';
 import { FirstLaunchCelebration } from './FirstLaunchCelebration';
 import { SplashScreen } from './onboarding/SplashScreen';
@@ -63,6 +64,11 @@ export function AuthGate({ children }: AuthGateProps) {
   const [showSplash,           setShowSplash]           = useState(true);
   const [subscriptionVerified, setSubscriptionVerified] = useState(false);
 
+  // Track whether we should show the unlock celebration overlay.
+  // This fires when the session transitions from locked → unlocked.
+  const [showUnlockCelebration, setShowUnlockCelebration] = useState(false);
+  const wasLockedRef = useRef<boolean>(true);
+
   // Track AppState to re-lock when returning from background
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
@@ -70,6 +76,23 @@ export function AuthGate({ children }: AuthGateProps) {
   useEffect(() => {
     configureRevenueCat();
   }, []);
+
+  // ── Detect unlock transition → trigger celebration overlay ─────────────────
+  // When a lock method is configured and the session transitions from locked to
+  // unlocked, show the celebration as a cosmetic overlay on top of the now-visible
+  // app interface. This avoids the rendering conflict of showing it inside the
+  // lock screen (which would unmount mid-animation).
+  useEffect(() => {
+    const lockEnabled = isBiometricEnabled || isPinEnabled;
+    const isCurrentlyLocked = lockEnabled && !isUnlocked;
+
+    if (wasLockedRef.current && !isCurrentlyLocked && lockEnabled) {
+      // Transition: was locked → now unlocked. Show celebration.
+      setShowUnlockCelebration(true);
+    }
+
+    wasLockedRef.current = isCurrentlyLocked;
+  }, [isUnlocked, isBiometricEnabled, isPinEnabled]);
 
   // ── SECURITY: Re-lock session when app goes to background ──────────────────
   // This prevents an attacker from using task-switcher manipulation or developer
@@ -198,6 +221,9 @@ export function AuthGate({ children }: AuthGateProps) {
       {children}
       {!hasSeenWelcomeCelebration && (
         <FirstLaunchCelebration onDone={markWelcomeCelebrationSeen} />
+      )}
+      {showUnlockCelebration && hasSeenWelcomeCelebration && (
+        <BiometricUnlockCelebration onDone={() => setShowUnlockCelebration(false)} />
       )}
     </>
   );
