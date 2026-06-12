@@ -70,7 +70,7 @@ export function PrivacyPermissionsScreen() {
       icon: ShieldCheck,
       title: "No cloud, no servers",
       description:
-        "Your journal lives only on this device. There's no server-side database of your thoughts.",
+        "Your journal lives only on this device, never on a server we control.",
     },
     {
       icon: ShieldCheck,
@@ -82,13 +82,13 @@ export function PrivacyPermissionsScreen() {
       icon: ShieldCheck,
       title: "Hardware-encrypted security",
       description:
-        "Your PIN is encrypted in the device's secure keystore — protected even if someone accesses the filesystem.",
+        "Your PIN is encrypted in the device's secure hardware-backed keystore.",
     },
     {
       icon: ShieldCheck,
       title: "Delete means delete",
       description:
-        "Remove the app and your data is gone forever. No cloud copies, no backups we keep.",
+        "Remove the app and your data is gone for good, with no copies kept.",
     },
   ];
 
