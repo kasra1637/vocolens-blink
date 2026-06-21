@@ -294,7 +294,11 @@ export default function SpeakScreen() {
   // Check initial permission status on mount
   useEffect(() => {
     const checkPermission = async () => {
+      // Set recording-active to suppress AuthGate re-lock during the OS
+      // permission dialog (which backgrounds the app on some platforms).
+      useRecordingStore.getState().setRecordingActive(true);
       const result = await voiceActions.requestPermission();
+      useRecordingStore.getState().setRecordingActive(false);
       if (result.status === "denied" && !result.canAskAgain) {
         console.log("Microphone permission permanently denied");
       }
@@ -319,17 +323,20 @@ export default function SpeakScreen() {
       setRecordingState("listening");
       setDuration(0);
 
+      // Signal recording intent BEFORE requesting permission — the OS
+      // permission dialog sends the app to background, which would otherwise
+      // trigger AuthGate's re-lock and show the PIN screen.
+      useRecordingStore.getState().setRecordingActive(true);
+
       // Request permission immediately
       const permissionResult = await voiceActions.requestPermission();
 
       if (permissionResult.status !== "granted") {
+        useRecordingStore.getState().setRecordingActive(false);
         setRecordingState("permission_denied");
         errorHaptic();
         return;
       }
-
-      // Signal that a recording session is active (suppresses AuthGate re-lock)
-      useRecordingStore.getState().setRecordingActive(true);
 
       // Start recording
       await voiceActions.startRecording();
