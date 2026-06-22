@@ -312,6 +312,14 @@ export function PaywallScreen() {
               <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.60)", fontSize: 14, textAlign: "center", marginTop: 8, lineHeight: 20, maxWidth: "85%" }}>
                 Speak freely and let clarity find you.
               </Text>
+
+              {/* Plutchik badge */}
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 12, opacity: 0.6 }}>
+                <FlaskConical size={12} color="#FFFFFF" strokeWidth={2} />
+                <Text style={{ fontFamily: "Inter_400Regular", color: "#FFFFFF", fontSize: 11 }}>
+                  Powered by the scientifically validated Plutchik Model
+                </Text>
+              </View>
             </Animated.View>
 
             {/* Benefits */}
@@ -389,13 +397,6 @@ export function PaywallScreen() {
                   ? `No charge for ${TRIAL_DAYS} days · Then ${yearlyPrice}/yr · Cancel anytime`
                   : `${threeMonthPrice} billed every 3 months · Cancel anytime`}
               </Text>
-
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 14, opacity: 0.6 }}>
-                <FlaskConical size={12} color="#FFFFFF" strokeWidth={2} />
-                <Text style={{ fontFamily: "Inter_400Regular", color: "#FFFFFF", fontSize: 11 }}>
-                  Powered by the scientifically validated Plutchik Model
-                </Text>
-              </View>
 
               {/* Legal + Restore */}
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 14 }}>

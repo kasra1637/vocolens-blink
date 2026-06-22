@@ -150,6 +150,18 @@ export function PrivacyPermissionsScreen() {
               >
                 Truly Yours
               </Text>
+              <Text
+                style={{
+                  fontFamily: "Inter_400Regular",
+                  color: "rgba(255, 255, 255, 0.60)",
+                  fontSize: 14,
+                  textAlign: "center",
+                  marginTop: 8,
+                  lineHeight: 20,
+                }}
+              >
+                Private encrypted & entirely yours
+              </Text>
             </Animated.View>
 
             {/* Feature cards — one per row, matching NDValueScreen1 exactly */}
