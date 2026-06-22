@@ -63,27 +63,27 @@ export function PrivacyPermissionsScreen() {
     {
       icon: ShieldCheck,
       title: "Your activities stay here",
-      description: "Nothing leaves unless you export it.",
+      description: "Nothing leaves unless you export it",
     },
     {
       icon: ShieldCheck,
       title: "No cloud, no servers",
-      description: "Lives on this device only.",
+      description: "Lives on this device only",
     },
     {
       icon: ShieldCheck,
       title: "Locked to you alone",
-      description: "Face ID, fingerprint, or PIN.",
+      description: "Face ID, fingerprint, or PIN",
     },
     {
       icon: ShieldCheck,
-      title: "Hardware-encrypted security",
-      description: "PIN stored in secure keystore.",
+      title: "Hardware-encrypted security and privacy",
+      description: "All your activity stays here. Nothing leaves unless you export it",
     },
     {
       icon: ShieldCheck,
       title: "Delete means delete",
-      description: "Wipe everything from Settings.",
+      description: "Wipe everything from Settings",
     },
   ];
 

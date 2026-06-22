@@ -25,22 +25,22 @@ const PAIN_POINTS = [
   {
     icon: HelpCircle,
     headline: "Feelings are hard to name",
-    body: "You feel it, but can't say it — just speak and Vocolens finds the words for you.",
+    body: "You feel it, but can't say it — just speak and Vocolens finds the words for you",
   },
   {
     icon: Meh,
     headline: "Overwhelm sneaks up",
-    body: "Small things pile up unnoticed — until suddenly it's too much.",
+    body: "Small things pile up unnoticed — until suddenly it's too much",
   },
   {
     icon: Frown,
     headline: "The same thought loops",
-    body: "A worry replays on repeat and you can't tell if it matters.",
+    body: "A worry replays on repeat and you can't tell if it matters",
   },
   {
     icon: Angry,
     headline: "Masking is exhausting",
-    body: "Holding it together all day leaves nothing left to process.",
+    body: "Holding it together all day leaves nothing left to process",
   },
 ];
 
@@ -122,7 +122,7 @@ export function NDValueScreen1() {
                   lineHeight: 23,
                 }}
               >
-                As a neurodivergent person, your mind works differently — and that's never a problem.
+                As a neurodivergent person, your mind works differently — and that's never a problem
               </Text>
             </Animated.View>
 

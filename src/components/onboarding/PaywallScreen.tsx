@@ -332,10 +332,10 @@ export function PaywallScreen() {
             <Animated.View entering={FadeIn.delay(120).duration(700).easing(SOFT)} style={{ marginTop: 14, marginBottom: 14 }}>
               <View style={{ backgroundColor: "rgba(255,255,255,0.10)", borderRadius: 18, borderWidth: 1, borderColor: "rgba(255,255,255,0.18)", paddingHorizontal: 16, paddingVertical: 14, gap: 11 }}>
                 {[
-                  { Icon: MessageCircle, text: "Put words to feelings you couldn't name before — no blank page, just talk" },
-                  { Icon: Shield, text: "Catch overwhelm before it builds, instead of after it hits" },
-                  { Icon: Eye, text: "See looping thoughts and triggers for what they really are" },
-                  { Icon: TrendingUp, text: "Watch patterns become clearer, week after week — privately, on your device" },
+                  { Icon: MessageCircle, text: "Name feelings you couldn't before" },
+                  { Icon: Shield, text: "Catch overwhelm before it hits" },
+                  { Icon: Eye, text: "See your thought loops clearly" },
+                  { Icon: TrendingUp, text: "Track patterns week after week" },
                 ].map((item, idx) => (
                   <View key={idx} style={{ flexDirection: "row", alignItems: "center" }}>
                     <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.12)", alignItems: "center", justifyContent: "center", marginRight: 12 }}>
