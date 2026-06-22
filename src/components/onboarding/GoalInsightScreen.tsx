@@ -49,13 +49,13 @@ const BLOCKER_LABELS: Record<GoalBlockerType, string> = {
 
 const GOAL_INSIGHT_MESSAGES: Record<GoalType, string> = {
   "emotional-processing":
-    "In a few weeks, you'll name feelings that used to just feel like static.",
+    "In a few weeks, you'll name feelings that used to just feel like static",
   "goal-setting":
-    "You'll see which days move you forward — and what quietly holds you back.",
+    "You'll see which days move you forward — and what quietly holds you back",
   "self-reflection":
-    "Patterns you've never noticed will start to show up clearly.",
+    "Patterns you've never noticed will start to show up clearly",
   "decision-making":
-    "Talking it out will surface the answer you already had inside.",
+    "Talking it out will surface the answer you already had inside",
 };
 
 export function GoalInsightScreen() {

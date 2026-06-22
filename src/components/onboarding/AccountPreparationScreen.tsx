@@ -290,7 +290,7 @@ export function AccountPreparationScreen() {
                 </Text>
                 , which includes eight core emotions and their intensities, to
                 ensure a precise and research-based understanding of your
-                feelings.
+                feelings
               </Text>
             </Animated.View>
 

@@ -111,7 +111,7 @@ export function PersonalizePermissionScreen() {
                 }}
               >
                 Answer a few quick questions so we can tailor everything just
-                for you.
+                for you
               </Text>
             </Animated.View>
 
@@ -144,7 +144,7 @@ export function PersonalizePermissionScreen() {
                     flexShrink: 1,
                   }}
                 >
-                  Your answers are private, encrypted, and never shared.
+                  Your answers are private, encrypted, and never shared
                 </Text>
               </View>
             </Animated.View>

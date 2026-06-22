@@ -92,7 +92,7 @@ function MonthlyExitModal({
           </View>
 
           <Text style={{ color: "rgba(255,255,255,0.75)", fontFamily: "Inter_400Regular", fontSize: 14, lineHeight: 21, marginBottom: 20 }}>
-            Try Vocolens monthly — no long-term commitment, cancel anytime.
+            Try Vocolens monthly — no long-term commitment, cancel anytime
           </Text>
 
           <View style={{
@@ -316,7 +316,7 @@ export function PaywallScreen() {
                 Your journal is ready.{"\n"}Let's make it yours.
               </Text>
               <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.60)", fontSize: 14, textAlign: "center", marginTop: 8, lineHeight: 20, maxWidth: "85%" }}>
-                Speak freely and let clarity find you.
+                Speak freely and let clarity find you
               </Text>
 
               {/* Plutchik badge */}

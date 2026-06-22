@@ -133,8 +133,8 @@ export function BiometricSetupScreen() {
       ? 'Create Your Backup PIN'
       : 'Protect with a PIN';
     const pinSubtitle = biometricAvailable
-      ? `This is your backup for when your ${biometricName} isn't available.`
-      : 'Choose a 4-digit PIN. Only you will be able to open Vocolens.';
+      ? `This is your backup for when your ${biometricName} isn't available`
+      : 'Choose a 4-digit PIN. Only you will be able to open Vocolens';
 
     return (
       <PinEntryScreen
@@ -152,8 +152,8 @@ export function BiometricSetupScreen() {
     : 'Secure your journal';
 
   const screenSubtitle = biometricAvailable
-    ? `Your journal locks automatically. Use your ${biometricName} or PIN to get back in.`
-    : 'Your device doesn\'t have biometrics. Set a 4-digit PIN to keep your journal private.';
+    ? `Your journal locks automatically. Use your ${biometricName} or PIN to get back in`
+    : 'Your device doesn\'t have biometrics. Set a 4-digit PIN to keep your journal private';
 
   const ctaLabel = checking
     ? 'Checking…'

@@ -43,13 +43,13 @@ const PROCESSING_LABELS: Record<ProcessingStyleType, string> = {
 // Personalised insight per selection
 const PROCESSING_INSIGHTS: Record<ProcessingStyleType, string> = {
   "talking-out":
-    "Hearing your own words creates connections silent thinking never could.",
+    "Hearing your own words creates connections silent thinking never could",
   "seeing-written":
-    "Vocolens transcribes everything — your words in writing, waiting for you.",
+    "Vocolens transcribes everything — your words in writing, waiting for you",
   "noticing-patterns":
-    "Vocolens tracks emotions and triggers over time so patterns start to appear.",
+    "Vocolens tracks emotions and triggers over time so patterns start to appear",
   "right-question":
-    "Vocolens surfaces the question beneath your words and reflects it back.",
+    "Vocolens surfaces the question beneath your words and reflects it back",
 };
 
 // Icon per selection — mirrors ProcessingStyleScreen
@@ -151,7 +151,7 @@ export function ProcessingStyleInsightScreen() {
                   lineHeight: 38,
                 }}
               >
-                We're built for that.
+                We're built for that
               </Text>
             </Animated.View>
 

@@ -62,11 +62,6 @@ export function PrivacyPermissionsScreen() {
   const privacyFeatures = [
     {
       icon: ShieldCheck,
-      title: "Your activities stay here",
-      description: "Nothing leaves unless you export it",
-    },
-    {
-      icon: ShieldCheck,
       title: "No cloud, no servers",
       description: "Lives on this device only",
     },
@@ -74,11 +69,6 @@ export function PrivacyPermissionsScreen() {
       icon: ShieldCheck,
       title: "Locked to you alone",
       description: "Face ID, fingerprint, or PIN",
-    },
-    {
-      icon: ShieldCheck,
-      title: "Hardware-encrypted security and privacy",
-      description: "All your activity stays here. Nothing leaves unless you export it",
     },
     {
       icon: ShieldCheck,
