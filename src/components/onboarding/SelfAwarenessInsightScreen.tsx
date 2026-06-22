@@ -143,7 +143,7 @@ export function SelfAwarenessInsightScreen() {
                   lineHeight: 38,
                 }}
               >
-                That makes total sense.
+                That makes total sense
               </Text>
             </Animated.View>
 

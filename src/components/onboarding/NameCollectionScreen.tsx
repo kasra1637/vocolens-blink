@@ -124,7 +124,7 @@ export function NameCollectionScreen() {
                   maxWidth: "85%",
                 }}
               >
-                I'll use it to make your experience feel personal.
+                I'll use it to make your experience feel personal
               </Text>
             </Animated.View>
 

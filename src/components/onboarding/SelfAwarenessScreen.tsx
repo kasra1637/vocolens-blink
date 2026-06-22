@@ -116,7 +116,7 @@ export function SelfAwarenessScreen() {
                   lineHeight: 20,
                 }}
               >
-                We'll help you notice when you're in this zone.
+                We'll help you notice when you're in this zone
               </Text>
             </Animated.View>
 
