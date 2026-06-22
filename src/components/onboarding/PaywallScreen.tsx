@@ -295,6 +295,12 @@ export function PaywallScreen() {
   const threeMonthPrice = threeMonthPkg?.product?.priceString ?? THREE_MONTH_PRICE;
   const monthlyPrice    = monthlyPkg?.product?.priceString    ?? MONTHLY_PRICE;
 
+  // Calculate savings percentage: Annual vs Quarterly (annualized)
+  const yearlyNum      = yearlyPkg?.product?.price      ?? 79.99;
+  const threeMonthNum  = threeMonthPkg?.product?.price  ?? 24.99;
+  const quarterlyAnnualized = threeMonthNum * 4;
+  const savingsPercent = Math.round(((quarterlyAnnualized - yearlyNum) / quarterlyAnnualized) * 100);
+
   return (
     <View style={{ flex: 1 }}>
       <LinearGradient colors={themeColors.backgroundGradient} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={{ flex: 1 }}>
@@ -350,7 +356,6 @@ export function PaywallScreen() {
               >
                 <Text style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF", fontSize: 14, marginBottom: 8, letterSpacing: 0.2 }}>Quarterly</Text>
                 <Text style={{ fontFamily: "Fraunces_700Bold", color: "#FFFFFF", fontSize: 26, lineHeight: 30 }}>{threeMonthPrice}</Text>
-                <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.55)", fontSize: 12, marginBottom: 10 }}>every 3 months</Text>
                 <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.70)", fontSize: 12, marginTop: "auto" }}>
                   Just {THREE_MONTH_PER_MONTH}/mo
                 </Text>
@@ -366,7 +371,11 @@ export function PaywallScreen() {
                 </View>
                 <Text style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF", fontSize: 14, marginBottom: 8, letterSpacing: 0.2, marginTop: 14 }}>Annual</Text>
                 <Text style={{ fontFamily: "Fraunces_700Bold", color: "#FFFFFF", fontSize: 26, lineHeight: 30 }}>{yearlyPrice}</Text>
-                <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.55)", fontSize: 12, marginBottom: 10 }}>per year</Text>
+                <View style={{ backgroundColor: "rgba(74, 222, 128, 0.20)", borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, alignSelf: "flex-start", marginTop: 6, marginBottom: 6 }}>
+                  <Text style={{ fontFamily: "Inter_700Bold", color: "#4ADE80", fontSize: 11 }}>
+                    Save {savingsPercent}% vs Quarterly
+                  </Text>
+                </View>
                 <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.70)", fontSize: 12, marginTop: "auto" }}>
                   Just {YEARLY_PER_MONTH}/mo
                 </Text>

@@ -134,20 +134,20 @@ export function WelcomeScreen() {
                 Turn your thoughts into clear insights
               </Text>
             </Animated.View>
-          </View>
 
-          {/* CTA button — always rendered to reserve layout space; animated opacity controls visibility */}
-          <Animated.View
-            style={[{ paddingHorizontal: 24, paddingBottom: 32 }, buttonAnimStyle]}
-            pointerEvents={currentPhase === "ready" ? "auto" : "none"}
-          >
-            <OnboardingCTAButton
-              label="Start Journaling Free"
-              onPress={handleGetStarted}
-              paddingVertical={18}
-              fontSize={18}
-            />
-          </Animated.View>
+            {/* CTA button — placed near subtitle with reduced gap */}
+            <Animated.View
+              style={[{ width: "100%", marginTop: 20 }, buttonAnimStyle]}
+              pointerEvents={currentPhase === "ready" ? "auto" : "none"}
+            >
+              <OnboardingCTAButton
+                label="Start Journaling Free"
+                onPress={handleGetStarted}
+                paddingVertical={18}
+                fontSize={18}
+              />
+            </Animated.View>
+          </View>
         </SafeAreaView>
       </LinearGradient>
     </View>
