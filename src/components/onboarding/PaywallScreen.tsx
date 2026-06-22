@@ -26,7 +26,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn, Easing } from "react-native-reanimated";
 const SOFT = Easing.bezier(0.16, 1, 0.3, 1);
 import { tapHaptic, successHaptic, errorHaptic, selectHaptic } from "@/lib/haptics";
-import { Check, ChevronRight, FlaskConical, X, Settings, MessageCircle, Shield, Eye, TrendingUp } from "lucide-react-native";
+import { Check, ChevronRight, X, Settings, MessageCircle, Shield, Eye, TrendingUp } from "lucide-react-native";
 import useOnboardingStore, { THEME_COLORS } from "@/lib/state/onboarding-store";
 import useSubscriptionStore from "@/lib/state/subscription-store";
 import { ProgressBar } from "@/components/onboarding/ProgressBar";
@@ -318,14 +318,6 @@ export function PaywallScreen() {
               <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.60)", fontSize: 14, textAlign: "center", marginTop: 8, lineHeight: 20, maxWidth: "85%" }}>
                 Speak freely and let clarity find you
               </Text>
-
-              {/* Plutchik badge */}
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 12, opacity: 0.6 }}>
-                <FlaskConical size={12} color="#FFFFFF" strokeWidth={2} />
-                <Text style={{ fontFamily: "Inter_400Regular", color: "#FFFFFF", fontSize: 11 }}>
-                  Powered by the scientifically validated Plutchik Model
-                </Text>
-              </View>
             </Animated.View>
 
             {/* Benefits */}
@@ -348,23 +340,11 @@ export function PaywallScreen() {
             </Animated.View>
 
             {/* Plan cards */}
-            <Animated.View entering={FadeIn.delay(180).duration(700).easing(SOFT)} style={{ flexDirection: "row", gap: 10, marginBottom: 14 }}>
-              {/* Three-month */}
-              <Pressable
-                onPress={() => { selectHaptic(); setSelectedPlan("three_month"); trackEvent("plan_selected", { plan: "three_month" }); }}
-                style={{ flex: 1, borderRadius: 18, borderWidth: selectedPlan === "three_month" ? 2.5 : 1.5, borderColor: selectedPlan === "three_month" ? "#FFFFFF" : "rgba(255,255,255,0.25)", backgroundColor: selectedPlan === "three_month" ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.10)", padding: 14, minHeight: 148 }}
-              >
-                <Text style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF", fontSize: 14, marginBottom: 8, letterSpacing: 0.2 }}>Quarterly</Text>
-                <Text style={{ fontFamily: "Fraunces_700Bold", color: "#FFFFFF", fontSize: 26, lineHeight: 30 }}>{threeMonthPrice}</Text>
-                <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.70)", fontSize: 12, marginTop: "auto" }}>
-                  Just {THREE_MONTH_PER_MONTH}/mo
-                </Text>
-              </Pressable>
-
+            <Animated.View entering={FadeIn.delay(180).duration(700).easing(SOFT)} style={{ flexDirection: "column", gap: 10, marginBottom: 14 }}>
               {/* Annual */}
               <Pressable
                 onPress={() => { selectHaptic(); setSelectedPlan("yearly"); trackEvent("plan_selected", { plan: "yearly" }); }}
-                style={{ flex: 1, borderRadius: 18, borderWidth: selectedPlan === "yearly" ? 2.5 : 1.5, borderColor: selectedPlan === "yearly" ? "#FFFFFF" : "rgba(255,255,255,0.25)", backgroundColor: selectedPlan === "yearly" ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.10)", padding: 14, minHeight: 148, position: "relative", overflow: "hidden" }}
+                style={{ width: "100%", borderRadius: 18, borderWidth: selectedPlan === "yearly" ? 2.5 : 1.5, borderColor: selectedPlan === "yearly" ? "#FFFFFF" : "rgba(255,255,255,0.25)", backgroundColor: selectedPlan === "yearly" ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.10)", padding: 14, minHeight: 80, position: "relative", overflow: "hidden" }}
               >
                 <View style={{ position: "absolute", top: 0, right: 0, backgroundColor: "#FFFFFF", borderBottomLeftRadius: 10, paddingHorizontal: 8, paddingVertical: 3 }}>
                   <Text style={{ fontFamily: "Inter_700Bold", fontSize: 9, color: themeColors.primary, letterSpacing: 0.5 }}>3-DAY FREE TRIAL</Text>
@@ -378,6 +358,18 @@ export function PaywallScreen() {
                 </View>
                 <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.70)", fontSize: 12, marginTop: "auto" }}>
                   Just {YEARLY_PER_MONTH}/mo
+                </Text>
+              </Pressable>
+
+              {/* Three-month */}
+              <Pressable
+                onPress={() => { selectHaptic(); setSelectedPlan("three_month"); trackEvent("plan_selected", { plan: "three_month" }); }}
+                style={{ width: "100%", borderRadius: 18, borderWidth: selectedPlan === "three_month" ? 2.5 : 1.5, borderColor: selectedPlan === "three_month" ? "#FFFFFF" : "rgba(255,255,255,0.25)", backgroundColor: selectedPlan === "three_month" ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.10)", padding: 14, minHeight: 80 }}
+              >
+                <Text style={{ fontFamily: "Inter_700Bold", color: "#FFFFFF", fontSize: 14, marginBottom: 8, letterSpacing: 0.2 }}>Quarterly</Text>
+                <Text style={{ fontFamily: "Fraunces_700Bold", color: "#FFFFFF", fontSize: 26, lineHeight: 30 }}>{threeMonthPrice}</Text>
+                <Text style={{ fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.70)", fontSize: 12, marginTop: "auto" }}>
+                  Just {THREE_MONTH_PER_MONTH}/mo
                 </Text>
               </Pressable>
             </Animated.View>
