@@ -23,7 +23,6 @@ import {
 } from '../services/deepgram-realtime-service';
 import { webAudioStreamingService } from '../services/web-audio-streaming-service';
 import { transcribeAudioFile } from '../deepgram-transcription-service';
-import useOnboardingStore from '../state/onboarding-store';
 
 export type PermissionState = 'granted' | 'denied' | 'undetermined';
 
@@ -88,7 +87,8 @@ export function useRealtimeVoiceRecording(): [
   RealtimeVoiceRecordingState,
   RealtimeVoiceRecordingActions
 ] {
-  const language = useOnboardingStore((s) => s.selectedTranscriptionLanguage);
+  // Hardcoded to English — sole supported transcription language
+  const language = 'en';
 
   // State
   const [permissionStatus, setPermissionStatus] = useState<PermissionState>('undetermined');

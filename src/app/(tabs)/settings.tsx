@@ -76,7 +76,6 @@ import {
 import { useCustomerCenter } from "@/lib/hooks/useCustomerCenter";
 import { removePin, changePin } from "@/lib/auth-service";
 import { exportAllDataAsCsv } from "@/lib/export-data";
-import { getLanguageByCode } from "@/lib/languages";
 import { hexToRgba } from "@/lib/glass";
 import { PinEntryScreen, type PinEntryScreenHandle } from "@/components/PinEntryScreen";
 
@@ -127,11 +126,6 @@ export default function SettingsScreen() {
   const setEmotionReflectionMode = useSettingsStore(
     (s) => s.setEmotionReflectionMode,
   );
-  const selectedLanguage = useOnboardingStore(
-    (s) => s.selectedTranscriptionLanguage,
-  );
-  const currentLang = getLanguageByCode(selectedLanguage);
-
   // Usage tracking
   const usageMinutes = useUsageMinutes();
   const remainingMinutes = useRemainingMinutes();
@@ -1089,69 +1083,6 @@ export default function SettingsScreen() {
                   </View>
                 </Pressable>
               </View>
-            </Animated.View>
-
-            {/* Transcription Language */}
-            {/* Transcription Language */}
-            <Animated.View key={`s-lng-${animationKey}`} entering={ENTER_5} className="mb-6">
-              <Pressable
-                onPress={() => {
-                  tapHaptic();
-                  router.push("/language-picker");
-                }}
-                className="active:opacity-70"
-                style={{
-                  backgroundColor: surfaceBg,
-                  borderWidth: 2,
-                  borderColor: borderColor,
-                  borderRadius: 24,
-                  overflow: "hidden",
-                }}
-              >
-                {/* Section header */}
-                <View
-                  className="flex-row items-center px-5 pt-5 pb-4"
-                  style={{
-                    borderBottomWidth: 1,
-                    borderBottomColor: "rgba(255, 255, 255, 0.12)",
-                  }}
-                >
-                  <View
-                    className="items-center justify-center mr-3"
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 12,
-                      backgroundColor: "rgba(255, 255, 255, 0.15)",
-                    }}
-                  >
-                    <Text style={{ fontSize: 18 }}>{currentLang.flag}</Text>
-                  </View>
-                  <Text
-                    className="text-xl font-bold"
-                    style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF" }}
-                  >
-                    Transcription Language
-                  </Text>
-                </View>
-
-                <View
-                  className="p-5"
-                  style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}
-                >
-                  <View className="flex-1">
-                    <Text
-                      style={{ fontFamily: "Inter_600SemiBold", color: "#FFFFFF", fontSize: 15, marginBottom: 2 }}
-                    >
-                      {currentLang.flag} {currentLang.name}
-                    </Text>
-                    <Text style={{ color: "rgba(255, 255, 255, 0.7)", fontSize: 13 }}>
-                      Used for all voice transcriptions
-                    </Text>
-                  </View>
-                  <ChevronRight size={20} color="rgba(255, 255, 255, 0.6)" strokeWidth={2} />
-                </View>
-              </Pressable>
             </Animated.View>
 
             {/* Privacy & Security */}

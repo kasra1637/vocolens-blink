@@ -304,7 +304,7 @@ export function PaywallScreen() {
   return (
     <View style={{ flex: 1 }}>
       <LinearGradient colors={themeColors.backgroundGradient} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={{ flex: 1 }}>
-        <ProgressBar currentStep={currentStep} totalSteps={22} />
+        <ProgressBar currentStep={currentStep} totalSteps={24} />
         <SafeAreaView style={{ flex: 1 }}>
           <BackButton onPress={handleBack} show={currentStep > 0} />
 

@@ -217,7 +217,6 @@ interface OnboardingState {
   selectedProcessingStyle: ProcessingStyleType | null;
   selectedAppFeeling: AppFeelingType | null;
   notificationPreferences: NotificationPreferences | null;
-  selectedTranscriptionLanguage: string;
 
   // Current onboarding step
   currentStep: number;
@@ -240,7 +239,6 @@ interface OnboardingState {
   setSelectedProcessingStyle: (value: ProcessingStyleType) => void;
   setSelectedAppFeeling: (value: AppFeelingType) => void;
   setNotificationPreferences: (preferences: NotificationPreferences) => void;
-  setSelectedTranscriptionLanguage: (language: string) => void;
   setCurrentStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
@@ -268,7 +266,6 @@ const useOnboardingStore = create<OnboardingState>()(
       selectedProcessingStyle: null,
       selectedAppFeeling: null,
       notificationPreferences: null,
-      selectedTranscriptionLanguage: "en",
       currentStep: 0,
 
       setHasCompletedOnboarding: (completed) =>
@@ -301,11 +298,9 @@ const useOnboardingStore = create<OnboardingState>()(
         set({ selectedAppFeeling: value }),
       setNotificationPreferences: (preferences) =>
         set({ notificationPreferences: preferences }),
-      setSelectedTranscriptionLanguage: (language) =>
-        set({ selectedTranscriptionLanguage: language }),
       setCurrentStep: (step) => set({ currentStep: step }),
       nextStep: () =>
-        set((state) => ({ currentStep: Math.min(state.currentStep + 1, 23) })),
+        set((state) => ({ currentStep: Math.min(state.currentStep + 1, 24) })),
       prevStep: () =>
         set((state) => ({ currentStep: Math.max(state.currentStep - 1, 0) })),
       resetOnboarding: () =>
@@ -323,7 +318,6 @@ const useOnboardingStore = create<OnboardingState>()(
           selectedJournalingFrequency: null,
           selectedJournalingTopic: null,
           notificationPreferences: null,
-          selectedTranscriptionLanguage: "en",
           currentStep: 0,
         }),
       getThemeColors: () => {
@@ -354,7 +348,6 @@ const useOnboardingStore = create<OnboardingState>()(
         selectedProcessingStyle: state.selectedProcessingStyle,
         selectedAppFeeling: state.selectedAppFeeling,
         notificationPreferences: state.notificationPreferences,
-        selectedTranscriptionLanguage: state.selectedTranscriptionLanguage,
       }),
     },
   ),

@@ -103,7 +103,6 @@ export async function exportAllDataAsCsv(): Promise<void> {
       ['Dark Mode', String(settings.isDarkMode)],
       ['Emotion Reflection Mode', settings.emotionReflectionMode],
       ['Theme', onboarding.selectedTheme],
-      ['Transcription Language', onboarding.selectedTranscriptionLanguage],
     ],
   );
 
